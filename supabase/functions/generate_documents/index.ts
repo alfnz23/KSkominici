@@ -1,114 +1,74 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { jsPDF } from "https://cdn.skypack.dev/jspdf@2.5.1"
-import * as XLSX from "https://cdn.skypack.dev/xlsx@0.18.5"
+import { handleOptions } from "../_shared/cors.ts";
+import { supabaseClient } from "../_shared/supabase.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { json, badRequest, serverError } from "../_shared/http.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+function fakePdfBytes(payload: unknown): Uint8Array {
+  // Placeholder: reálné PDF sem doplníš později (např. HTML->PDF).
+  const text = `PDF PLACEHOLDER\n\n${JSON.stringify(payload, null, 2)}`;
+  return new TextEncoder().encode(text);
 }
 
-interface GenerateDocumentsRequest {
-  report_id: string
-  formats?: ('pdf' | 'xlsx')[]
-}
-
-interface ReportWithRelations {
-  id: string
-  company_id: string
-  job_id: string
-  report_kind: string
-  status: string
-  data: any
-  created_at: string
-  sequence_no: number
-  jobs: {
-    id: string
-    type: string
-    status: string
-    scheduled_at: string
-    notes: string
-    customers: {
-      id: string
-      name: string
-      email: string
-      phone: string
-      address: string
-    }
-  }
-  companies: {
-    id: string
-    name: string
-    ico: string
-    dic: string
-    address: string
-    phone: string
-    email: string
-  }
-}
-
-serve(async (req) => {
-  // Handle CORS
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+Deno.serve(async (req) => {
+  const opt = handleOptions(req);
+  if (opt) return opt;
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    if (req.method !== "POST") return badRequest("Use POST");
+    const sb = supabaseClient(req);
+    await requireUser(sb);
 
-    const { report_id, formats = ['pdf'] }: GenerateDocumentsRequest = await req.json()
+    const body = await req.json();
+    const { report_id, formats } = body ?? {};
+    if (!report_id) return badRequest("report_id is required");
 
-    if (!report_id) {
-      return new Response(
-        JSON.stringify({ error: 'report_id is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    const wanted: string[] = Array.isArray(formats) && formats.length ? formats : ["pdf"];
+
+    const { data: report, error: repErr } = await sb
+      .from("reports")
+      .select("id, company_id, job_id, report_kind, sequence_no, data, status")
+      .eq("id", report_id)
+      .single();
+    if (repErr) return serverError("Report load failed", repErr);
+    if (report.status !== "finalized") return badRequest("Report must be finalized first");
+
+    const createdDocs: any[] = [];
+
+    if (wanted.includes("pdf")) {
+      const bytes = fakePdfBytes(report);
+      const filename = `report-${report.id}.pdf`;
+      const path = `${report.company_id}/${report.job_id}/${report.id}/${filename}`;
+
+      const { error: upErr } = await sb.storage.from("documents").upload(path, bytes, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+      if (upErr) return serverError("Storage upload failed", upErr);
+
+      const { data: doc, error: docErr } = await sb
+        .from("documents")
+        .insert({
+          company_id: report.company_id,
+          job_id: report.job_id,
+          report_id: report.id,
+          type: "pdf",
+          storage_path: path,
+          filename,
+          mime_type: "application/pdf",
+        })
+        .select("*")
+        .single();
+      if (docErr) return serverError("Document insert failed", docErr);
+
+      createdDocs.push(doc);
     }
 
-    // Načteme report s relacemi
-    const { data: report, error: reportError } = await supabase
-      .from('reports')
-      .select(`
-        *,
-        jobs!inner (
-          *,
-          customers (*)
-        ),
-        companies (*)
-      `)
-      .eq('id', report_id)
-      .single()
-
-    if (reportError || !report) {
-      return new Response(
-        JSON.stringify({ error: 'Report not found', details: reportError }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const reportData = report as ReportWithRelations
-    const documentIds: string[] = []
-    const downloadPaths: string[] = []
-
-    // Generujeme dokumenty podle formátů
-    for (const format of formats) {
-      let fileBuffer: Uint8Array
-      let filename: string
-      let mimeType: string
-
-      if (format === 'pdf') {
-        const pdfDoc = generatePDF(reportData)
-        fileBuffer = new Uint8Array(pdfDoc.output('arraybuffer'))
-        filename = `report_${reportData.sequence_no}_${reportData.id}.pdf`
-        mimeType = 'application/pdf'
-      } else if (format === 'xlsx') {
-        const workbook = generateXLSX(reportData)
-        const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
-        fileBuffer = new Uint8Array(buffer)
-        filename = `report_${reportData.sequence_no}_${reportData.id}.xlsx`
+    // XLSX: zatím placeholder vynechán (přidáš později)
+    return json({ documents: createdDocs });
+  } catch (e) {
+    return serverError("Unhandled error", String(e));
+  }
+});.xlsx`
         mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       } else {
         continue
