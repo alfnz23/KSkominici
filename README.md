@@ -1,73 +1,73 @@
-# KSkominici
+# KSkominici Backend API
 
-Projekt KSkominici - aplikace pro správu a organizaci komunitních aktivit.
+Backend API for the KSkominici report management system.
 
-## Popis
+## Features
 
-KSkominici je aplikace určená pro správu komunitních aktivit, událostí a komunikace mezi členy komunity. Umožňuje uživatelům organizovat akce, komunikovat a sdílet informace v rámci místní komunity.
+- Report draft autosave functionality
+- MySQL database integration
+- Input validation
+- Error handling
+- Rate limiting
+- CORS support
 
-## Funkce
+## Setup
 
-- 📅 Správa událostí a aktivit
-- 👥 Komunitní komunikace
-- 📢 Oznámení a aktualky
-- 🗺️ Lokální informace
-- 📱 Responzivní design
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Copy `.env.example` to `.env` and configure your database
+4. Start the server: `npm run dev`
 
-## Instalace
+## API Endpoints
 
-```bash
-# Klonování repozitáře
-git clone https://github.com/alfnz23/KSkominici.git
+### Save Report
+`POST /api/reports/save`
 
-# Přechod do adresáře
-cd KSkominici
+Save or update a report draft.
 
-# Instalace závislostí
-npm install
+**Request Body:**
+```json
+{
+  "job_id": 1,
+  "report_id": 2, // optional - if not provided, creates new report
+  "report_kind": "incident",
+  "sequence_no": 1, // optional
+  "data": {
+    "content": "Report data object"
+  }
+}
 ```
 
-## Spuštění
-
-```bash
-# Vývojový režim
-npm run dev
-
-# Produkční build
-npm run build
-
-# Spuštění produkční verze
-npm start
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Report saved successfully",
+  "data": {
+    "report_id": 2
+  }
+}
 ```
 
-## Technologie
+## Database Schema
 
-- Frontend: HTML, CSS, JavaScript
-- Backend: Node.js
-- Databáze: MongoDB/PostgreSQL
-- Další nástroje: Git, npm
+The API expects a `reports` table with the following structure:
 
-## Přispívání
+```sql
+CREATE TABLE reports (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  job_id INT NOT NULL,
+  report_kind VARCHAR(255) NOT NULL,
+  sequence_no INT DEFAULT 1,
+  data JSON,
+  status ENUM('draft', 'submitted', 'approved') DEFAULT 'draft',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
 
-1. Forkněte repozitář
-2. Vytvořte feature branch (`git checkout -b feature/nova-funkcnost`)
-3. Commitněte změny (`git commit -am 'Přidána nová funkcnost'`)
-4. Pushněte do branch (`git push origin feature/nova-funkcnost`)
-5. Vytvořte Pull Request
+## Development
 
-## Licence
-
-Tento projekt je licencován pod MIT licencí - viz [LICENSE](LICENSE) soubor pro detaily.
-
-## Kontakt
-
-- Autor: alfnz23
-- GitHub: [@alfnz23](https://github.com/alfnz23)
-- Repository: [KSkominici](https://github.com/alfnz23/KSkominici)
-
-## Changelog
-
-### v1.0.0
-- Základní funkcionalita aplikace
-- Uživatelské rozhraní
-- Správa událostí
+- `npm run dev` - Start development server with nodemon
+- `npm test` - Run tests
+- `npm start` - Start production server
