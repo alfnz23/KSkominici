@@ -1,198 +1,140 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 interface CreateJobRequest {
   customer: {
-    email: string
-    name?: string
-    phone?: string
-    address?: string
-  }
-  type: "inspection" | "passport"
-  assigned_to?: string
-  scheduled_at?: string
-  notes?: string
+    email: string;
+    name?: string;
+    phone?: string;
+    address?: string;
+  };
+  type: "inspection" | "passport";
+  assigned_to?: string;
+  scheduled_at?: string;
+  notes?: string;
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    // Get Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
-    )
-
-    // Verify authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseClient.auth.getUser()
-
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { 
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
+    if (req.method !== "POST") {
+      return new Response(JSON.stringify({ error: "Use POST" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Get company_id from profiles
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('company_id')
-      .eq('id', user.id)
-      .single()
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
+    });
+
+    // Auth
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    const user = authData?.user;
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Profile -> company_id
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("company_id, role")
+      .eq("id", user.id)
+      .single();
 
     if (profileError || !profile?.company_id) {
-      return new Response(
-        JSON.stringify({ error: 'Company not found for user' }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
+      return new Response(JSON.stringify({ error: "Company not found for user" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const requestBody: CreateJobRequest = await req.json()
-    const { customer, type, assigned_to, scheduled_at, notes } = requestBody
+    const body: CreateJobRequest = await req.json();
+    const { customer, type, assigned_to, scheduled_at, notes } = body ?? {};
 
-    // Validate required fields
-    if (!customer?.email || !type) {
-      return new Response(
-        JSON.stringify({ error: 'Email and type are required' }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
+    if (!customer?.email) {
+      return new Response(JSON.stringify({ error: "customer.email is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (type !== "inspection" && type !== "passport") {
+      return new Response(JSON.stringify({ error: "Invalid type" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Upsert customer
-    const { data: existingCustomer, error: customerFindError } = await supabaseClient
-      .from('customers')
-      .select('id')
-      .eq('email', customer.email)
-      .eq('company_id', profile.company_id)
-      .single()
-
-    let customerId: string
-
-    if (existingCustomer) {
-      // Update existing customer
-      const { data: updatedCustomer, error: updateError } = await supabaseClient
-        .from('customers')
-        .update({
-          name: customer.name || null,
-          phone: customer.phone || null,
-          address: customer.address || null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingCustomer.id)
-        .select('id')
-        .single()
-
-      if (updateError) {
-        return new Response(
-          JSON.stringify({ error: 'Failed to update customer', details: updateError.message }),
-          { 
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        )
-      }
-
-      customerId = updatedCustomer.id
-    } else {
-      // Create new customer
-      const { data: newCustomer, error: createError } = await supabaseClient
-        .from('customers')
-        .insert({
-          email: customer.email,
-          name: customer.name || null,
-          phone: customer.phone || null,
-          address: customer.address || null,
+    // Customer upsert (best way)
+    const { data: cust, error: custErr } = await supabase
+      .from("customers")
+      .upsert(
+        {
           company_id: profile.company_id,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select('id')
-        .single()
+          email: customer.email,
+          name: customer.name ?? null,
+          phone: customer.phone ?? null,
+          address: customer.address ?? null,
+        },
+        { onConflict: "company_id,email" },
+      )
+      .select("*")
+      .single();
 
-      if (createError) {
-        return new Response(
-          JSON.stringify({ error: 'Failed to create customer', details: createError.message }),
-          { 
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        )
-      }
-
-      customerId = newCustomer.id
+    if (custErr || !cust?.id) {
+      return new Response(JSON.stringify({ error: "Failed to upsert customer", details: custErr?.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Create job
-    const jobData = {
-      customer_id: customerId,
-      type,
-      status: 'draft',
-      assigned_to: assigned_to || null,
-      scheduled_at: scheduled_at ? new Date(scheduled_at).toISOString() : null,
-      notes: notes || null,
-      company_id: profile.company_id,
-      created_by: user.id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
+    const assigned = assigned_to ?? user.id;
 
-    const { data: job, error: jobError } = await supabaseClient
-      .from('jobs')
-      .insert(jobData)
+    const { data: job, error: jobErr } = await supabase
+      .from("jobs")
+      .insert({
+        company_id: profile.company_id,
+        customer_id: cust.id,
+        type,
+        status: "in_progress",
+        assigned_to: assigned,
+        scheduled_at: scheduled_at ?? null,
+        notes: notes ?? null,
+      })
       .select(`
         *,
         customer:customers(*),
-        assigned_technician:profiles!jobs_assigned_to_fkey(id, full_name, email),
-        creator:profiles!jobs_created_by_fkey(id, full_name, email)
+        assigned_technician:profiles!jobs_assigned_to_fkey(id, full_name, role)
       `)
-      .single()
+      .single();
 
-    if (jobError) {
-      return new Response(
-        JSON.stringify({ error: 'Failed to create job', details: jobError.message }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
+    if (jobErr) {
+      return new Response(JSON.stringify({ error: "Failed to create job", details: jobErr.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    return new Response(
-      JSON.stringify({ job }),
-      { 
-        status: 201,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    )
-
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    )
+    return new Response(JSON.stringify({ job, customer: cust }), {
+      status: 201,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: "Internal server error", details: error?.message ?? String(error) }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
-})
+});
