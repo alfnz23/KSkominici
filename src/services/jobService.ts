@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { CreateJobRequest, CreateJobResponse } from '@/types/job'
+import type { CreateJobRequest, CreateJobResponse, Job } from '@/types/job'
 
 export class JobService {
   static async createJob(jobData: CreateJobRequest): Promise<CreateJobResponse> {
@@ -12,6 +12,29 @@ export class JobService {
     }
 
     return data
+  }
+
+  // Vytvoření nové zakázky s generováním dokumentů
+  static async createJobWithDocuments(jobData: CreateJobRequest): Promise<Job> {
+    try {
+      // 1. Vytvoř job přes Edge Function
+      const response = await this.createJob(jobData)
+      const job = response.job
+      
+      // 2. Automaticky generuj dokumenty
+      const { error: docsError } = await supabase.functions.invoke('generate_documents', {
+        body: { jobId: job.id }
+      })
+      
+      if (docsError) {
+        console.warn('Document generation failed:', docsError)
+        // Pokračuj bez chyby - dokumenty lze vygenerovat později
+      }
+      
+      return job
+    } catch (error) {
+      throw new Error(`Failed to create job with documents: ${error}`)
+    }
   }
 
   static async getJobs() {
@@ -75,5 +98,106 @@ export class JobService {
     }
 
     return data
+  }
+
+  // Finalizace reportu
+  static async finalizeReport(jobId: string): Promise<void> {
+    try {
+      const { error } = await supabase.functions.invoke('finalize_report', {
+        body: { jobId }
+      })
+      
+      if (error) {
+        throw new Error(error.message)
+      }
+      
+      await this.updateJobStatus(jobId, 'completed')
+    } catch (error) {
+      throw new Error(`Failed to finalize report: ${error}`)
+    }
+  }
+
+  // Odeslání passport package
+  static async sendPassportPackage(jobId: string, recipientEmail: string): Promise<void> {
+    try {
+      const { error } = await supabase.functions.invoke('send_passport_package', {
+        body: { jobId, recipientEmail }
+      })
+      
+      if (error) {
+        throw new Error(error.message)
+      }
+    } catch (error) {
+      throw new Error(`Failed to send passport package: ${error}`)
+    }
+  }
+
+  // Odeslání report emailu
+  static async sendReportEmail(jobId: string, recipientEmail: string): Promise<void> {
+    try {
+      const { error } = await supabase.functions.invoke('send_report_email', {
+        body: { jobId, recipientEmail }
+      })
+      
+      if (error) {
+        throw new Error(error.message)
+      }
+    } catch (error) {
+      throw new Error(`Failed to send report email: ${error}`)
+    }
+  }
+
+  // Upload faktury
+  static async uploadInvoice(jobId: string, invoiceFile: File): Promise<void> {
+    try {
+      // Pro Edge Functions používáme base64 enkódování souboru
+      const fileBuffer = await invoiceFile.arrayBuffer()
+      const base64File = btoa(String.fromCharCode(...new Uint8Array(fileBuffer)))
+      
+      const { error } = await supabase.functions.invoke('upload_invoice', {
+        body: { 
+          jobId, 
+          fileName: invoiceFile.name,
+          fileType: invoiceFile.type,
+          fileData: base64File
+        }
+      })
+      
+      if (error) {
+        throw new Error(error.message)
+      }
+    } catch (error) {
+      throw new Error(`Failed to upload invoice: ${error}`)
+    }
+  }
+
+  // Generování dokumentů pro existující job
+  static async generateDocuments(jobId: string): Promise<void> {
+    try {
+      const { error } = await supabase.functions.invoke('generate_documents', {
+        body: { jobId }
+      })
+      
+      if (error) {
+        throw new Error(error.message)
+      }
+    } catch (error) {
+      throw new Error(`Failed to generate documents: ${error}`)
+    }
+  }
+
+  // Uložení reportu
+  static async saveReport(jobId: string, reportData: any): Promise<void> {
+    try {
+      const { error } = await supabase.functions.invoke('save_report', {
+        body: { jobId, reportData }
+      })
+      
+      if (error) {
+        throw new Error(error.message)
+      }
+    } catch (error) {
+      throw new Error(`Failed to save report: ${error}`)
+    }
   }
 }
