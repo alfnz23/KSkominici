@@ -1,23 +1,43 @@
+'use client'
+
 import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { JobList } from './jobs/JobList'
 import { CreateJobForm } from './jobs/CreateJobForm'
+import { useJobs } from '../src/hooks/useJobs'
 
 export function Dashboard() {
+  const { jobs, loading, error, fetchJobs, createNewJob } = useJobs()
+
+  React.useEffect(() => {
+    fetchJobs()
+  }, [])
+
+  if (loading) return <div>Načítání...</div>
+  if (error) return <div>Chyba: {error}</div>
+
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Job Management Dashboard</h1>
+    <div className="p-6 max-w-6xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
       
-      <div className="grid gap-8">
-        {/* Create New Job Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Create New Job</h2>
-          <CreateJobForm />
-        </div>
-        
-        {/* Jobs List Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <JobList />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Vytvořit nový job</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CreateJobForm onSubmit={createNewJob} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Seznam jobů</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <JobList jobs={jobs} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
