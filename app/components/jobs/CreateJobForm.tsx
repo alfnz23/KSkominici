@@ -14,6 +14,7 @@ interface CreateJobFormData {
 }
 
 export function CreateJobForm({ onJobCreated }: { onJobCreated: () => void }) {
+  const router = useRouter()
   const [formData, setFormData] = useState<CreateJobFormData>({
     type: 'INSTALLATION',
     customerId: '',
@@ -21,6 +22,7 @@ export function CreateJobForm({ onJobCreated }: { onJobCreated: () => void }) {
     notes: ''
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
