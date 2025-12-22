@@ -1,62 +1,42 @@
-import { useState, useEffect } from 'react'
-import { createJob, getJobs, getJobById, updateJobStatus } from '../../lib/api/jobs'
-import type { Job, CreateJobRequest } from '../types/job'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiClient } from '@/app/lib/api/client'
+import type { CreateJobRequest } from '@/app/types'
 
 export function useJobs() {
-  const [jobs, setJobs] = useState<Job[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  return useQuery({
+    queryKey: ['jobs'],
+    queryFn: () => apiClient.getJobs()
+  })
+}
 
-  const fetchJobs = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const data = await getJobs()
-      setJobs(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch jobs')
-    } finally {
-      setLoading(false)
+export function useJob(id: string) {
+  return useQuery({
+    queryKey: ['jobs', id],
+    queryFn: () => apiClient.getJobById(id),
+    enabled: !!id
+  })
+}
+
+export function useCreateJob() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (jobData: CreateJobRequest) => apiClient.createJob(jobData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] })
     }
-  }
+  })
+}
 
-  const createNewJob = async (jobData: CreateJobRequest) => {
-    try {
-      setLoading(true)
-      const newJob = await createJob(jobData)
-      setJobs(prev => [newJob, ...prev])
-      return newJob
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create job')
-      throw err
-    } finally {
-      setLoading(false)
+export function useUpdateJobStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      apiClient.updateJobStatus(id, status),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] })
+      queryClient.invalidateQueries({ queryKey: ['jobs', data.id] })
     }
-  }
-
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      const updatedJob = await updateJobStatus(id, status)
-      setJobs(prev => prev.map(job => 
-        job.id === id ? updatedJob : job
-      ))
-      return updatedJob
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update job')
-      throw err
-    }
-  }
-
-  useEffect(() => {
-    fetchJobs()
-  }, [])
-
-  return {
-    jobs,
-    loading,
-    error,
-    createNewJob,
-    updateStatus,
-    refetch: fetchJobs
-  }
+  })
 }
