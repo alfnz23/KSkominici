@@ -1,7 +1,7 @@
 import { POST } from './route'
 import { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { db } from '@/lib/db'
+import { db } from '@/app/lib/db'
 
 jest.mock('next-auth')
 jest.mock('@/lib/db')
