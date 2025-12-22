@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card } from '../ui/card'
+import { apiClient } from '@/app/lib/api/client'
+import { CreateJobRequest } from '@/app/types'
 
 interface CreateJobFormData {
   type: string
