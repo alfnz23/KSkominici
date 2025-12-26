@@ -1,4 +1,6 @@
-import { useEffect } from 'react'
+'use client'
+
+import { useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import dynamicImport from 'next/dynamic'
