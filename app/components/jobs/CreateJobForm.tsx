@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card } from '../ui/card'
-import { apiClient } from '@/app/lib/api/client'
+import { apiClient } from '@/lib/api/client'
 import { CreateJobRequest } from '@/app/types'
 
 interface CreateJobFormData {
@@ -104,10 +104,14 @@ export function CreateJobForm({ onJobCreated }: { onJobCreated: () => void }) {
           />
         </div>
 
+        {error && (
+          <div className="text-red-500 text-sm">{error}</div>
+        )}
+
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded disabled:opacity-50"
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50"
         >
           {isLoading ? 'Creating...' : 'Create Job'}
         </button>
