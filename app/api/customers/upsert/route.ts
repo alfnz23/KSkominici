@@ -22,29 +22,50 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = upsertCustomerSchema.parse(body)
     
-    const customer = await db.customer.upsert({
-      where: {
-        companyId_email: {
-          companyId: session.user.companyId,
-          email: validatedData.email
-        }
-      },
-      update: {
-        name: validatedData.name,
-        phone: validatedData.phone,
-        address: validatedData.address,
-        updatedAt: new Date()
-      },
-      create: {
-        email: validatedData.email,
-        name: validatedData.name,
-        phone: validatedData.phone,
-        address: validatedData.address,
-        companyId: session.user.companyId,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    })
+    // Check if customer exists
+    const { data: existingCustomer } = await supabaseServer
+      .from('customers')
+      .select('*')
+      .eq('company_id', session.user.companyId)
+      .eq('email', validatedData.email)
+      .single()
+
+    let customer
+    if (existingCustomer) {
+      // Update existing customer
+      const { data, error } = await supabaseServer
+        .from('customers')
+        .update({
+          name: validatedData.name,
+          phone: validatedData.phone,
+          address: validatedData.address,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingCustomer.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      customer = data
+    } else {
+      // Create new customer
+      const { data, error } = await supabaseServer
+        .from('customers')
+        .insert({
+          email: validatedData.email,
+          name: validatedData.name,
+          phone: validatedData.phone,
+          address: validatedData.address,
+          company_id: session.user.companyId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      customer = data
+    }
 
     return NextResponse.json(customer)
   } catch (error) {
