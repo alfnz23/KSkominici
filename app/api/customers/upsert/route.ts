@@ -11,10 +11,22 @@ const upsertCustomerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    // Get user from Supabase auth
+    const { data: { user }, error: authError } = await supabaseServer.auth.getUser()
     
-    if (!session?.user?.companyId) {
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Get user profile to get company_id
+    const { data: profile } = await supabaseServer
+      .from('profiles')
+      .select('company_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile?.company_id) {
+      return NextResponse.json({ error: 'No company associated with user' }, { status: 400 })
     }
 
     const body = await request.json()
@@ -24,7 +36,7 @@ export async function POST(request: NextRequest) {
     const { data: existingCustomer } = await supabaseServer
       .from('customers')
       .select('*')
-      .eq('company_id', session.user.companyId)
+      .eq('company_id', profile.company_id)
       .eq('email', validatedData.email)
       .single()
 
