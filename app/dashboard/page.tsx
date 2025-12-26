@@ -1,14 +1,15 @@
-'use client'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import dynamicImport from 'next/dynamic'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { lazy, Suspense } from 'react'
-
-const Dashboard = lazy(() => import('../components/Dashboard').then(m => ({ default: m.Dashboard })))
+const Dashboard = dynamicImport(
+  () => import('../components/Dashboard').then(m => m.Dashboard),
+  { ssr: false }
+)
 
 export default function DashboardPage() {
   const router = useRouter()
