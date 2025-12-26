@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { CreateJobRequest, CreateJobResponse, Job } from '@/types/job'
+import type { CreateJobRequest, CreateJobResponse, Job } from '../types/job'
 
 export class JobService {
   static async createJob(jobData: CreateJobRequest): Promise<CreateJobResponse> {
