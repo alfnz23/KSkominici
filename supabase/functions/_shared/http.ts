@@ -1,4 +1,4 @@
-import { corsHeaders } from "./cors.ts";
+import { corsHeaders } from "./cors";
 
 export function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
