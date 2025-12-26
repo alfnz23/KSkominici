@@ -10,3 +10,6 @@ export const supabaseServer = createClient(
   supabaseUrl,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+// Export createClient function for direct use
+export { createClient }
