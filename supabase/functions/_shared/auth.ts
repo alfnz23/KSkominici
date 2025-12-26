@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function requireUser(sb: SupabaseClient) {
   const { data, error } = await sb.auth.getUser();
