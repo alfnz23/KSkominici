@@ -49,7 +49,9 @@ export default function DashboardPage() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Dashboard />
+        <Suspense fallback={<div className="flex items-center justify-center py-12">Loading...</div>}>
+          <Dashboard />
+        </Suspense>
       </main>
     </div>
   )
