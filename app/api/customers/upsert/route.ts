@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
           name: validatedData.name,
           phone: validatedData.phone,
           address: validatedData.address,
-          company_id: session.user.companyId,
+          company_id: profile.company_id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
