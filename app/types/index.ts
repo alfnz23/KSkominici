@@ -92,3 +92,16 @@ export interface Lead {
   message?: string
   created_at: string
 }
+
+export interface CreateJobRequest {
+  customer: {
+    email: string
+    name?: string
+    phone?: string
+    address?: string
+  }
+  type: 'INSTALLATION' | 'MAINTENANCE' | 'REPAIR' | 'INSPECTION'
+  assigned_to?: string
+  scheduled_at?: string
+  notes?: string
+}
