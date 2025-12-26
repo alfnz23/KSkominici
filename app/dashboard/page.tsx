@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { Dashboard } from '../../components/Dashboard'
+import { Dashboard } from '../components/Dashboard'
 
 export default function DashboardPage() {
   const router = useRouter()
