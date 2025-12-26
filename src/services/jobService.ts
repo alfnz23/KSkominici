@@ -152,7 +152,7 @@ export class JobService {
     try {
       // Pro Edge Functions používáme base64 enkódování souboru
       const fileBuffer = await invoiceFile.arrayBuffer()
-      const base64File = btoa(String.fromCharCode(...new Uint8Array(fileBuffer)))
+      const base64File = btoa(String.fromCharCode(...Array.from(new Uint8Array(fileBuffer))))
       
       const { error } = await supabase.functions.invoke('upload_invoice', {
         body: { 
