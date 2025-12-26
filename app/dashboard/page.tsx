@@ -1,9 +1,17 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { Dashboard } from '../components/Dashboard'
+import dynamic from 'next/dynamic'
+
+const Dashboard = dynamic(
+  () => import('../components/Dashboard').then(m => m.Dashboard),
+  { ssr: false }
+)
 
 export default function DashboardPage() {
   const router = useRouter()
