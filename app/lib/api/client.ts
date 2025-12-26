@@ -7,7 +7,7 @@ interface JobData {
     phone?: string
     address?: string
   }
-  type: 'inspection' | 'passport'
+  type: 'INSPECTION' | 'MAINTENANCE' | 'REPAIR' | 'INSTALLATION'
   assigned_to?: string
   scheduled_at?: string
   notes?: string
