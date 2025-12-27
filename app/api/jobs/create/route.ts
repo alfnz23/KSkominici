@@ -5,13 +5,11 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
     
-    // Ověření přihlášení
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Získání profilu technika
     const { data: profile } = await supabase
       .from('profiles')
       .select('company_id')
@@ -28,39 +26,61 @@ export async function POST(request: NextRequest) {
       job_type,
       inspection_address,
       inspection_date,
-      building_data,
     } = body;
 
-    // Vytvoření nové zakázky
+    // Najdi nebo vytvoř zákazníka
+    let customer_id = null;
+    if (customer_email) {
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('company_id', profile.company_id)
+        .eq('email', customer_email)
+        .single();
+      
+      if (customer) {
+        customer_id = customer.id;
+      } else {
+        // Vytvoř nového zákazníka
+        const { data: newCustomer } = await supabase
+          .from('customers')
+          .insert({
+            company_id: profile.company_id,
+            email: customer_email,
+          })
+          .select('id')
+          .single();
+        customer_id = newCustomer?.id;
+      }
+    }
+
+    // Mapování job_type na tvůj enum
+    const type = job_type === 'single_report' ? 'inspection' : 'passport';
+
+    // Vytvoř job
     const { data: job, error: jobError } = await supabase
       .from('jobs')
       .insert({
         company_id: profile.company_id,
-        customer_email,
-        job_type, // 'single_report' nebo 'building_passport'
+        customer_id,
+        type, // tvůj enum: 'inspection' nebo 'passport'
+        status: 'draft', // tvůj enum
         inspection_address,
         inspection_date,
-        status: 'draft',
-        metadata: building_data || {},
+        assigned_to: user.id,
       })
       .select()
       .single();
 
     if (jobError) {
       console.error('Job creation error:', jobError);
-      return NextResponse.json(
-        { error: 'Failed to create job' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to create job' }, { status: 500 });
     }
 
     return NextResponse.json({ job }, { status: 201 });
   } catch (error) {
     console.error('Error in job creation:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -83,7 +103,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    // Získání parametrů
     const { searchParams } = new URL(request.url);
     const year = searchParams.get('year');
     const status = searchParams.get('status');
@@ -110,18 +129,12 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Jobs fetch error:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch jobs' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
     }
 
     return NextResponse.json({ jobs }, { status: 200 });
   } catch (error) {
     console.error('Error fetching jobs:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
