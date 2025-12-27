@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
     // Seřaď podle statusu
     customers.sort((a, b) => {
       const statusOrder = { expired: 0, expiring_soon: 1, active: 2 };
-      return statusOrder[a.status] - statusOrder[b.status];
+      return (statusOrder as any)[a.status] - (statusOrder as any)[b.status];
     });
 
     return NextResponse.json({ customers }, { status: 200 });
