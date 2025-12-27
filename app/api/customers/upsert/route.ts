@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseServer } from '../../../lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 const upsertCustomerSchema = z.object({
@@ -11,15 +11,17 @@ const upsertCustomerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createClient()
+    
     // Get user from Supabase auth
-    const { data: { user }, error: authError } = await supabaseServer.auth.getUser()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Get user profile to get company_id
-    const { data: profile } = await supabaseServer
+    const { data: profile } = await supabase
       .from('profiles')
       .select('company_id')
       .eq('id', user.id)
@@ -33,7 +35,7 @@ export async function POST(request: NextRequest) {
     const validatedData = upsertCustomerSchema.parse(body)
     
     // Check if customer exists
-    const { data: existingCustomer } = await supabaseServer
+    const { data: existingCustomer } = await supabase
       .from('customers')
       .select('*')
       .eq('company_id', profile.company_id)
@@ -43,7 +45,7 @@ export async function POST(request: NextRequest) {
     let customer
     if (existingCustomer) {
       // Update existing customer
-      const { data, error } = await supabaseServer
+      const { data, error } = await supabase
         .from('customers')
         .update({
           name: validatedData.name,
@@ -59,7 +61,7 @@ export async function POST(request: NextRequest) {
       customer = data
     } else {
       // Create new customer
-      const { data, error } = await supabaseServer
+      const { data, error } = await supabase
         .from('customers')
         .insert({
           email: validatedData.email,
