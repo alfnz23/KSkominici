@@ -23,16 +23,22 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const year = searchParams.get('year') || new Date().getFullYear().toString();
 
-    // Načíst všechny zákazníky firmy s jejich posledními kontrolami
+    // Načti všechny joby s jejich zákazníky a reporty
     const { data: jobs, error: jobsError } = await supabase
       .from('jobs')
       .select(`
         id,
-        customer_email,
         inspection_address,
         inspection_date,
         status,
-        metadata,
+        type,
+        customers (
+          id,
+          email,
+          name,
+          phone,
+          address
+        ),
         reports (
           id,
           data,
@@ -40,37 +46,38 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq('company_id', profile.company_id)
+      .eq('type', 'inspection') // jen kontroly, ne pasporty
       .gte('inspection_date', `${year}-01-01`)
       .lte('inspection_date', `${year}-12-31`)
       .order('inspection_date', { ascending: false });
 
     if (jobsError) {
       console.error('Jobs fetch error:', jobsError);
-      return NextResponse.json(
-        { error: 'Failed to fetch customers' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 });
     }
 
-    // Agregovat data o zákaznících
+    // Agreguj zákazníky
     const customersMap = new Map();
 
     jobs?.forEach((job) => {
+      const customer = job.customers;
+      if (!customer) return;
+
       const report = job.reports?.[0];
       const reportData = report?.data || {};
       
-      if (!customersMap.has(job.customer_email)) {
-        // Vypočítat datum příští kontroly (obvykle +1 rok)
+      if (!customersMap.has(customer.id)) {
+        // Vypočítej příští kontrolu (+1 rok)
         const nextInspectionDate = reportData.nextInspectionDate || 
           new Date(new Date(job.inspection_date).setFullYear(new Date(job.inspection_date).getFullYear() + 1))
             .toISOString().split('T')[0];
 
-        // Vypočítat dny do vypršení
+        // Vypočítej dny do vypršení
         const today = new Date();
         const expirationDate = new Date(nextInspectionDate);
         const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-        // Určit status
+        // Urči status
         let status: 'active' | 'expiring_soon' | 'expired' = 'active';
         if (daysUntilExpiration < 0) {
           status = 'expired';
@@ -78,12 +85,12 @@ export async function GET(request: NextRequest) {
           status = 'expiring_soon';
         }
 
-        customersMap.set(job.customer_email, {
-          id: job.id,
-          name: reportData.customerName || 'Neznámý zákazník',
-          email: job.customer_email,
-          phone: reportData.customerPhone || '',
-          address: reportData.permanentAddress || '',
+        customersMap.set(customer.id, {
+          id: customer.id,
+          name: customer.name || reportData.customerName || 'Neznámý zákazník',
+          email: customer.email,
+          phone: customer.phone || reportData.customerPhone || '',
+          address: customer.address || reportData.permanentAddress || '',
           inspection_address: job.inspection_address,
           last_inspection_date: job.inspection_date,
           next_inspection_date: nextInspectionDate,
@@ -95,7 +102,7 @@ export async function GET(request: NextRequest) {
 
     const customers = Array.from(customersMap.values());
 
-    // Seřadit podle statusu (expired > expiring_soon > active)
+    // Seřaď podle statusu
     customers.sort((a, b) => {
       const statusOrder = { expired: 0, expiring_soon: 1, active: 2 };
       return statusOrder[a.status] - statusOrder[b.status];
@@ -104,9 +111,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ customers }, { status: 200 });
   } catch (error) {
     console.error('Error fetching customers:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
