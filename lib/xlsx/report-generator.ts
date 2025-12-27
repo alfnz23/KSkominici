@@ -256,5 +256,5 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   });
 
   // Vrátit buffer
-  return await workbook.xlsx.writeBuffer() as Buffer;
+  return Buffer.from(await workbook.xlsx.writeBuffer());
 }
