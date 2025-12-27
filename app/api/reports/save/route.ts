@@ -97,6 +97,10 @@ export async function GET(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
+
     const { searchParams } = new URL(request.url);
     const jobId = searchParams.get('job_id');
     const reportId = searchParams.get('report_id');
