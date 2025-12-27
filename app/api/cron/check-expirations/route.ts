@@ -5,15 +5,14 @@ import { Resend } from 'resend';
 // Tento endpoint by měl být volán cron jobem (např. denně)
 // Můžete použít Vercel Cron nebo jiný scheduler
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-export async function GET(request: NextRequest) {
-  const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function GET(request: NextRequest) {
   try {
+    // Inicializace uvnitř funkce
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     // Ověření autorizace (můžete použít secret token)
     const authHeader = request.headers.get('authorization');
     const expectedToken = process.env.CRON_SECRET;
