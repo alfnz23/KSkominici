@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         inspection_date,
         status,
         type,
-        customers (
+        customers!inner (
           id,
           email,
           name,
@@ -59,10 +59,12 @@ export async function GET(request: NextRequest) {
     // Agreguj zákazníky
     const customersMap = new Map();
 
-    jobs?.forEach((job) => {
-      const customer = job.customers;
-      if (!customer) return;
-
+    jobs?.forEach((job: any) => {
+      // customers je pole - vezmeme první prvek
+      const customerArray = job.customers;
+      if (!customerArray || customerArray.length === 0) return;
+      
+      const customer = customerArray[0];
       const report = job.reports?.[0];
       const reportData = report?.data || {};
       
