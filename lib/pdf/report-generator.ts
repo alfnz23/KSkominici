@@ -11,6 +11,8 @@ interface ReportData {
   technicianName: string;
   chimneyType: string;
   chimneyHeight?: string;
+  chimneyDescription?: string;
+  flue?: string;
   condition: string;
   defectsFound?: string;
   recommendations?: string;
@@ -83,6 +85,12 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
       if (data.chimneyHeight) {
         doc.text(`Výška komína: ${data.chimneyHeight} m`);
       }
+      if (data.chimneyDescription) {
+        doc.text(`Popis spalinové cesty: ${data.chimneyDescription}`);
+      }
+      if (data.flue) {
+        doc.text(`Kouřovod: ${data.flue}`);
+      }
       doc.text(`Stav: ${data.condition}`);
       doc.moveDown();
 
@@ -102,11 +110,13 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
 
       // Spotřebiče
       if (data.appliances && data.appliances.length > 0) {
-        doc.fontSize(12).font('Helvetica-Bold').text('PŘIPOJENÉ SPOTŘEBIČE');
-        doc.moveDown(0.5);
+        const validAppliances = data.appliances.filter(a => a.type || a.manufacturer);
+        
+        if (validAppliances.length > 0) {
+          doc.fontSize(12).font('Helvetica-Bold').text('PŘIPOJENÉ SPOTŘEBIČE');
+          doc.moveDown(0.5);
 
-        data.appliances.forEach((appliance, index) => {
-          if (appliance.type || appliance.manufacturer) {
+          validAppliances.forEach((appliance, index) => {
             doc.fontSize(10).font('Helvetica-Bold').text(`${index + 1}. Spotřebič:`);
             doc.fontSize(10).font('Helvetica');
             if (appliance.type) doc.text(`  Typ: ${appliance.type}`);
@@ -114,8 +124,8 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
             if (appliance.power) doc.text(`  Výkon: ${appliance.power}`);
             if (appliance.serialNumber) doc.text(`  Výrobní číslo: ${appliance.serialNumber}`);
             doc.moveDown(0.5);
-          }
-        });
+          });
+        }
       }
 
       // Patička
@@ -127,6 +137,7 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
 
       doc.end();
     } catch (error) {
+      console.error('PDF generation error:', error);
       reject(error);
     }
   });
