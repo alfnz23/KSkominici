@@ -13,6 +13,7 @@ interface ReportData {
   chimneyHeight?: string;
   chimneyDescription?: string;
   flue?: string;
+  flueType?: string;
   condition: string;
   defectsFound?: string;
   recommendations?: string;
@@ -20,7 +21,8 @@ interface ReportData {
     type: string;
     manufacturer: string;
     power: string;
-    serialNumber: string;
+    location: string;
+    floor: string;
   }>;
 }
 
@@ -147,6 +149,12 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     row++;
   }
 
+  if (data.flueType) {
+    worksheet.getCell(`A${row}`).value = 'Typ kouřovodu:';
+    worksheet.getCell(`B${row}`).value = data.flueType;
+    row++;
+  }
+
   worksheet.getCell(`A${row}`).value = 'Stav:';
   worksheet.getCell(`B${row}`).value = data.condition;
   worksheet.getCell(`B${row}`).font = {
@@ -222,7 +230,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
         row++;
 
         if (appliance.type) {
-          worksheet.getCell(`A${row}`).value = '  Typ:';
+          worksheet.getCell(`A${row}`).value = '  Druh:';
           worksheet.getCell(`B${row}`).value = appliance.type;
           row++;
         }
@@ -239,9 +247,15 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
           row++;
         }
 
-        if (appliance.serialNumber) {
-          worksheet.getCell(`A${row}`).value = '  Výrobní číslo:';
-          worksheet.getCell(`B${row}`).value = appliance.serialNumber;
+        if (appliance.location) {
+          worksheet.getCell(`A${row}`).value = '  Umístění:';
+          worksheet.getCell(`B${row}`).value = appliance.location;
+          row++;
+        }
+
+        if (appliance.floor) {
+          worksheet.getCell(`A${row}`).value = '  Podlaží:';
+          worksheet.getCell(`B${row}`).value = appliance.floor;
           row++;
         }
 
