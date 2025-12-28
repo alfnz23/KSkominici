@@ -11,6 +11,8 @@ interface ReportData {
   technicianName: string;
   chimneyType: string;
   chimneyHeight?: string;
+  chimneyDescription?: string;
+  flue?: string;
   condition: string;
   defectsFound?: string;
   recommendations?: string;
@@ -26,7 +28,6 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Protokol kontroly');
 
-  // Nastavení šířky sloupců
   worksheet.columns = [
     { width: 30 },
     { width: 50 },
@@ -47,7 +48,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
 
   let row = 3;
 
-  // Sekce: Údaje o zákazníkovi
+  // ÚDAJE O ZÁKAZNÍKOVI
   worksheet.getCell(`A${row}`).value = 'ÚDAJE O ZÁKAZNÍKOVI';
   worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
   worksheet.getCell(`A${row}`).fill = {
@@ -80,7 +81,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
 
   row++;
 
-  // Sekce: Údaje o kontrole
+  // ÚDAJE O KONTROLE
   worksheet.getCell(`A${row}`).value = 'ÚDAJE O KONTROLE';
   worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
   worksheet.getCell(`A${row}`).fill = {
@@ -111,7 +112,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
 
   row++;
 
-  // Sekce: Technické údaje
+  // TECHNICKÉ ÚDAJE
   worksheet.getCell(`A${row}`).value = 'TECHNICKÉ ÚDAJE';
   worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
   worksheet.getCell(`A${row}`).fill = {
@@ -129,6 +130,20 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   if (data.chimneyHeight) {
     worksheet.getCell(`A${row}`).value = 'Výška komína:';
     worksheet.getCell(`B${row}`).value = `${data.chimneyHeight} m`;
+    row++;
+  }
+
+  if (data.chimneyDescription) {
+    worksheet.getCell(`A${row}`).value = 'Popis spalinové cesty:';
+    worksheet.getCell(`B${row}`).value = data.chimneyDescription;
+    worksheet.getCell(`B${row}`).alignment = { wrapText: true };
+    row++;
+  }
+
+  if (data.flue) {
+    worksheet.getCell(`A${row}`).value = 'Kouřovod:';
+    worksheet.getCell(`B${row}`).value = data.flue;
+    worksheet.getCell(`B${row}`).alignment = { wrapText: true };
     row++;
   }
 
@@ -183,7 +198,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     row++;
   }
 
-  // Sekce: Spotřebiče
+  // SPOTŘEBIČE
   if (data.appliances && data.appliances.length > 0) {
     const validAppliances = data.appliances.filter(
       (a) => a.type || a.manufacturer
@@ -255,6 +270,5 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     });
   });
 
-  // Vrátit buffer
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }
