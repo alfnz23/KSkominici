@@ -31,6 +31,8 @@ interface ReportData {
   inspectionDate: string;
   nextInspectionDate?: string;
   technicianName: string;
+  technicianIco?: string;
+  technicianAddress?: string;
   chimneyType: string;
   chimneyHeight?: string;
   chimneyDescription?: string;
@@ -65,6 +67,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  technicianHeader: {
+    fontSize: 9,
+    textAlign: 'center',
+    marginBottom: 3,
+    color: '#666',
   },
   sectionTitle: {
     fontSize: 14,
@@ -111,6 +119,20 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
         {/* Hlavička */}
         <Text style={styles.title}>PROTOKOL O KONTROLE</Text>
         <Text style={styles.subtitle}>SPALINOVÉ CESTY</Text>
+        
+        {/* Informace o technikovi */}
+        {data.technicianName && (
+          <Text style={styles.technicianHeader}>
+            Provedl: {data.technicianName}
+            {data.technicianIco && ` | IČO: ${data.technicianIco}`}
+          </Text>
+        )}
+        {data.technicianAddress && (
+          <Text style={styles.technicianHeader}>
+            {data.technicianAddress}
+          </Text>
+        )}
+        <Text style={styles.technicianHeader}> </Text>
 
         {/* Údaje o zákazníkovi */}
         <Text style={styles.sectionTitle}>ÚDAJE O ZÁKAZNÍKOVI</Text>
