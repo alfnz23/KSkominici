@@ -1,26 +1,22 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import { renderToBuffer } from '@react-pdf/renderer';
-import fs from 'fs';
 import path from 'path';
 
-// Robustní načtení fontů pro Vercel
+// Robustní načtení fontů pro Vercel - použij cesty
 const regularFontPath = path.join(process.cwd(), 'public', 'fonts', 'Roboto-Regular.ttf');
 const boldFontPath = path.join(process.cwd(), 'public', 'fonts', 'Roboto-Bold.ttf');
-
-const regularFont = fs.readFileSync(regularFontPath);
-const boldFont = fs.readFileSync(boldFontPath);
 
 // Registrace Roboto fontů s plnou UTF-8 podporou
 Font.register({
   family: 'Roboto',
   fonts: [
     {
-      src: regularFont,
+      src: regularFontPath,
       fontWeight: 'normal',
     },
     {
-      src: boldFont,
+      src: boldFontPath,
       fontWeight: 'bold',
     },
   ],
