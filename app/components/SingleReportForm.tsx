@@ -60,6 +60,24 @@ export default function SingleReportForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
+  // Načíst profil technika při načtení komponenty
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await fetch('/api/profile');
+        if (res.ok) {
+          const { profile } = await res.json();
+          if (profile?.full_name) {
+            setFormData(prev => ({ ...prev, technicianName: profile.full_name }));
+          }
+        }
+      } catch (error) {
+        console.error('Chyba při načítání profilu:', error);
+      }
+    };
+    loadProfile();
+  }, []);
+
   const handleInputChange = (field: keyof ReportFormData, value: any) => {
     setFormData((prev) => {
       const updates: Partial<ReportFormData> = { [field]: value };
