@@ -38,21 +38,15 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
       doc.on('error', reject);
 
       // Hlavička
-      doc
-        .fontSize(20)
-        .font('Helvetica-Bold')
-        .text('PROTOKOL O KONTROLE', { align: 'center' });
-      
-      doc
-        .fontSize(16)
-        .text('SPALINOVÉ CESTY', { align: 'center' })
-        .moveDown();
+      doc.fontSize(20).text('PROTOKOL O KONTROLE', { align: 'center' });
+      doc.fontSize(16).text('SPALINOVÉ CESTY', { align: 'center' });
+      doc.moveDown();
 
       // Údaje o zákazníkovi
-      doc.fontSize(12).font('Helvetica-Bold').text('ÚDAJE O ZÁKAZNÍKOVI');
+      doc.fontSize(14).text('ÚDAJE O ZÁKAZNÍKOVI');
       doc.moveDown(0.5);
 
-      doc.fontSize(10).font('Helvetica');
+      doc.fontSize(10);
       doc.text(`Jméno a příjmení: ${data.customerName}`);
       doc.text(`Email: ${data.customerEmail}`);
       if (data.customerPhone) {
@@ -64,10 +58,10 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
       doc.moveDown();
 
       // Údaje o kontrole
-      doc.fontSize(12).font('Helvetica-Bold').text('ÚDAJE O KONTROLE');
+      doc.fontSize(14).text('ÚDAJE O KONTROLE');
       doc.moveDown(0.5);
 
-      doc.fontSize(10).font('Helvetica');
+      doc.fontSize(10);
       doc.text(`Adresa kontrolovaného objektu: ${data.inspectionAddress}`);
       doc.text(`Datum kontroly: ${new Date(data.inspectionDate).toLocaleDateString('cs-CZ')}`);
       if (data.nextInspectionDate) {
@@ -77,10 +71,10 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
       doc.moveDown();
 
       // Technické údaje
-      doc.fontSize(12).font('Helvetica-Bold').text('TECHNICKÉ ÚDAJE');
+      doc.fontSize(14).text('TECHNICKÉ ÚDAJE');
       doc.moveDown(0.5);
 
-      doc.fontSize(10).font('Helvetica');
+      doc.fontSize(10);
       doc.text(`Typ komína: ${data.chimneyType}`);
       if (data.chimneyHeight) {
         doc.text(`Výška komína: ${data.chimneyHeight} m`);
@@ -95,16 +89,16 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
       doc.moveDown();
 
       if (data.defectsFound) {
-        doc.fontSize(12).font('Helvetica-Bold').text('ZJIŠTĚNÉ ZÁVADY');
+        doc.fontSize(14).text('ZJIŠTĚNÉ ZÁVADY');
         doc.moveDown(0.5);
-        doc.fontSize(10).font('Helvetica').text(data.defectsFound);
+        doc.fontSize(10).text(data.defectsFound);
         doc.moveDown();
       }
 
       if (data.recommendations) {
-        doc.fontSize(12).font('Helvetica-Bold').text('DOPORUČENÍ');
+        doc.fontSize(14).text('DOPORUČENÍ');
         doc.moveDown(0.5);
-        doc.fontSize(10).font('Helvetica').text(data.recommendations);
+        doc.fontSize(10).text(data.recommendations);
         doc.moveDown();
       }
 
@@ -113,12 +107,12 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
         const validAppliances = data.appliances.filter(a => a.type || a.manufacturer);
         
         if (validAppliances.length > 0) {
-          doc.fontSize(12).font('Helvetica-Bold').text('PŘIPOJENÉ SPOTŘEBIČE');
+          doc.fontSize(14).text('PŘIPOJENÉ SPOTŘEBIČE');
           doc.moveDown(0.5);
 
           validAppliances.forEach((appliance, index) => {
-            doc.fontSize(10).font('Helvetica-Bold').text(`${index + 1}. Spotřebič:`);
-            doc.fontSize(10).font('Helvetica');
+            doc.fontSize(11).text(`${index + 1}. Spotřebič:`);
+            doc.fontSize(10);
             if (appliance.type) doc.text(`  Typ: ${appliance.type}`);
             if (appliance.manufacturer) doc.text(`  Výrobce: ${appliance.manufacturer}`);
             if (appliance.power) doc.text(`  Výkon: ${appliance.power}`);
@@ -130,7 +124,7 @@ export async function generateReportPDF(data: ReportData): Promise<Buffer> {
 
       // Patička
       doc.moveDown(2);
-      doc.fontSize(8).font('Helvetica').text(
+      doc.fontSize(8).text(
         `Dokument vygenerován: ${new Date().toLocaleDateString('cs-CZ')} ${new Date().toLocaleTimeString('cs-CZ')}`,
         { align: 'center' }
       );
