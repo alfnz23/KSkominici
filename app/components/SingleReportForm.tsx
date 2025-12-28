@@ -7,8 +7,8 @@ interface ReportFormData {
   // Zákaznická data
   customerName: string;
   customerEmail: string;
-  permanentAddress: string; // Trvalé bydliště
-  inspectionAddress: string; // Adresa kontrolovaného objektu
+  permanentAddress: string;
+  inspectionAddress: string;
   customerPhone: string;
 
   // Data o kontrole
@@ -17,11 +17,13 @@ interface ReportFormData {
   technicianName: string;
   
   // Technické údaje
-  chimneyType: string; // Typ komína
+  chimneyType: string;
   chimneyHeight: string;
-  condition: string; // Stav
-  defectsFound: string; // Zjištěné závady
-  recommendations: string; // Doporučení
+  chimneyDescription: string;
+  flue: string;
+  condition: string;
+  defectsFound: string;
+  recommendations: string;
   
   // Spotřebiče
   appliances: Array<{
@@ -44,6 +46,8 @@ export default function SingleReportForm() {
     technicianName: '',
     chimneyType: '',
     chimneyHeight: '',
+    chimneyDescription: '',
+    flue: '',
     condition: 'Vyhovující',
     defectsFound: '',
     recommendations: '',
@@ -152,7 +156,7 @@ export default function SingleReportForm() {
           job_id: job.id,
           report_id: report.id,
           to_email: formData.customerEmail,
-          cc_email: formData.technicianName, // Email technika
+          cc_email: formData.technicianName,
         }),
       });
 
@@ -173,6 +177,8 @@ export default function SingleReportForm() {
           technicianName: '',
           chimneyType: '',
           chimneyHeight: '',
+          chimneyDescription: '',
+          flue: '',
           condition: 'Vyhovující',
           defectsFound: '',
           recommendations: '',
@@ -363,6 +369,32 @@ export default function SingleReportForm() {
                   onChange={(e) => handleInputChange('chimneyHeight', e.target.value)}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="např. 12"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Popis spalinové cesty
+                </label>
+                <textarea
+                  value={formData.chimneyDescription}
+                  onChange={(e) => handleInputChange('chimneyDescription', e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Například: Zděný komín opatřen ochrannou komínovou vložkou..."
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Kouřovod
+                </label>
+                <textarea
+                  value={formData.flue}
+                  onChange={(e) => handleInputChange('flue', e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Například: PP roury DN 80mm v délce do 1m..."
                 />
               </div>
 
