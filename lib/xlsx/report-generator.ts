@@ -9,6 +9,8 @@ interface ReportData {
   inspectionDate: string;
   nextInspectionDate?: string;
   technicianName: string;
+  technicianIco?: string;
+  technicianAddress?: string;
   chimneyType: string;
   chimneyHeight?: string;
   chimneyDescription?: string;
@@ -48,7 +50,32 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   };
   worksheet.getRow(1).height = 30;
 
-  let row = 3;
+  let row = 2;
+
+  // Informace o technikovi
+  if (data.technicianName) {
+    worksheet.mergeCells(`A${row}:B${row}`);
+    const techCell = worksheet.getCell(`A${row}`);
+    let techInfo = `Provedl: ${data.technicianName}`;
+    if (data.technicianIco) {
+      techInfo += ` | IČO: ${data.technicianIco}`;
+    }
+    techCell.value = techInfo;
+    techCell.font = { size: 10 };
+    techCell.alignment = { horizontal: 'center' };
+    row++;
+  }
+
+  if (data.technicianAddress) {
+    worksheet.mergeCells(`A${row}:B${row}`);
+    const addrCell = worksheet.getCell(`A${row}`);
+    addrCell.value = data.technicianAddress;
+    addrCell.font = { size: 10 };
+    addrCell.alignment = { horizontal: 'center' };
+    row++;
+  }
+
+  row++; // Prázdný řádek
 
   // ÚDAJE O ZÁKAZNÍKOVI
   worksheet.getCell(`A${row}`).value = 'ÚDAJE O ZÁKAZNÍKOVI';
