@@ -21,6 +21,7 @@ interface ReportFormData {
   chimneyHeight: string;
   chimneyDescription: string;
   flue: string;
+  flueType: string;
   condition: string;
   defectsFound: string;
   recommendations: string;
@@ -30,7 +31,8 @@ interface ReportFormData {
     type: string;
     manufacturer: string;
     power: string;
-    serialNumber: string;
+    location: string;
+    floor: string;
   }>;
 }
 
@@ -48,10 +50,11 @@ export default function SingleReportForm() {
     chimneyHeight: '',
     chimneyDescription: '',
     flue: '',
+    flueType: '',
     condition: 'Vyhovující',
     defectsFound: '',
     recommendations: '',
-    appliances: [{ type: '', manufacturer: '', power: '', serialNumber: '' }],
+    appliances: [{ type: '', manufacturer: '', power: '', location: '', floor: '' }],
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,7 +69,7 @@ export default function SingleReportForm() {
       ...prev,
       appliances: [
         ...prev.appliances,
-        { type: '', manufacturer: '', power: '', serialNumber: '' },
+        { type: '', manufacturer: '', power: '', location: '', floor: '' },
       ],
     }));
   };
@@ -178,10 +181,11 @@ export default function SingleReportForm() {
           chimneyHeight: '',
           chimneyDescription: '',
           flue: '',
+          flueType: '',
           condition: 'Vyhovující',
           defectsFound: '',
           recommendations: '',
-          appliances: [{ type: '', manufacturer: '', power: '', serialNumber: '' }],
+          appliances: [{ type: '', manufacturer: '', power: '', location: '', floor: '' }],
         });
         setSubmitStatus('idle');
       }, 2000);
@@ -351,10 +355,8 @@ export default function SingleReportForm() {
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Vyberte typ</option>
-                  <option value="Jednoprůduchový">Jednoprůduchový</option>
-                  <option value="Víceprůduchový">Víceprůduchový</option>
-                  <option value="Nerezový">Nerezový</option>
-                  <option value="Keramický">Keramický</option>
+                  <option value="zděný vestavěný">zděný vestavěný</option>
+                  <option value="systémový montovaný">systémový montovaný</option>
                 </select>
               </div>
 
@@ -395,6 +397,22 @@ export default function SingleReportForm() {
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Například: PP roury DN 80mm v délce do 1m..."
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Typ kouřovodu
+                </label>
+                <select
+                  value={formData.flueType}
+                  onChange={(e) => handleInputChange('flueType', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Vyberte typ</option>
+                  <option value="samostatný">samostatný</option>
+                  <option value="vícevrstvý">vícevrstvý</option>
+                  <option value="koncentrický">koncentrický</option>
+                </select>
               </div>
 
               <div>
@@ -463,17 +481,22 @@ export default function SingleReportForm() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Typ spotřebiče
+                        Druh spotřebiče
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={appliance.type}
                         onChange={(e) =>
                           updateAppliance(index, 'type', e.target.value)
                         }
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                        placeholder="např. Plynový kotel"
-                      />
+                      >
+                        <option value="">Vyberte druh</option>
+                        <option value="Kondenzační kotel">Kondenzační kotel</option>
+                        <option value="Atmosférický kotel">Atmosférický kotel</option>
+                        <option value="kotel na TP">kotel na TP</option>
+                        <option value="Krbová vložka">Krbová vložka</option>
+                        <option value="Krbová kamna">Krbová kamna</option>
+                      </select>
                     </div>
 
                     <div>
@@ -495,30 +518,66 @@ export default function SingleReportForm() {
                       <label className="block text-sm font-medium text-slate-700 mb-2">
                         Výkon
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={appliance.power}
                         onChange={(e) =>
                           updateAppliance(index, 'power', e.target.value)
                         }
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                        placeholder="např. 24 kW"
-                      />
+                      >
+                        <option value="">Vyberte výkon</option>
+                        <option value="do 24kW">do 24kW</option>
+                        <option value="do 35kW">do 35kW</option>
+                        <option value="do 50kW">do 50kW</option>
+                        <option value="do 70kW">do 70kW</option>
+                        <option value="do 100kW">do 100kW</option>
+                      </select>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Výrobní číslo
+                        Umístění spotřebiče
                       </label>
-                      <input
-                        type="text"
-                        value={appliance.serialNumber}
+                      <select
+                        value={appliance.location}
                         onChange={(e) =>
-                          updateAppliance(index, 'serialNumber', e.target.value)
+                          updateAppliance(index, 'location', e.target.value)
                         }
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                        placeholder="SN123456789"
-                      />
+                      >
+                        <option value="">Vyberte umístění</option>
+                        <option value="obývací pokoj">obývací pokoj</option>
+                        <option value="kuchyně">kuchyně</option>
+                        <option value="technická místnost">technická místnost</option>
+                        <option value="koupelna">koupelna</option>
+                        <option value="WC">WC</option>
+                        <option value="pokoj">pokoj</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Podlaží
+                      </label>
+                      <select
+                        value={appliance.floor}
+                        onChange={(e) =>
+                          updateAppliance(index, 'floor', e.target.value)
+                        }
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      >
+                        <option value="">Vyberte podlaží</option>
+                        <option value="2PP">2PP</option>
+                        <option value="1PP">1PP</option>
+                        <option value="1NP">1NP</option>
+                        <option value="2NP">2NP</option>
+                        <option value="3NP">3NP</option>
+                        <option value="4NP">4NP</option>
+                        <option value="5NP">5NP</option>
+                        <option value="6NP">6NP</option>
+                        <option value="7NP">7NP</option>
+                        <option value="8NP">8NP</option>
+                      </select>
                     </div>
                   </div>
 
