@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    // Get customers for this company
+    // Get customers
     const { data: customers, error: customersError } = await supabase
       .from('customers')
       .select('*')
@@ -37,7 +37,70 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 });
     }
 
-    return NextResponse.json({ customers: customers || [] }, { status: 200 });
+    // Pro každého zákazníka načti poslední job + report + dokument
+    const customersWithJobs = await Promise.all(
+      (customers || []).map(async (customer) => {
+        // Najdi poslední job pro tohoto zákazníka
+        const { data: jobs } = await supabase
+          .from('jobs')
+          .select('id, scheduled_at')
+          .eq('customer_id', customer.id)
+          .order('scheduled_at', { ascending: false })
+          .limit(1);
+
+        const lastJob = jobs?.[0];
+
+        if (!lastJob) {
+          return {
+            ...customer,
+            lastInspectionDate: null,
+            nextInspectionDate: null,
+            inspectionAddress: null,
+            pdfUrl: null,
+          };
+        }
+
+        // Načti report pro tento job
+        const { data: reports } = await supabase
+          .from('reports')
+          .select('id, data')
+          .eq('job_id', lastJob.id)
+          .limit(1);
+
+        const report = reports?.[0];
+        const reportData = report?.data || {};
+
+        // Načti PDF dokument
+        const { data: documents } = await supabase
+          .from('documents')
+          .select('id, storage_path')
+          .eq('job_id', lastJob.id)
+          .eq('type', 'pdf')
+          .limit(1);
+
+        const pdfDoc = documents?.[0];
+        let pdfUrl = null;
+
+        if (pdfDoc) {
+          // Vytvoř signed URL pro PDF
+          const { data: signedUrl } = await supabase.storage
+            .from('documents')
+            .createSignedUrl(pdfDoc.storage_path, 3600); // 1 hodina platnost
+
+          pdfUrl = signedUrl?.signedUrl || null;
+        }
+
+        return {
+          ...customer,
+          lastInspectionDate: reportData.inspectionDate || null,
+          nextInspectionDate: reportData.nextInspectionDate || null,
+          inspectionAddress: reportData.inspectionAddress || null,
+          pdfUrl,
+        };
+      })
+    );
+
+    return NextResponse.json({ customers: customersWithJobs }, { status: 200 });
   } catch (error) {
     console.error('Error fetching customers:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
