@@ -15,6 +15,7 @@ interface ReportFormData {
   inspectionDate: string;
   nextInspectionDate: string;
   technicianName: string;
+  technicianEmail: string;
   
   // Technické údaje
   chimneyType: string;
@@ -44,6 +45,7 @@ export default function SingleReportForm() {
     inspectionDate: new Date().toISOString().split('T')[0],
     nextInspectionDate: '',
     technicianName: '',
+    technicianEmail: '',
     chimneyType: '',
     chimneyHeight: '',
     chimneyDescription: '',
@@ -175,6 +177,7 @@ export default function SingleReportForm() {
           inspectionDate: new Date().toISOString().split('T')[0],
           nextInspectionDate: '',
           technicianName: '',
+          technicianEmail: '',
           chimneyType: '',
           chimneyHeight: '',
           chimneyDescription: '',
@@ -330,6 +333,20 @@ export default function SingleReportForm() {
                   onChange={(e) => handleInputChange('technicianName', e.target.value)}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Petr Kominík"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Email technika *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={formData.technicianEmail}
+                  onChange={(e) => handleInputChange('technicianEmail', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="technik@email.cz"
                 />
               </div>
             </div>
