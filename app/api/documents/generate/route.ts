@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('company_id')
+      .select('company_id, full_name, technician_ico, technician_address')
       .eq('id', user.id)
       .single();
 
@@ -32,112 +32,101 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Načtení zprávy
+    // Načíst report data
     const { data: report, error: reportError } = await supabase
       .from('reports')
-      .select('*')
+      .select('data')
       .eq('id', report_id)
-      .eq('job_id', job_id)
       .single();
 
     if (reportError || !report) {
       return NextResponse.json({ error: 'Report not found' }, { status: 404 });
     }
 
-    // Generování PDF
-    const pdfBuffer = await generateReportPDF(report.data);
-    const pdfFilename = `zprava-${report_id}-${Date.now()}.pdf`;
+    // Přidat IČO a adresu technika do reportData
+    const reportData = {
+      ...report.data,
+      technicianIco: profile.technician_ico,
+      technicianAddress: profile.technician_address,
+    };
+
+    // Vygenerovat PDF
+    const pdfBuffer = await generateReportPDF(reportData);
+    const pdfFilename = `zprava-${crypto.randomUUID()}-${Date.now()}.pdf`;
     const pdfPath = `${profile.company_id}/${job_id}/${pdfFilename}`;
 
     const { error: pdfUploadError } = await supabase.storage
       .from('documents')
       .upload(pdfPath, pdfBuffer, {
         contentType: 'application/pdf',
-        upsert: true,
+        upsert: false,
       });
 
     if (pdfUploadError) {
       console.error('PDF upload error:', pdfUploadError);
-      return NextResponse.json(
-        { error: 'Failed to upload PDF' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to upload PDF' }, { status: 500 });
     }
 
-    // Uložení PDF do databáze
-    const { data: pdfDoc, error: pdfDocError } = await supabase
-      .from('documents')
-      .insert({
-        company_id: profile.company_id,
-        job_id,
-        report_id,
-        type: 'pdf',
-        storage_path: pdfPath,
-        filename: pdfFilename,
-        mime_type: 'application/pdf',
-      })
-      .select()
-      .single();
+    // Uložit PDF metadata
+    const { error: pdfDocError } = await supabase.from('documents').insert({
+      company_id: profile.company_id,
+      job_id,
+      report_id,
+      filename: pdfFilename,
+      mime_type: 'application/pdf',
+      storage_path: pdfPath,
+      type: 'pdf',
+    });
 
     if (pdfDocError) {
-      console.error('PDF doc insert error:', pdfDocError);
+      console.error('PDF metadata error:', pdfDocError);
     }
 
-    // Generování XLSX
-    const xlsxBuffer = await generateReportXLSX(report.data);
-    const xlsxFilename = `zprava-${report_id}-${Date.now()}.xlsx`;
+    // Vygenerovat XLSX
+    const xlsxBuffer = await generateReportXLSX(reportData);
+    const xlsxFilename = `zprava-${crypto.randomUUID()}-${Date.now()}.xlsx`;
     const xlsxPath = `${profile.company_id}/${job_id}/${xlsxFilename}`;
 
     const { error: xlsxUploadError } = await supabase.storage
       .from('documents')
       .upload(xlsxPath, xlsxBuffer, {
         contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        upsert: true,
+        upsert: false,
       });
 
     if (xlsxUploadError) {
       console.error('XLSX upload error:', xlsxUploadError);
+      return NextResponse.json({ error: 'Failed to upload XLSX' }, { status: 500 });
     }
 
-    // Uložení XLSX do databáze
-    const { data: xlsxDoc, error: xlsxDocError } = await supabase
-      .from('documents')
-      .insert({
-        company_id: profile.company_id,
-        job_id,
-        report_id,
-        type: 'xlsx',
-        storage_path: xlsxPath,
-        filename: xlsxFilename,
-        mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      })
-      .select()
-      .single();
+    // Uložit XLSX metadata
+    const { error: xlsxDocError } = await supabase.from('documents').insert({
+      company_id: profile.company_id,
+      job_id,
+      report_id,
+      filename: xlsxFilename,
+      mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      storage_path: xlsxPath,
+      type: 'xlsx',
+    });
 
     if (xlsxDocError) {
-      console.error('XLSX doc insert error:', xlsxDocError);
+      console.error('XLSX metadata error:', xlsxDocError);
     }
-
-    // Aktualizace statusu zprávy
-    await supabase
-      .from('reports')
-      .update({ status: 'generated' })
-      .eq('id', report_id);
 
     return NextResponse.json(
       {
         success: true,
-        documents: {
-          pdf: pdfDoc,
-          xlsx: xlsxDoc,
-        },
+        message: 'Documents generated successfully',
+        pdf_path: pdfPath,
+        xlsx_path: xlsxPath,
       },
       { status: 200 }
     );
   } catch (error) {
     console.error('Error generating documents:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
+      { error: 'Failed to generate documents', details: String(error) },
       { status: 500 }
     );
   }
