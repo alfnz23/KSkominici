@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { job_id, report_id, to_email, cc_email } = body;
+    const { job_id, report_id, to_email } = body;
 
     if (!job_id || !report_id || !to_email) {
       return NextResponse.json(
@@ -47,8 +47,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Načíst data zprávy
+    const { data: report } = await supabase
+      .from('reports')
+      .select('data')
+      .eq('id', report_id)
+      .single();
+
+    const reportData = report?.data || {};
+
     // Stáhnout soubory ze storage
-    const attachments = await Promise.all(
+    const allAttachments = await Promise.all(
       documents.map(async (doc) => {
         const { data: file } = await supabase.storage
           .from('documents')
@@ -60,11 +69,12 @@ export async function POST(request: NextRequest) {
         return {
           filename: doc.filename,
           content: Buffer.from(buffer),
+          type: doc.type,
         };
       })
     );
 
-    const validAttachments = attachments.filter((a) => a !== null);
+    const validAttachments = allAttachments.filter((a) => a !== null);
 
     if (validAttachments.length === 0) {
       return NextResponse.json(
@@ -73,20 +83,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Načíst data zprávy pro email
-    const { data: report } = await supabase
-      .from('reports')
-      .select('data')
-      .eq('id', report_id)
-      .single();
+    // Pouze PDF pro zákazníka
+    const customerAttachments = validAttachments.filter(a => a.type === 'pdf');
 
-    const reportData = report?.data || {};
+    // PDF + XLSX pro technika
+    const technicianAttachments = validAttachments;
 
-    // Odeslat email zákazníkovi
+    // 1. Email zákazníkovi (jen PDF)
     const customerEmailData = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'info@vase-firma.cz',
+      from: process.env.EMAIL_FROM || 'noreply@kskominici.com',
       to: [to_email],
-      cc: cc_email ? [cc_email] : undefined,
       subject: `Protokol o kontrole spalinové cesty - ${reportData.inspectionAddress || ''}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -132,15 +138,38 @@ export async function POST(request: NextRequest) {
           </p>
         </div>
       `,
-      attachments: validAttachments,
+      attachments: customerAttachments,
     });
+
+    // 2. Email technikovi (PDF + XLSX) - použít přihlášeného uživatele
+    if (profile.email && profile.email !== to_email) {
+      await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'noreply@kskominici.com',
+        to: [profile.email],
+        subject: `Protokol odeslán - ${reportData.customerName || to_email}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Protokol byl úspěšně odeslán</h2>
+            <p>Protokol byl odeslán zákazníkovi: <strong>${to_email}</strong></p>
+            <p>V příloze naleznete kopii dokumentů (PDF + XLSX).</p>
+            
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <strong>Zákazník:</strong> ${reportData.customerName}<br>
+              <strong>Adresa:</strong> ${reportData.inspectionAddress}<br>
+              <strong>Datum kontroly:</strong> ${reportData.inspectionDate ? new Date(reportData.inspectionDate).toLocaleDateString('cs-CZ') : 'N/A'}
+            </div>
+          </div>
+        `,
+        attachments: technicianAttachments,
+      });
+    }
 
     // Uložit informaci o odeslaném emailu
     await supabase.from('email_outbox').insert({
       company_id: profile.company_id,
       job_id,
       to_email,
-      cc_email: cc_email || null,
+      cc_email: profile.email || null,
       subject: `Protokol o kontrole spalinové cesty - ${reportData.inspectionAddress || ''}`,
       payload: { report_id, documents: documents.map((d) => d.id) },
       status: 'sent',
@@ -153,23 +182,6 @@ export async function POST(request: NextRequest) {
       .from('jobs')
       .update({ status: 'sent' })
       .eq('id', job_id);
-
-    // Pokud je cc_email (email technika), odeslat i tam
-    if (cc_email && cc_email !== to_email) {
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM || 'info@vase-firma.cz',
-        to: [cc_email],
-        subject: `Kopie: Protokol - ${reportData.customerName || to_email}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Kopie odeslaného protokolu</h2>
-            <p>Protokol byl úspěšně odeslán zákazníkovi: <strong>${to_email}</strong></p>
-            <p>V příloze naleznete kopii dokumentů.</p>
-          </div>
-        `,
-        attachments: validAttachments,
-      });
-    }
 
     return NextResponse.json(
       {
