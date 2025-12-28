@@ -90,11 +90,30 @@ export async function GET(request: NextRequest) {
           pdfUrl = signedUrl?.signedUrl || null;
         }
 
+        const today = new Date();
+        const nextDate = reportData.nextInspectionDate ? new Date(reportData.nextInspectionDate) : null;
+        
+        let status: 'active' | 'expiring_soon' | 'expired' = 'active';
+        let daysUntilExpiration = 0;
+        
+        if (nextDate) {
+          const diffTime = nextDate.getTime() - today.getTime();
+          daysUntilExpiration = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (daysUntilExpiration < 0) {
+            status = 'expired';
+          } else if (daysUntilExpiration <= 30) {
+            status = 'expiring_soon';
+          }
+        }
+
         return {
           ...customer,
-          lastInspectionDate: reportData.inspectionDate || null,
-          nextInspectionDate: reportData.nextInspectionDate || null,
-          inspectionAddress: reportData.inspectionAddress || null,
+          last_inspection_date: reportData.inspectionDate || null,
+          next_inspection_date: reportData.nextInspectionDate || null,
+          inspection_address: reportData.inspectionAddress || null,
+          status,
+          days_until_expiration: daysUntilExpiration,
           pdfUrl,
         };
       })
