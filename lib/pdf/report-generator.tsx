@@ -35,6 +35,7 @@ interface ReportData {
   chimneyHeight?: string;
   chimneyDescription?: string;
   flue?: string;
+  flueType?: string;
   condition: string;
   defectsFound?: string;
   recommendations?: string;
@@ -42,7 +43,8 @@ interface ReportData {
     type: string;
     manufacturer: string;
     power: string;
-    serialNumber: string;
+    location: string;
+    floor: string;
   }>;
 }
 
@@ -202,6 +204,14 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
             </Text>
           </View>
         )}
+        {data.flueType && (
+          <View style={styles.row}>
+            <Text style={styles.text}>
+              <Text style={styles.label}>Typ kouřovodu: </Text>
+              {data.flueType}
+            </Text>
+          </View>
+        )}
         <View style={styles.row}>
           <Text style={styles.text}>
             <Text style={styles.label}>Stav: </Text>
@@ -239,7 +249,7 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
                   {index + 1}. Spotřebič:
                 </Text>
                 {appliance.type && (
-                  <Text style={styles.text}>  Typ: {appliance.type}</Text>
+                  <Text style={styles.text}>  Druh: {appliance.type}</Text>
                 )}
                 {appliance.manufacturer && (
                   <Text style={styles.text}>  Výrobce: {appliance.manufacturer}</Text>
@@ -247,8 +257,11 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
                 {appliance.power && (
                   <Text style={styles.text}>  Výkon: {appliance.power}</Text>
                 )}
-                {appliance.serialNumber && (
-                  <Text style={styles.text}>  Výrobní číslo: {appliance.serialNumber}</Text>
+                {appliance.location && (
+                  <Text style={styles.text}>  Umístění: {appliance.location}</Text>
+                )}
+                {appliance.floor && (
+                  <Text style={styles.text}>  Podlaží: {appliance.floor}</Text>
                 )}
               </View>
             ))}
