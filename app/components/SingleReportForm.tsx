@@ -156,7 +156,7 @@ export default function SingleReportForm() {
           job_id: job.id,
           report_id: report.id,
           to_email: formData.customerEmail,
-          cc_email: formData.technicianName,
+          cc_email: formData.technicianEmail,
         }),
       });
 
