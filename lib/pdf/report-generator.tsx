@@ -1,6 +1,21 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import { renderToBuffer } from '@react-pdf/renderer';
+
+// Registrace Roboto fontů s plnou UTF-8 podporou
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    {
+      src: '/fonts/Roboto-Regular.ttf',
+      fontWeight: 'normal',
+    },
+    {
+      src: '/fonts/Roboto-Bold.ttf',
+      fontWeight: 'bold',
+    },
+  ],
+});
 
 interface ReportData {
   customerName: string;
@@ -30,7 +45,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Roboto',
   },
   title: {
     fontSize: 20,
