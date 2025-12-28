@@ -1,4 +1,6 @@
-import jsPDF from 'jspdf';
+import React from 'react';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { renderToBuffer } from '@react-pdf/renderer';
 
 interface ReportData {
   customerName: string;
@@ -24,197 +26,227 @@ interface ReportData {
   }>;
 }
 
+const styles = StyleSheet.create({
+  page: {
+    padding: 40,
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 15,
+    marginBottom: 8,
+    backgroundColor: '#f0f0f0',
+    padding: 5,
+  },
+  row: {
+    marginBottom: 4,
+  },
+  label: {
+    fontWeight: 'bold',
+  },
+  text: {
+    lineHeight: 1.5,
+  },
+  appliance: {
+    marginLeft: 10,
+    marginTop: 5,
+  },
+  applianceTitle: {
+    fontWeight: 'bold',
+    marginBottom: 3,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 40,
+    right: 40,
+    textAlign: 'center',
+    fontSize: 8,
+    color: '#666',
+  },
+});
+
+const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
+  const validAppliances = data.appliances.filter(a => a.type || a.manufacturer);
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Hlavička */}
+        <Text style={styles.title}>PROTOKOL O KONTROLE</Text>
+        <Text style={styles.subtitle}>SPALINOVÉ CESTY</Text>
+
+        {/* Údaje o zákazníkovi */}
+        <Text style={styles.sectionTitle}>ÚDAJE O ZÁKAZNÍKOVI</Text>
+        <View style={styles.row}>
+          <Text style={styles.text}>
+            <Text style={styles.label}>Jméno a příjmení: </Text>
+            {data.customerName}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.text}>
+            <Text style={styles.label}>Email: </Text>
+            {data.customerEmail}
+          </Text>
+        </View>
+        {data.customerPhone && (
+          <View style={styles.row}>
+            <Text style={styles.text}>
+              <Text style={styles.label}>Telefon: </Text>
+              {data.customerPhone}
+            </Text>
+          </View>
+        )}
+        {data.permanentAddress && (
+          <View style={styles.row}>
+            <Text style={styles.text}>
+              <Text style={styles.label}>Adresa trvalého bydliště: </Text>
+              {data.permanentAddress}
+            </Text>
+          </View>
+        )}
+
+        {/* Údaje o kontrole */}
+        <Text style={styles.sectionTitle}>ÚDAJE O KONTROLE</Text>
+        <View style={styles.row}>
+          <Text style={styles.text}>
+            <Text style={styles.label}>Adresa kontrolovaného objektu: </Text>
+            {data.inspectionAddress}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.text}>
+            <Text style={styles.label}>Datum kontroly: </Text>
+            {new Date(data.inspectionDate).toLocaleDateString('cs-CZ')}
+          </Text>
+        </View>
+        {data.nextInspectionDate && (
+          <View style={styles.row}>
+            <Text style={styles.text}>
+              <Text style={styles.label}>Datum příští kontroly: </Text>
+              {new Date(data.nextInspectionDate).toLocaleDateString('cs-CZ')}
+            </Text>
+          </View>
+        )}
+        <View style={styles.row}>
+          <Text style={styles.text}>
+            <Text style={styles.label}>Kontrolu provedl: </Text>
+            {data.technicianName}
+          </Text>
+        </View>
+
+        {/* Technické údaje */}
+        <Text style={styles.sectionTitle}>TECHNICKÉ ÚDAJE</Text>
+        <View style={styles.row}>
+          <Text style={styles.text}>
+            <Text style={styles.label}>Typ komína: </Text>
+            {data.chimneyType}
+          </Text>
+        </View>
+        {data.chimneyHeight && (
+          <View style={styles.row}>
+            <Text style={styles.text}>
+              <Text style={styles.label}>Výška komína: </Text>
+              {data.chimneyHeight} m
+            </Text>
+          </View>
+        )}
+        {data.chimneyDescription && (
+          <View style={styles.row}>
+            <Text style={styles.text}>
+              <Text style={styles.label}>Popis spalinové cesty: </Text>
+              {data.chimneyDescription}
+            </Text>
+          </View>
+        )}
+        {data.flue && (
+          <View style={styles.row}>
+            <Text style={styles.text}>
+              <Text style={styles.label}>Kouřovod: </Text>
+              {data.flue}
+            </Text>
+          </View>
+        )}
+        <View style={styles.row}>
+          <Text style={styles.text}>
+            <Text style={styles.label}>Stav: </Text>
+            {data.condition}
+          </Text>
+        </View>
+
+        {/* Zjištěné závady */}
+        {data.defectsFound && (
+          <>
+            <Text style={styles.sectionTitle}>ZJIŠTĚNÉ ZÁVADY</Text>
+            <View style={styles.row}>
+              <Text style={styles.text}>{data.defectsFound}</Text>
+            </View>
+          </>
+        )}
+
+        {/* Doporučení */}
+        {data.recommendations && (
+          <>
+            <Text style={styles.sectionTitle}>DOPORUČENÍ</Text>
+            <View style={styles.row}>
+              <Text style={styles.text}>{data.recommendations}</Text>
+            </View>
+          </>
+        )}
+
+        {/* Spotřebiče */}
+        {validAppliances.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>PŘIPOJENÉ SPOTŘEBIČE</Text>
+            {validAppliances.map((appliance, index) => (
+              <View key={index} style={styles.appliance}>
+                <Text style={styles.applianceTitle}>
+                  {index + 1}. Spotřebič:
+                </Text>
+                {appliance.type && (
+                  <Text style={styles.text}>  Typ: {appliance.type}</Text>
+                )}
+                {appliance.manufacturer && (
+                  <Text style={styles.text}>  Výrobce: {appliance.manufacturer}</Text>
+                )}
+                {appliance.power && (
+                  <Text style={styles.text}>  Výkon: {appliance.power}</Text>
+                )}
+                {appliance.serialNumber && (
+                  <Text style={styles.text}>  Výrobní číslo: {appliance.serialNumber}</Text>
+                )}
+              </View>
+            ))}
+          </>
+        )}
+
+        {/* Patička */}
+        <Text style={styles.footer}>
+          Dokument vygenerován: {new Date().toLocaleDateString('cs-CZ')} {new Date().toLocaleTimeString('cs-CZ')}
+        </Text>
+      </Page>
+    </Document>
+  );
+};
+
 export async function generateReportPDF(data: ReportData): Promise<Buffer> {
   try {
-    const doc = new jsPDF();
-    let y = 20;
-
-    // Hlavička
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PROTOKOL O KONTROLE', 105, y, { align: 'center' });
-    y += 10;
-    
-    doc.setFontSize(16);
-    doc.text('SPALINOVÉ CESTY', 105, y, { align: 'center' });
-    y += 15;
-
-    // Údaje o zákazníkovi
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('ÚDAJE O ZÁKAZNÍKOVI', 20, y);
-    y += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Jméno a příjmení: ${data.customerName}`, 20, y);
-    y += 6;
-    doc.text(`Email: ${data.customerEmail}`, 20, y);
-    y += 6;
-    
-    if (data.customerPhone) {
-      doc.text(`Telefon: ${data.customerPhone}`, 20, y);
-      y += 6;
-    }
-    
-    if (data.permanentAddress) {
-      doc.text(`Adresa trvalého bydliště: ${data.permanentAddress}`, 20, y);
-      y += 6;
-    }
-    y += 5;
-
-    // Údaje o kontrole
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('ÚDAJE O KONTROLE', 20, y);
-    y += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Adresa kontrolovaného objektu: ${data.inspectionAddress}`, 20, y);
-    y += 6;
-    doc.text(`Datum kontroly: ${new Date(data.inspectionDate).toLocaleDateString('cs-CZ')}`, 20, y);
-    y += 6;
-    
-    if (data.nextInspectionDate) {
-      doc.text(`Datum příští kontroly: ${new Date(data.nextInspectionDate).toLocaleDateString('cs-CZ')}`, 20, y);
-      y += 6;
-    }
-    
-    doc.text(`Kontrolu provedl: ${data.technicianName}`, 20, y);
-    y += 10;
-
-    // Technické údaje
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('TECHNICKÉ ÚDAJE', 20, y);
-    y += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Typ komína: ${data.chimneyType}`, 20, y);
-    y += 6;
-    
-    if (data.chimneyHeight) {
-      doc.text(`Výška komína: ${data.chimneyHeight} m`, 20, y);
-      y += 6;
-    }
-    
-    if (data.chimneyDescription) {
-      const descLines = doc.splitTextToSize(`Popis spalinové cesty: ${data.chimneyDescription}`, 170);
-      doc.text(descLines, 20, y);
-      y += descLines.length * 6;
-    }
-    
-    if (data.flue) {
-      const flueLines = doc.splitTextToSize(`Kouřovod: ${data.flue}`, 170);
-      doc.text(flueLines, 20, y);
-      y += flueLines.length * 6;
-    }
-    
-    doc.text(`Stav: ${data.condition}`, 20, y);
-    y += 10;
-
-    // Zjištěné závady
-    if (data.defectsFound) {
-      if (y > 250) {
-        doc.addPage();
-        y = 20;
-      }
-      
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('ZJIŠTĚNÉ ZÁVADY', 20, y);
-      y += 8;
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      const defectLines = doc.splitTextToSize(data.defectsFound, 170);
-      doc.text(defectLines, 20, y);
-      y += defectLines.length * 6 + 5;
-    }
-
-    // Doporučení
-    if (data.recommendations) {
-      if (y > 250) {
-        doc.addPage();
-        y = 20;
-      }
-      
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('DOPORUČENÍ', 20, y);
-      y += 8;
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      const recLines = doc.splitTextToSize(data.recommendations, 170);
-      doc.text(recLines, 20, y);
-      y += recLines.length * 6 + 5;
-    }
-
-    // Spotřebiče
-    if (data.appliances && data.appliances.length > 0) {
-      const validAppliances = data.appliances.filter(a => a.type || a.manufacturer);
-      
-      if (validAppliances.length > 0) {
-        if (y > 240) {
-          doc.addPage();
-          y = 20;
-        }
-        
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text('PŘIPOJENÉ SPOTŘEBIČE', 20, y);
-        y += 8;
-
-        validAppliances.forEach((appliance, index) => {
-          if (y > 270) {
-            doc.addPage();
-            y = 20;
-          }
-          
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.text(`${index + 1}. Spotřebič:`, 20, y);
-          y += 6;
-          
-          doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
-          if (appliance.type) {
-            doc.text(`  Typ: ${appliance.type}`, 20, y);
-            y += 6;
-          }
-          if (appliance.manufacturer) {
-            doc.text(`  Výrobce: ${appliance.manufacturer}`, 20, y);
-            y += 6;
-          }
-          if (appliance.power) {
-            doc.text(`  Výkon: ${appliance.power}`, 20, y);
-            y += 6;
-          }
-          if (appliance.serialNumber) {
-            doc.text(`  Výrobní číslo: ${appliance.serialNumber}`, 20, y);
-            y += 6;
-          }
-          y += 3;
-        });
-      }
-    }
-
-    // Patička
-    const pageCount = doc.getNumberOfPages();
-    doc.setPage(pageCount);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text(
-      `Dokument vygenerován: ${new Date().toLocaleDateString('cs-CZ')} ${new Date().toLocaleTimeString('cs-CZ')}`,
-      105,
-      285,
-      { align: 'center' }
-    );
-
-    const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+    const pdfBuffer = await renderToBuffer(<ReportDocument data={data} />);
     return pdfBuffer;
   } catch (error) {
     console.error('PDF generation error:', error);
