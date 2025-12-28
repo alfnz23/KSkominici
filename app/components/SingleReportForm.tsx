@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Send, Loader2, CheckCircle } from 'lucide-react';
 
 interface ReportFormData {
