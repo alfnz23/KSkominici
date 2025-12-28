@@ -14,6 +14,7 @@ interface Customer {
   inspection_address: string;
   status: 'active' | 'expiring_soon' | 'expired';
   days_until_expiration: number;
+  pdfUrl?: string | null;
 }
 
 export default function CustomerList() {
@@ -259,7 +260,15 @@ export default function CustomerList() {
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Obnovit
                     </button>
-                    <button className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center text-sm font-medium">
+                    <button
+                      onClick={() => customer.pdfUrl && window.open(customer.pdfUrl, '_blank')}
+                      disabled={!customer.pdfUrl}
+                      className={`px-4 py-2 rounded-lg transition-colors flex items-center text-sm font-medium ${
+                        customer.pdfUrl
+                          ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          : 'bg-slate-50 text-slate-400 cursor-not-allowed'
+                      }`}
+                    >
                       <FileText className="w-4 h-4 mr-2" />
                       Zobrazit
                     </button>
