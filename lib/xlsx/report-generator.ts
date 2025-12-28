@@ -18,6 +18,7 @@ interface ReportData {
   flueType?: string;
   condition: string;
   defectsFound?: string;
+  defectRemovalDate?: string;
   recommendations?: string;
   appliances: Array<{
     type: string;
@@ -30,286 +31,267 @@ interface ReportData {
 
 export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Protokol kontroly');
+  const worksheet = workbook.addWorksheet('Protokol');
 
   worksheet.columns = [
     { width: 30 },
     { width: 50 },
   ];
 
+  let row = 1;
+
   // Hlavička
-  worksheet.mergeCells('A1:B1');
-  const titleCell = worksheet.getCell('A1');
-  titleCell.value = 'PROTOKOL O KONTROLE SPALINOVÉ CESTY';
-  titleCell.font = { size: 16, bold: true };
-  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-  titleCell.fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFE67E22' },
+  worksheet.mergeCells(`A${row}:B${row}`);
+  const headerCell = worksheet.getCell(`A${row}`);
+  headerCell.value = 'ZPRÁVA';
+  headerCell.font = { size: 14, bold: true };
+  headerCell.alignment = { horizontal: 'center', vertical: 'middle' };
+  headerCell.border = {
+    top: { style: 'medium' },
+    left: { style: 'medium' },
+    right: { style: 'medium' },
+    bottom: { style: 'thin' },
   };
-  worksheet.getRow(1).height = 30;
+  row++;
 
-  let row = 2;
+  worksheet.mergeCells(`A${row}:B${row}`);
+  const subtitleCell = worksheet.getCell(`A${row}`);
+  subtitleCell.value = 'o provedení kontroly a čištění spalinové cesty';
+  subtitleCell.font = { size: 11 };
+  subtitleCell.alignment = { horizontal: 'center' };
+  subtitleCell.border = {
+    left: { style: 'medium' },
+    right: { style: 'medium' },
+    bottom: { style: 'medium' },
+  };
+  row++;
+  row++; // Prázdný řádek
 
-  // Informace o technikovi
-  if (data.technicianName) {
-    worksheet.mergeCells(`A${row}:B${row}`);
-    const techCell = worksheet.getCell(`A${row}`);
-    let techInfo = `Provedl: ${data.technicianName}`;
-    if (data.technicianIco) {
-      techInfo += ` | IČO: ${data.technicianIco}`;
-    }
-    techCell.value = techInfo;
-    techCell.font = { size: 10 };
-    techCell.alignment = { horizontal: 'center' };
+  // Informace o firmě
+  worksheet.getCell(`A${row}`).value = 'KS Kominíci.cz';
+  worksheet.getCell(`A${row}`).font = { bold: true, size: 11 };
+  row++;
+
+  worksheet.getCell(`A${row}`).value = data.technicianName;
+  row++;
+
+  if (data.technicianAddress) {
+    worksheet.getCell(`A${row}`).value = data.technicianAddress;
     row++;
   }
 
-  if (data.technicianAddress) {
-    worksheet.mergeCells(`A${row}:B${row}`);
-    const addrCell = worksheet.getCell(`A${row}`);
-    addrCell.value = data.technicianAddress;
-    addrCell.font = { size: 10 };
-    addrCell.alignment = { horizontal: 'center' };
+  if (data.technicianIco) {
+    worksheet.getCell(`A${row}`).value = `IČO odborně způsobilé osoby: ${data.technicianIco}`;
     row++;
   }
 
   row++; // Prázdný řádek
 
-  // ÚDAJE O ZÁKAZNÍKOVI
-  worksheet.getCell(`A${row}`).value = 'ÚDAJE O ZÁKAZNÍKOVI';
-  worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
-  worksheet.getCell(`A${row}`).fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFD5D8DC' },
-  };
-  worksheet.mergeCells(`A${row}:B${row}`);
-  row++;
+  // Údaje o zákazníkovi - tabulka
+  const addTableRow = (label: string, value: string, hasBottomBorder = true) => {
+    const labelCell = worksheet.getCell(`A${row}`);
+    labelCell.value = label;
+    labelCell.font = { bold: true };
+    labelCell.border = {
+      left: { style: 'thin' },
+      right: { style: 'thin' },
+      top: row === 9 ? { style: 'thin' } : undefined,
+      bottom: hasBottomBorder ? { style: 'thin' } : undefined,
+    };
 
-  worksheet.getCell(`A${row}`).value = 'Jméno a příjmení:';
-  worksheet.getCell(`B${row}`).value = data.customerName;
-  row++;
-
-  worksheet.getCell(`A${row}`).value = 'Email:';
-  worksheet.getCell(`B${row}`).value = data.customerEmail;
-  row++;
-
-  if (data.customerPhone) {
-    worksheet.getCell(`A${row}`).value = 'Telefon:';
-    worksheet.getCell(`B${row}`).value = data.customerPhone;
+    const valueCell = worksheet.getCell(`B${row}`);
+    valueCell.value = value;
+    valueCell.border = {
+      left: { style: 'thin' },
+      right: { style: 'thin' },
+      top: row === 9 ? { style: 'thin' } : undefined,
+      bottom: hasBottomBorder ? { style: 'thin' } : undefined,
+    };
     row++;
-  }
+  };
+
+  addTableRow('Jméno zákazníka:', data.customerName);
+  addTableRow(
+    'Kontakt zákazníka (email):',
+    `${data.customerEmail} | tel: ${data.customerPhone || ''}`
+  );
 
   if (data.permanentAddress) {
-    worksheet.getCell(`A${row}`).value = 'Adresa trvalého bydliště:';
-    worksheet.getCell(`B${row}`).value = data.permanentAddress;
+    addTableRow('Sídlo firmy/Bydliště:', data.permanentAddress);
+  }
+
+  const validAppliances = data.appliances.filter(a => a.type || a.manufacturer);
+  addTableRow(
+    'Adresa kontrolovaného objektu:',
+    `${data.inspectionAddress} | Podlaží: ${validAppliances[0]?.floor || ''}`
+  );
+  addTableRow(
+    'Datum provedení kontroly:',
+    new Date(data.inspectionDate).toLocaleDateString('cs-CZ'),
+    false
+  );
+
+  row++; // Prázdný řádek
+
+  // SPOTŘEBIČ
+  if (validAppliances.length > 0) {
+    worksheet.getCell(`A${row}`).value = 'SPOTŘEBIČ:';
+    worksheet.getCell(`A${row}`).font = { bold: true };
+    worksheet.getCell(`A${row}`).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD5D8DC' },
+    };
+    row++;
+
+    const appliance = validAppliances[0];
+    addTableRow('Druh:', appliance.type || '');
+    addTableRow('Typ:', appliance.manufacturer || '');
+    addTableRow('Výkon:', appliance.power || '');
+    addTableRow('Umístění:', appliance.location || '', false);
+
     row++;
   }
 
-  row++;
-
-  // ÚDAJE O KONTROLE
-  worksheet.getCell(`A${row}`).value = 'ÚDAJE O KONTROLE';
-  worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
+  // SPECIFICKÉ SPALINOVÉ CESTY
+  worksheet.getCell(`A${row}`).value = 'SPECIFICKÉ SPALINOVÉ CESTY:';
+  worksheet.getCell(`A${row}`).font = { bold: true };
   worksheet.getCell(`A${row}`).fill = {
     type: 'pattern',
     pattern: 'solid',
     fgColor: { argb: 'FFD5D8DC' },
   };
-  worksheet.mergeCells(`A${row}:B${row}`);
   row++;
 
-  worksheet.getCell(`A${row}`).value = 'Adresa kontrolovaného objektu:';
-  worksheet.getCell(`B${row}`).value = data.inspectionAddress;
-  row++;
-
-  worksheet.getCell(`A${row}`).value = 'Datum kontroly:';
-  worksheet.getCell(`B${row}`).value = new Date(data.inspectionDate).toLocaleDateString('cs-CZ');
-  row++;
-
-  if (data.nextInspectionDate) {
-    worksheet.getCell(`A${row}`).value = 'Datum příští kontroly:';
-    worksheet.getCell(`B${row}`).value = new Date(data.nextInspectionDate).toLocaleDateString('cs-CZ');
-    row++;
-  }
-
-  worksheet.getCell(`A${row}`).value = 'Kontrolu provedl:';
-  worksheet.getCell(`B${row}`).value = data.technicianName;
-  row++;
-
-  row++;
-
-  // TECHNICKÉ ÚDAJE
-  worksheet.getCell(`A${row}`).value = 'TECHNICKÉ ÚDAJE';
-  worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
-  worksheet.getCell(`A${row}`).fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFD5D8DC' },
-  };
-  worksheet.mergeCells(`A${row}:B${row}`);
-  row++;
-
-  worksheet.getCell(`A${row}`).value = 'Typ komína:';
-  worksheet.getCell(`B${row}`).value = data.chimneyType;
-  row++;
-
-  if (data.chimneyHeight) {
-    worksheet.getCell(`A${row}`).value = 'Výška komína:';
-    worksheet.getCell(`B${row}`).value = `${data.chimneyHeight} m`;
-    row++;
-  }
-
+  let chimneyDesc = data.chimneyType;
   if (data.chimneyDescription) {
-    worksheet.getCell(`A${row}`).value = 'Popis spalinové cesty:';
-    worksheet.getCell(`B${row}`).value = data.chimneyDescription;
-    worksheet.getCell(`B${row}`).alignment = { wrapText: true };
-    row++;
+    chimneyDesc += '\n' + data.chimneyDescription;
   }
+  addTableRow('Komín:', chimneyDesc);
 
   if (data.flue) {
-    worksheet.getCell(`A${row}`).value = 'Kouřovod:';
-    worksheet.getCell(`B${row}`).value = data.flue;
-    worksheet.getCell(`B${row}`).alignment = { wrapText: true };
-    row++;
-  }
-
-  if (data.flueType) {
-    worksheet.getCell(`A${row}`).value = 'Typ kouřovodu:';
-    worksheet.getCell(`B${row}`).value = data.flueType;
-    row++;
-  }
-
-  worksheet.getCell(`A${row}`).value = 'Stav:';
-  worksheet.getCell(`B${row}`).value = data.condition;
-  worksheet.getCell(`B${row}`).font = {
-    bold: true,
-    color: {
-      argb: data.condition === 'Vyhovující' ? 'FF27AE60' : 
-            data.condition === 'Nevyhovující' ? 'FFE74C3C' : 'FFF39C12'
+    let flueDesc = data.flueType || '';
+    if (data.flue) {
+      flueDesc += (flueDesc ? '\n' : '') + data.flue;
     }
+    addTableRow('Kouřovod:', flueDesc, false);
+  }
+
+  row++;
+
+  // Zjištěné nedostatky odstraněné
+  worksheet.mergeCells(`A${row}:B${row}`);
+  const defectsRemovedLabel = worksheet.getCell(`A${row}`);
+  defectsRemovedLabel.value = 'ZJIŠTĚNÉ NEDOSTATKY, KTERÉ BYLY ODSTRANĚNY NA MÍSTĚ:';
+  defectsRemovedLabel.font = { bold: true };
+  defectsRemovedLabel.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFD5D8DC' },
   };
   row++;
 
-  row++;
-
-  if (data.defectsFound) {
-    worksheet.getCell(`A${row}`).value = 'ZJIŠTĚNÉ ZÁVADY';
-    worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
-    worksheet.getCell(`A${row}`).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFD5D8DC' },
-    };
-    worksheet.mergeCells(`A${row}:B${row}`);
-    row++;
-
-    worksheet.getCell(`A${row}`).value = data.defectsFound;
-    worksheet.getCell(`A${row}`).alignment = { wrapText: true, vertical: 'top' };
-    worksheet.mergeCells(`A${row}:B${row}`);
-    worksheet.getRow(row).height = 60;
-    row++;
-    row++;
-  }
-
-  if (data.recommendations) {
-    worksheet.getCell(`A${row}`).value = 'DOPORUČENÍ';
-    worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
-    worksheet.getCell(`A${row}`).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFD5D8DC' },
-    };
-    worksheet.mergeCells(`A${row}:B${row}`);
-    row++;
-
-    worksheet.getCell(`A${row}`).value = data.recommendations;
-    worksheet.getCell(`A${row}`).alignment = { wrapText: true, vertical: 'top' };
-    worksheet.mergeCells(`A${row}:B${row}`);
-    worksheet.getRow(row).height = 60;
-    row++;
-    row++;
-  }
-
-  // SPOTŘEBIČE
-  if (data.appliances && data.appliances.length > 0) {
-    const validAppliances = data.appliances.filter(
-      (a) => a.type || a.manufacturer
-    );
-
-    if (validAppliances.length > 0) {
-      worksheet.getCell(`A${row}`).value = 'PŘIPOJENÉ SPOTŘEBIČE';
-      worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
-      worksheet.getCell(`A${row}`).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFD5D8DC' },
-      };
-      worksheet.mergeCells(`A${row}:B${row}`);
-      row++;
-
-      validAppliances.forEach((appliance, index) => {
-        worksheet.getCell(`A${row}`).value = `${index + 1}. Spotřebič:`;
-        worksheet.getCell(`A${row}`).font = { bold: true };
-        worksheet.mergeCells(`A${row}:B${row}`);
-        row++;
-
-        if (appliance.type) {
-          worksheet.getCell(`A${row}`).value = '  Druh:';
-          worksheet.getCell(`B${row}`).value = appliance.type;
-          row++;
-        }
-
-        if (appliance.manufacturer) {
-          worksheet.getCell(`A${row}`).value = '  Výrobce:';
-          worksheet.getCell(`B${row}`).value = appliance.manufacturer;
-          row++;
-        }
-
-        if (appliance.power) {
-          worksheet.getCell(`A${row}`).value = '  Výkon:';
-          worksheet.getCell(`B${row}`).value = appliance.power;
-          row++;
-        }
-
-        if (appliance.location) {
-          worksheet.getCell(`A${row}`).value = '  Umístění:';
-          worksheet.getCell(`B${row}`).value = appliance.location;
-          row++;
-        }
-
-        if (appliance.floor) {
-          worksheet.getCell(`A${row}`).value = '  Podlaží:';
-          worksheet.getCell(`B${row}`).value = appliance.floor;
-          row++;
-        }
-
-        row++;
-      });
-    }
-  }
-
-  // Patička
-  row++;
   worksheet.mergeCells(`A${row}:B${row}`);
-  const footerCell = worksheet.getCell(`A${row}`);
-  footerCell.value = `Dokument vygenerován: ${new Date().toLocaleDateString('cs-CZ')} ${new Date().toLocaleTimeString('cs-CZ')}`;
-  footerCell.font = { size: 9, italic: true };
-  footerCell.alignment = { horizontal: 'center' };
+  const defectsRemovedValue = worksheet.getCell(`A${row}`);
+  defectsRemovedValue.value =
+    data.condition !== 'Vyhovující' && data.defectsFound ? data.defectsFound : '';
+  defectsRemovedValue.border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    right: { style: 'thin' },
+    bottom: { style: 'thin' },
+  };
+  worksheet.getRow(row).height = 30;
+  row++;
+  row++;
 
-  // Formátování všech řádků
-  worksheet.eachRow((row) => {
-    row.eachCell((cell) => {
-      cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' },
-      };
-    });
-  });
+  // Zjištěné nedostatky neodstraněné
+  worksheet.mergeCells(`A${row}:B${row}`);
+  const defectsNotRemovedLabel = worksheet.getCell(`A${row}`);
+  defectsNotRemovedLabel.value = 'ZJIŠTĚNÉ NEDOSTATKY, KTERÉ NEBYLY ODSTRANĚNY NA MÍSTĚ:';
+  defectsNotRemovedLabel.font = { bold: true };
+  defectsNotRemovedLabel.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFD5D8DC' },
+  };
+  row++;
 
-  return Buffer.from(await workbook.xlsx.writeBuffer());
+  worksheet.mergeCells(`A${row}:B${row}`);
+  const defectsNotRemovedValue = worksheet.getCell(`A${row}`);
+  defectsNotRemovedValue.value =
+    data.condition !== 'Vyhovující' && data.defectsFound ? data.defectsFound : '';
+  defectsNotRemovedValue.border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    right: { style: 'thin' },
+    bottom: { style: 'thin' },
+  };
+  worksheet.getRow(row).height = 30;
+  row++;
+  row++;
+
+  // Termín odstranění
+  if (data.defectRemovalDate) {
+    worksheet.mergeCells(`A${row}:B${row}`);
+    const removalDateLabel = worksheet.getCell(`A${row}`);
+    removalDateLabel.value = 'TERMÍN ODSTRANĚNÍ NEDOSTATKŮ:';
+    removalDateLabel.font = { bold: true };
+    removalDateLabel.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD5D8DC' },
+    };
+    row++;
+
+    worksheet.mergeCells(`A${row}:B${row}`);
+    const removalDateValue = worksheet.getCell(`A${row}`);
+    removalDateValue.value = new Date(data.defectRemovalDate).toLocaleDateString('cs-CZ');
+    removalDateValue.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      right: { style: 'thin' },
+      bottom: { style: 'thin' },
+    };
+    row++;
+    row++;
+  }
+
+  // Poznámka - pokud vyhovující
+  if (data.condition === 'Vyhovující') {
+    worksheet.mergeCells(`A${row}:B${row}`);
+    const noteLabel = worksheet.getCell(`A${row}`);
+    noteLabel.value = 'POZNÁMKA:';
+    noteLabel.font = { bold: true };
+    noteLabel.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFD5D8DC' },
+    };
+    row++;
+
+    worksheet.mergeCells(`A${row}:B${row}`);
+    const noteValue = worksheet.getCell(`A${row}`);
+    noteValue.value = `Spalinová cesta je čistá a vyhovuje bezpečnému provozu\n${data.recommendations || ''}`;
+    noteValue.alignment = { wrapText: true };
+    noteValue.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      right: { style: 'thin' },
+      bottom: { style: 'thin' },
+    };
+    worksheet.getRow(row).height = 30;
+    row++;
+    row++;
+  }
+
+  // Podpis
+  row++;
+  worksheet.getCell(`A${row}`).value = `Kontrolu provedl: ${data.technicianName}`;
+  row++;
+  worksheet.getCell(`A${row}`).value = `Dne: ${new Date(data.inspectionDate).toLocaleDateString('cs-CZ')}`;
+  worksheet.getCell(`B${row}`).value = `V: ${data.technicianAddress?.split(',')[1] || ''}`;
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer);
 }
