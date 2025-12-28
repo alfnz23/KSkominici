@@ -61,7 +61,19 @@ export default function SingleReportForm() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const handleInputChange = (field: keyof ReportFormData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updates: Partial<ReportFormData> = { [field]: value };
+      
+      // Automaticky nastavit datum příští kontroly +1 rok
+      if (field === 'inspectionDate' && value) {
+        const inspDate = new Date(value);
+        const nextDate = new Date(inspDate);
+        nextDate.setFullYear(nextDate.getFullYear() + 1);
+        updates.nextInspectionDate = nextDate.toISOString().split('T')[0];
+      }
+      
+      return { ...prev, ...updates };
+    });
   };
 
   const addAppliance = () => {
@@ -338,126 +350,6 @@ export default function SingleReportForm() {
             </div>
           </div>
 
-          {/* Technické údaje */}
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">
-              Technické údaje
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Typ komína *
-                </label>
-                <select
-                  required
-                  value={formData.chimneyType}
-                  onChange={(e) => handleInputChange('chimneyType', e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Vyberte typ</option>
-                  <option value="zděný vestavěný">zděný vestavěný</option>
-                  <option value="systémový montovaný">systémový montovaný</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Výška komína (m)
-                </label>
-                <input
-                  type="text"
-                  value={formData.chimneyHeight}
-                  onChange={(e) => handleInputChange('chimneyHeight', e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="např. 12"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Popis spalinové cesty
-                </label>
-                <textarea
-                  value={formData.chimneyDescription}
-                  onChange={(e) => handleInputChange('chimneyDescription', e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Například: Zděný komín opatřen ochrannou komínovou vložkou..."
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Kouřovod
-                </label>
-                <textarea
-                  value={formData.flue}
-                  onChange={(e) => handleInputChange('flue', e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Například: PP roury DN 80mm v délce do 1m..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Typ kouřovodu
-                </label>
-                <select
-                  value={formData.flueType}
-                  onChange={(e) => handleInputChange('flueType', e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Vyberte typ</option>
-                  <option value="samostatný">samostatný</option>
-                  <option value="vícevrstvý">vícevrstvý</option>
-                  <option value="koncentrický">koncentrický</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Stav *
-                </label>
-                <select
-                  required
-                  value={formData.condition}
-                  onChange={(e) => handleInputChange('condition', e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="Vyhovující">Vyhovující</option>
-                  <option value="Vyhovující s drobnými vadami">Vyhovující s drobnými vadami</option>
-                  <option value="Nevyhovující">Nevyhovující</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Zjištěné závady
-              </label>
-              <textarea
-                value={formData.defectsFound}
-                onChange={(e) => handleInputChange('defectsFound', e.target.value)}
-                rows={3}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Popis zjištěných závad..."
-              />
-            </div>
-
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Doporučení
-              </label>
-              <textarea
-                value={formData.recommendations}
-                onChange={(e) => handleInputChange('recommendations', e.target.value)}
-                rows={3}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Doporučení pro zákazníka..."
-              />
-            </div>
-          </div>
 
           {/* Spotřebiče */}
           <div>
@@ -594,6 +486,131 @@ export default function SingleReportForm() {
               ))}
             </div>
           </div>
+
+
+          {/* Technické údaje */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-200">
+              Technické údaje
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Typ komína *
+                </label>
+                <select
+                  required
+                  value={formData.chimneyType}
+                  onChange={(e) => handleInputChange('chimneyType', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Vyberte typ</option>
+                  <option value="zděný vestavěný">zděný vestavěný</option>
+                  <option value="systémový montovaný">systémový montovaný</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Výška komína (m)
+                </label>
+                <input
+                  type="text"
+                  value={formData.chimneyHeight}
+                  onChange={(e) => handleInputChange('chimneyHeight', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="např. 12"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Popis spalinové cesty
+                </label>
+                <textarea
+                  value={formData.chimneyDescription}
+                  onChange={(e) => handleInputChange('chimneyDescription', e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Například: Zděný komín opatřen ochrannou komínovou vložkou..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Typ kouřovodu
+                </label>
+                <select
+                  value={formData.flueType}
+                  onChange={(e) => handleInputChange('flueType', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Vyberte typ</option>
+                  <option value="samostatný">samostatný</option>
+                  <option value="vícevrstvý">vícevrstvý</option>
+                  <option value="koncentrický">koncentrický</option>
+                </select>
+              </div>
+
+              <div></div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Kouřovod
+                </label>
+                <textarea
+                  value={formData.flue}
+                  onChange={(e) => handleInputChange('flue', e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Například: PP roury DN 80mm v délce do 1m..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Stav *
+                </label>
+                <select
+                  required
+                  value={formData.condition}
+                  onChange={(e) => handleInputChange('condition', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="Vyhovující">Vyhovující</option>
+                  <option value="Vyhovující s drobnými vadami">Vyhovující s drobnými vadami</option>
+                  <option value="Nevyhovující">Nevyhovující</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Zjištěné závady
+              </label>
+              <textarea
+                value={formData.defectsFound}
+                onChange={(e) => handleInputChange('defectsFound', e.target.value)}
+                rows={3}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Popis zjištěných závad..."
+              />
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Doporučení
+              </label>
+              <textarea
+                value={formData.recommendations}
+                onChange={(e) => handleInputChange('recommendations', e.target.value)}
+                rows={3}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Doporučení pro zákazníka..."
+              />
+            </div>
+          </div>
+
 
           {/* Tlačítka */}
           <div className="flex items-center justify-between pt-6 border-t border-slate-200">
