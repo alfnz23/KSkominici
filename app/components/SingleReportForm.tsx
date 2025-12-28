@@ -24,6 +24,7 @@ interface ReportFormData {
   flueType: string;
   condition: string;
   defectsFound: string;
+  defectRemovalDate: string;
   recommendations: string;
   
   // Spotřebiče
@@ -53,6 +54,7 @@ export default function SingleReportForm() {
     flueType: '',
     condition: 'Vyhovující',
     defectsFound: '',
+    defectRemovalDate: '',
     recommendations: '',
     appliances: [{ type: '', manufacturer: '', power: '', location: '', floor: '' }],
   });
@@ -214,6 +216,7 @@ export default function SingleReportForm() {
           flueType: '',
           condition: 'Vyhovující',
           defectsFound: '',
+          defectRemovalDate: '',
           recommendations: '',
           appliances: [{ type: '', manufacturer: '', power: '', location: '', floor: '' }],
         });
@@ -614,6 +617,20 @@ export default function SingleReportForm() {
                 placeholder="Popis zjištěných závad..."
               />
             </div>
+
+            {formData.defectsFound && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Termín odstranění nedostatků
+                </label>
+                <input
+                  type="date"
+                  value={formData.defectRemovalDate}
+                  onChange={(e) => handleInputChange('defectRemovalDate', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            )}
 
             <div className="mt-4">
               <label className="block text-sm font-medium text-slate-700 mb-2">
