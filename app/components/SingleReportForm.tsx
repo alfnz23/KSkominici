@@ -127,6 +127,67 @@ export default function SingleReportForm() {
     }
   }, []);
 
+  // Načíst data pro obnovení jednotky z pasportu nebo přidání nové jednotky
+  useEffect(() => {
+    // Zkontrolovat renewPassportUnit (obnovení jednotky)
+    const renewPassportUnitStr = sessionStorage.getItem('renewPassportUnit');
+    if (renewPassportUnitStr) {
+      try {
+        const unitData = JSON.parse(renewPassportUnitStr);
+        
+        // Předvyplnit formulář s daty jednotky
+        setFormData(prev => ({
+          ...prev,
+          customerName: unitData.customerName || '',
+          companyOrPersonName: unitData.companyOrPersonName || unitData.customerName || '',
+          customerEmail: unitData.customerEmail || unitData.email || '',
+          customerPhone: unitData.customerPhone || unitData.phone || '',
+          permanentAddress: unitData.permanentAddress || '',
+          inspectionAddress: unitData.buildingAddress || unitData.inspectionAddress || '',
+          inspectionDate: new Date().toISOString().split('T')[0], // Nové datum
+          nextInspectionDate: '', // Vypočítá se automaticky
+          chimneyType: unitData.chimneyType || '',
+          chimneyDescription: unitData.chimneyDescription || '',
+          flue: unitData.flue || '',
+          flueType: unitData.flueType || '',
+          condition: unitData.condition || 'Vyhovuje',
+          defectsFound: unitData.defectsFound || '',
+          defectRemovalDate: unitData.defectRemovalDate || '',
+          recommendations: unitData.recommendations || '',
+          appliances: unitData.appliances && unitData.appliances.length > 0 
+            ? unitData.appliances 
+            : [{ type: '', manufacturer: '', power: '', location: '', floor: '' }],
+        }));
+
+        // Vyčistit sessionStorage
+        sessionStorage.removeItem('renewPassportUnit');
+      } catch (error) {
+        console.error('Chyba při načítání passport unit renewal dat:', error);
+      }
+    }
+
+    // Zkontrolovat newPassportUnit (přidání nové jednotky)
+    const newPassportUnitStr = sessionStorage.getItem('newPassportUnit');
+    if (newPassportUnitStr) {
+      try {
+        const passportData = JSON.parse(newPassportUnitStr);
+        
+        // Předvyplnit pouze adresu budovy
+        setFormData(prev => ({
+          ...prev,
+          inspectionAddress: passportData.buildingAddress || '',
+          inspectionDate: new Date().toISOString().split('T')[0],
+          nextInspectionDate: '',
+        }));
+
+        // Vyčistit sessionStorage
+        sessionStorage.removeItem('newPassportUnit');
+      } catch (error) {
+        console.error('Chyba při načítání new passport unit dat:', error);
+      }
+    }
+  }, []);
+
   const handleInputChange = (field: keyof ReportFormData, value: any) => {
     setFormData((prev) => {
       const updates: Partial<ReportFormData> = { [field]: value };
