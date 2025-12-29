@@ -1,17 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* Dark Theme Overrides for KSkominici Dashboard */
-/* Add this to app/globals.css */
 
-/* Dashboard Dark Theme */
+/* Dark Theme for KSkominici Dashboard */
+
+/* Base Styles */
 .dashboard-dark {
-  @apply bg-black text-white;
+  background-color: #000000;
+  color: #ffffff;
 }
 
 /* Form Containers */
 .dashboard-dark .bg-white {
-  @apply bg-gradient-to-br from-slate-900/90 to-black/90 border-slate-800/50 backdrop-blur-xl shadow-2xl;
+  background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.9), rgba(0, 0, 0, 0.9));
+  border-color: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 /* Input Fields */
@@ -22,155 +26,176 @@
 .dashboard-dark input[type="number"],
 .dashboard-dark textarea,
 .dashboard-dark select {
-  @apply bg-slate-900/50 border-slate-700 text-white placeholder-slate-500;
-  @apply focus:border-orange-500 focus:ring-orange-500/50;
+  background-color: rgba(15, 23, 42, 0.5);
+  border-color: #334155;
+  color: #ffffff;
+}
+
+.dashboard-dark input::placeholder,
+.dashboard-dark textarea::placeholder {
+  color: #64748b;
+}
+
+.dashboard-dark input:focus,
+.dashboard-dark textarea:focus,
+.dashboard-dark select:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+  outline: none;
 }
 
 /* Labels */
 .dashboard-dark label {
-  @apply text-slate-300;
+  color: #cbd5e1;
 }
 
-/* Buttons - Primary (Orange gradient) */
-.dashboard-dark button.bg-gradient-to-r,
-.dashboard-dark button[class*="from-orange"] {
-  @apply shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30;
+/* Buttons with Shadows */
+.dashboard-dark button[class*="gradient"] {
+  box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.25);
 }
 
-/* Buttons - Secondary */
-.dashboard-dark button.bg-blue-600,
-.dashboard-dark button[class*="bg-blue"] {
-  @apply bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg shadow-blue-500/25;
-}
-
-/* Buttons - Danger */
-.dashboard-dark button.bg-red-600,
-.dashboard-dark button[class*="bg-red"] {
-  @apply bg-gradient-to-r from-red-600 to-red-700 shadow-lg shadow-red-500/25;
+.dashboard-dark button[class*="gradient"]:hover {
+  box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.3);
 }
 
 /* Cards */
 .dashboard-dark .rounded-xl,
 .dashboard-dark .rounded-lg {
-  @apply border-slate-800/50;
+  border-color: rgba(30, 41, 59, 0.5);
 }
 
 /* Tables */
 .dashboard-dark table thead {
-  @apply bg-slate-900/50 border-slate-800;
+  background-color: rgba(15, 23, 42, 0.5);
+  border-color: #1e293b;
 }
 
 .dashboard-dark table tbody tr {
-  @apply border-slate-800/50 hover:bg-slate-900/30;
+  border-color: rgba(30, 41, 59, 0.5);
+}
+
+.dashboard-dark table tbody tr:hover {
+  background-color: rgba(15, 23, 42, 0.3);
 }
 
 .dashboard-dark table td,
 .dashboard-dark table th {
-  @apply text-slate-300;
+  color: #cbd5e1;
 }
 
-/* Badges */
+/* Badges - Green */
 .dashboard-dark .bg-green-100 {
-  @apply bg-green-900/30 text-green-400 border border-green-800;
+  background-color: rgba(20, 83, 45, 0.3);
+  color: #4ade80;
+  border: 1px solid #166534;
 }
 
+/* Badges - Yellow */
 .dashboard-dark .bg-yellow-100 {
-  @apply bg-yellow-900/30 text-yellow-400 border border-yellow-800;
+  background-color: rgba(113, 63, 18, 0.3);
+  color: #facc15;
+  border: 1px solid #713f12;
 }
 
+/* Badges - Red */
 .dashboard-dark .bg-red-100 {
-  @apply bg-red-900/30 text-red-400 border border-red-800;
+  background-color: rgba(127, 29, 29, 0.3);
+  color: #f87171;
+  border: 1px solid #7f1d1d;
 }
 
+/* Badges - Blue */
 .dashboard-dark .bg-blue-100 {
-  @apply bg-blue-900/30 text-blue-400 border border-blue-800;
+  background-color: rgba(30, 58, 138, 0.3);
+  color: #60a5fa;
+  border: 1px solid #1e3a8a;
 }
 
+/* Badges - Purple */
 .dashboard-dark .bg-purple-100 {
-  @apply bg-purple-900/30 text-purple-400 border border-purple-800;
+  background-color: rgba(88, 28, 135, 0.3);
+  color: #c084fc;
+  border: 1px solid #581c87;
 }
 
+/* Badges - Slate */
 .dashboard-dark .bg-slate-100 {
-  @apply bg-slate-900/30 text-slate-400 border border-slate-800;
+  background-color: rgba(15, 23, 42, 0.3);
+  color: #94a3b8;
+  border: 1px solid #1e293b;
 }
 
 /* Text Colors */
 .dashboard-dark .text-slate-700 {
-  @apply text-slate-300;
+  color: #cbd5e1;
 }
 
 .dashboard-dark .text-slate-600 {
-  @apply text-slate-400;
+  color: #94a3b8;
 }
 
 .dashboard-dark .text-slate-900 {
-  @apply text-white;
+  color: #ffffff;
 }
 
 /* Hover States */
 .dashboard-dark .hover\:bg-slate-50:hover {
-  @apply bg-slate-900/30;
+  background-color: rgba(15, 23, 42, 0.3);
 }
 
 .dashboard-dark .hover\:bg-slate-100:hover {
-  @apply bg-slate-900/50;
+  background-color: rgba(15, 23, 42, 0.5);
 }
 
 /* Disabled States */
 .dashboard-dark input:disabled,
 .dashboard-dark select:disabled,
 .dashboard-dark textarea:disabled {
-  @apply bg-slate-900/30 text-slate-600 cursor-not-allowed;
+  background-color: rgba(15, 23, 42, 0.3);
+  color: #475569;
+  cursor: not-allowed;
 }
 
-/* Auto-filled Fields (blue background) */
+/* Auto-filled Fields */
 .dashboard-dark .bg-blue-50 {
-  @apply bg-blue-950/30 border-blue-800/50;
+  background-color: rgba(23, 37, 84, 0.3);
+  border-color: rgba(30, 58, 138, 0.5);
 }
 
 /* Success Messages */
 .dashboard-dark .bg-green-50 {
-  @apply bg-green-950/30 text-green-400 border-green-800;
+  background-color: rgba(20, 83, 45, 0.3);
+  color: #4ade80;
+  border-color: #166534;
 }
 
 /* Error Messages */
 .dashboard-dark .bg-red-50 {
-  @apply bg-red-950/30 text-red-400 border-red-800;
+  background-color: rgba(127, 29, 29, 0.3);
+  color: #f87171;
+  border-color: #7f1d1d;
 }
 
-/* Gradients for visual interest */
-.gradient-border {
-  position: relative;
-}
-
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* Scrollbar Dark Theme */
+/* Scrollbar */
 .dashboard-dark ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
 .dashboard-dark ::-webkit-scrollbar-track {
-  @apply bg-slate-950;
+  background-color: #020617;
 }
 
 .dashboard-dark ::-webkit-scrollbar-thumb {
-  @apply bg-slate-800 rounded-full hover:bg-slate-700;
+  background-color: #1e293b;
+  border-radius: 9999px;
 }
 
-/* Loading Spinner */
+.dashboard-dark ::-webkit-scrollbar-thumb:hover {
+  background-color: #334155;
+}
+
+/* Loading Spinner Glow */
 .dashboard-dark .animate-spin {
   filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.5));
 }
