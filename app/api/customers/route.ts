@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
           .from('jobs')
           .select('id, scheduled_at')
           .eq('customer_id', customer.id)
-          .order('scheduled_at', { ascending: false })
+          .order('inspection_date', { ascending: false })
           .limit(1);
 
         const lastJob = jobs?.[0];
