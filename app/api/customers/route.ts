@@ -40,24 +40,58 @@ export async function GET(request: NextRequest) {
     // Pro každého zákazníka načti poslední job + report + dokument
     const customersWithJobs = await Promise.all(
       (customers || []).map(async (customer) => {
-        // Najdi poslední job pro tohoto zákazníka
-        const { data: jobs } = await supabase
+        // 1. Zkus najít inspection job (standardní zpráva)
+        const { data: inspectionJobs } = await supabase
           .from('jobs')
-          .select('id, scheduled_at')
+          .select('id, type, inspection_date')
           .eq('customer_id', customer.id)
           .eq('type', 'inspection')
           .order('inspection_date', { ascending: false })
           .limit(1);
 
-        const lastJob = jobs?.[0];
+        let lastJob = inspectionJobs?.[0];
+        let isPassportCustomer = false;
+
+        // 2. Pokud nemá inspection job, zkus najít passport job podle emailu
+        if (!lastJob) {
+          // Najdi reports kde email = customer.email
+          const { data: passportReports } = await supabase
+            .from('reports')
+            .select('job_id, data, created_at')
+            .eq('company_id', profile.company_id)
+            .order('created_at', { ascending: false });
+
+          // Filtruj reports podle emailu v data
+          const customerReport = passportReports?.find(r => 
+            r.data?.customerEmail === customer.email
+          );
+
+          if (customerReport) {
+            // Načti passport job
+            const { data: passportJobs } = await supabase
+              .from('jobs')
+              .select('id, type, inspection_date')
+              .eq('id', customerReport.job_id)
+              .eq('type', 'passport')
+              .single();
+
+            if (passportJobs) {
+              lastJob = passportJobs;
+              isPassportCustomer = true;
+            }
+          }
+        }
 
         if (!lastJob) {
           return {
             ...customer,
-            lastInspectionDate: null,
-            nextInspectionDate: null,
-            inspectionAddress: null,
+            last_inspection_date: null,
+            next_inspection_date: null,
+            inspection_address: null,
+            status: 'active',
+            days_until_expiration: 0,
             pdfUrl: null,
+            is_passport: false,
           };
         }
 
@@ -110,12 +144,13 @@ export async function GET(request: NextRequest) {
 
         return {
           ...customer,
-          last_inspection_date: reportData.inspectionDate || null,
+          last_inspection_date: reportData.inspectionDate || lastJob.inspection_date || null,
           next_inspection_date: reportData.nextInspectionDate || null,
           inspection_address: reportData.inspectionAddress || null,
           status,
           days_until_expiration: daysUntilExpiration,
           pdfUrl,
+          is_passport: isPassportCustomer,
         };
       })
     );
