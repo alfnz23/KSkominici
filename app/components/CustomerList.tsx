@@ -66,15 +66,42 @@ export default function CustomerList() {
   };
 
   const renewInspection = async (customer: Customer) => {
-    // Otevře formulář s předvyplněnými daty
     const confirmed = confirm(
       `Chcete obnovit kontrolu pro zákazníka ${customer.name}?`
     );
     if (!confirmed) return;
 
-    // Zde můžete přesměrovat na formulář s předvyplněnými daty
-    // nebo otevřít modal s formulářem
-    console.log('Obnova kontroly pro:', customer);
+    try {
+      // Načíst poslední report pro tohoto zákazníka
+      const res = await fetch(`/api/reports/latest?customerId=${customer.id}`);
+      if (!res.ok) {
+        alert('Nepodařilo se načíst data zprávy');
+        return;
+      }
+
+      const { report } = await res.json();
+      
+      if (!report || !report.data) {
+        alert('Nenalezena žádná zpráva pro obnovení');
+        return;
+      }
+
+      // Uložit data do sessionStorage
+      sessionStorage.setItem('renewReportData', JSON.stringify({
+        ...report.data,
+        customerId: customer.id,
+        customerName: customer.name,
+        customerEmail: customer.email,
+        customerPhone: customer.phone,
+        inspectionAddress: customer.inspection_address,
+      }));
+
+      // Přesměrovat na dashboard
+      window.location.href = '/dashboard?renew=true';
+    } catch (error) {
+      console.error('Chyba při obnově kontroly:', error);
+      alert('Nepodařilo se načíst data pro obnovení');
+    }
   };
 
   const getStatusBadge = (status: Customer['status']) => {
