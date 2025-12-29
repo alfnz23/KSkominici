@@ -20,7 +20,7 @@ export async function GET(
       .from('jobs')
       .select('*')
       .eq('id', passportId)
-      .eq('type', 'building_passport')
+      .eq('type', 'passport')
       .single();
 
     if (jobError || !job) {
