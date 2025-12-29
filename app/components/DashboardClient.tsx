@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Home, Users, Calendar, Settings, LogOut } from 'lucide-react';
+import { FileText, Home, Users, Calendar, Settings, LogOut, Building2 } from 'lucide-react';
 import SingleReportForm from './SingleReportForm';
 import PassportForm from './PassportForm';
 import PassportDetail from './PassportDetail';
 import CustomerManagement from './CustomerManagement';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 type View = 'home' | 'single-report' | 'passport' | 'passport-detail' | 'customers' | 'settings';
 
@@ -28,7 +29,6 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
   const router = useRouter();
   const supabase = createClient();
 
-  // Detekce URL parametru ?renew=true
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const isRenew = urlParams.get('renew') === 'true';
@@ -43,219 +43,211 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
     router.push('/login');
   };
 
+  const menuItems = [
+    { id: 'home' as View, icon: Home, label: 'Přehled' },
+    { id: 'single-report' as View, icon: FileText, label: 'Nová zpráva' },
+    { id: 'passport' as View, icon: Building2, label: 'Nový pasport' },
+    { id: 'customers' as View, icon: Users, label: 'Správa zákazníků' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Hlavní navigace */}
-      <nav className="bg-white shadow-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-                  <Home className="w-6 h-6 text-white" />
-                </div>
-                <span className="ml-3 text-xl font-bold text-slate-800">
-                  Kominická Evidence
+    <div className="min-h-screen bg-black">
+      {/* Gradient overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-black to-slate-900 pointer-events-none opacity-90" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-orange-900/20 via-transparent to-transparent pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-red-900/20 via-transparent to-transparent pointer-events-none" />
+
+      <div className="relative z-10 flex h-screen">
+        {/* Sidebar */}
+        <div className="w-72 bg-gradient-to-b from-slate-900/95 to-black/95 backdrop-blur-xl border-r border-slate-800/50 shadow-2xl flex flex-col">
+          {/* Logo Section */}
+          <div className="p-6 border-b border-slate-800/50">
+            <div className="flex items-center justify-center mb-4">
+              <div className="relative w-32 h-32">
+                <Image
+                  src="/logo-kskominici.png"
+                  alt="KSkominici Logo"
+                  width={128}
+                  height={128}
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+            <div className="text-center">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                KSkominici
+              </h1>
+              <p className="text-xs text-slate-400 mt-1">Kominická Evidence</p>
+            </div>
+          </div>
+
+          {/* User Info */}
+          <div className="px-6 py-4 border-b border-slate-800/50">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-sm">
+                  {profile?.full_name?.charAt(0) || 'T'}
                 </span>
               </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-slate-600">
-                <span className="font-medium">{profile?.full_name || user.email}</span>
-                {profile?.companies?.name && (
-                  <span className="ml-2 text-slate-400">• {profile.companies.name}</span>
-                )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">
+                  {profile?.full_name || 'Technik'}
+                </p>
+                <p className="text-xs text-slate-400 truncate">
+                  {user?.email}
+                </p>
               </div>
-              <button 
-                onClick={handleSignOut}
-                className="text-slate-600 hover:text-slate-900 flex items-center gap-2"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
             </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setCurrentView(item.id);
+                    setSelectedPassport(null);
+                  }}
+                  className={`
+                    w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+                    ${isActive 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/25' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    }
+                  `}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Sign Out Button */}
+          <div className="p-4 border-t border-slate-800/50">
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Odhlásit se</span>
+            </button>
           </div>
         </div>
-      </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentView === 'home' && (
-          <>
-            {/* Statistiky */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">
-                      Zprávy tento měsíc
-                    </p>
-                    <p className="text-3xl font-bold text-slate-900 mt-1">
-                      {stats.reportsThisMonth}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-blue-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">
-                      Brzy vyprší platnost
-                    </p>
-                    <p className="text-3xl font-bold text-orange-600 mt-1">
-                      {stats.expiringSoon}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-orange-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">
-                      Celkem zákazníků
-                    </p>
-                    <p className="text-3xl font-bold text-slate-900 mt-1">
-                      {stats.totalCustomers}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Users className="w-6 h-6 text-green-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Hlavní akce */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                Co chcete udělat?
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* V1 - Jednotlivá zpráva */}
-                <button
-                  onClick={() => setCurrentView('single-report')}
-                  className="group bg-white rounded-xl shadow-sm border-2 border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all p-8 text-left"
-                >
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <FileText className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">
-                    Nová zpráva
-                  </h3>
-                  <p className="text-slate-600">
-                    Vytvořit zprávu o kontrole pro jednoho zákazníka
+        {/* Main Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-7xl mx-auto p-8">
+            {/* Home View */}
+            {currentView === 'home' && (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-slate-900/90 to-black/90 backdrop-blur-xl rounded-2xl border border-slate-800/50 p-8 shadow-2xl">
+                  <h2 className="text-3xl font-bold text-white mb-2">
+                    Vítejte zpět, {profile?.full_name || 'Technik'}!
+                  </h2>
+                  <p className="text-slate-400">
+                    Přehled vašich kontrol a úkolů
                   </p>
-                  <div className="mt-4 inline-flex items-center text-blue-600 font-medium">
-                    Vytvořit zprávu →
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-gradient-to-br from-slate-900/90 to-black/90 backdrop-blur-xl rounded-2xl border border-slate-800/50 p-6 shadow-2xl hover:shadow-orange-500/10 transition-shadow">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <FileText className="w-7 h-7 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-400">Zpráv tento měsíc</p>
+                        <p className="text-3xl font-bold text-white">{stats.reportsThisMonth}</p>
+                      </div>
+                    </div>
                   </div>
-                </button>
 
-                {/* V2 - Pasport */}
-                <button
-                  onClick={() => setCurrentView('passport')}
-                  className="group bg-white rounded-xl shadow-sm border-2 border-slate-200 hover:border-orange-500 hover:shadow-lg transition-all p-8 text-left"
-                >
-                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Home className="w-8 h-8 text-white" />
+                  <div className="bg-gradient-to-br from-slate-900/90 to-black/90 backdrop-blur-xl rounded-2xl border border-slate-800/50 p-6 shadow-2xl hover:shadow-orange-500/10 transition-shadow">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                        <Calendar className="w-7 h-7 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-400">Brzy vyprší</p>
+                        <p className="text-3xl font-bold text-white">{stats.expiringSoon}</p>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">
-                    Nový pasport domu
-                  </h3>
-                  <p className="text-slate-600">
-                    Vytvořit komplexní pasport pro celý bytový dům
-                  </p>
-                  <div className="mt-4 inline-flex items-center text-orange-600 font-medium">
-                    Vytvořit pasport →
+
+                  <div className="bg-gradient-to-br from-slate-900/90 to-black/90 backdrop-blur-xl rounded-2xl border border-slate-800/50 p-6 shadow-2xl hover:shadow-orange-500/10 transition-shadow">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <Users className="w-7 h-7 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-slate-400">Celkem zákazníků</p>
+                        <p className="text-3xl font-bold text-white">{stats.totalCustomers}</p>
+                      </div>
+                    </div>
                   </div>
-                </button>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="bg-gradient-to-br from-slate-900/90 to-black/90 backdrop-blur-xl rounded-2xl border border-slate-800/50 p-8 shadow-2xl">
+                  <h3 className="text-xl font-bold text-white mb-6">Rychlé akce</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setCurrentView('single-report')}
+                      className="p-6 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl hover:shadow-2xl hover:shadow-orange-500/25 transition-all duration-200 text-left group"
+                    >
+                      <FileText className="w-8 h-8 text-white mb-3 group-hover:scale-110 transition-transform" />
+                      <h4 className="text-lg font-bold text-white mb-1">Nová zpráva</h4>
+                      <p className="text-sm text-white/80">Vytvořit kontrolní zprávu</p>
+                    </button>
+
+                    <button
+                      onClick={() => setCurrentView('passport')}
+                      className="p-6 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl hover:shadow-2xl hover:shadow-purple-500/25 transition-all duration-200 text-left group"
+                    >
+                      <Building2 className="w-8 h-8 text-white mb-3 group-hover:scale-110 transition-transform" />
+                      <h4 className="text-lg font-bold text-white mb-1">Nový pasport</h4>
+                      <p className="text-sm text-white/80">Pasport pro budovu</p>
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Rychlý přístup k zákazníkům */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-slate-900">
-                  Správa zákazníků
-                </h3>
-                <button
-                  onClick={() => setCurrentView('customers')}
-                  className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-                >
-                  Zobrazit všechny →
-                </button>
-              </div>
-              <div className="text-slate-600 text-sm">
-                Přehled zpráv a passportů s možností obnovení kontrol a sledování vypršení platnosti
-              </div>
-            </div>
-          </>
-        )}
-
-        {currentView === 'single-report' && (
-          <div>
-            <button
-              onClick={() => setCurrentView('home')}
-              className="mb-6 text-slate-600 hover:text-slate-900 font-medium flex items-center"
-            >
-              ← Zpět na dashboard
-            </button>
-            <SingleReportForm />
+            {/* Forms */}
+            {currentView === 'single-report' && <SingleReportForm />}
+            {currentView === 'passport' && <PassportForm />}
+            {currentView === 'passport-detail' && selectedPassport && (
+              <PassportDetail
+                passportId={selectedPassport}
+                onBack={() => {
+                  setSelectedPassport(null);
+                  setCurrentView('customers');
+                }}
+                onRenewUnit={(unitData) => {
+                  sessionStorage.setItem('renewPassportUnit', JSON.stringify(unitData));
+                  setCurrentView('single-report');
+                }}
+              />
+            )}
+            {currentView === 'customers' && (
+              <CustomerManagement
+                onSelectPassport={(passportId) => {
+                  setSelectedPassport(passportId);
+                  setCurrentView('passport-detail');
+                }}
+              />
+            )}
           </div>
-        )}
-
-        {currentView === 'passport' && (
-          <div>
-            <button
-              onClick={() => setCurrentView('home')}
-              className="mb-6 text-slate-600 hover:text-slate-900 font-medium flex items-center"
-            >
-              ← Zpět na dashboard
-            </button>
-            <PassportForm />
-          </div>
-        )}
-
-
-        {currentView === 'passport-detail' && selectedPassport && (
-          <div>
-            <PassportDetail
-              passportId={selectedPassport}
-              onBack={() => {
-                setSelectedPassport(null);
-                setCurrentView('customers');
-              }}
-              onRenewUnit={(unitData) => {
-                // Uložit data jednotky do sessionStorage
-                sessionStorage.setItem('renewPassportUnit', JSON.stringify(unitData));
-                // Přejít na formulář pro jednotlivou zprávu
-                setCurrentView('single-report');
-              }}
-            />
-          </div>
-        )}
-
-        {currentView === 'customers' && (
-          <div>
-            <button
-              onClick={() => setCurrentView('home')}
-              className="mb-6 text-slate-600 hover:text-slate-900 font-medium flex items-center"
-            >
-              ← Zpět na dashboard
-            </button>
-            <CustomerManagement 
-              onSelectPassport={(passportId) => {
-                setSelectedPassport(passportId);
-                setCurrentView('passport-detail');
-              }}
-            />
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
