@@ -21,12 +21,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    // Najít všechny passporty (jobs s type='building_passport')
+    // Najít všechny passporty (jobs s type='passport')
     const { data: passportJobs, error: jobsError } = await supabase
       .from('jobs')
       .select('*')
       .eq('company_id', profile.company_id)
-      .eq('type', 'building_passport')
+      .eq('type', 'passport')
       .order('inspection_date', { ascending: false });
 
     if (jobsError) {
