@@ -2,23 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark Theme for KSkominici Dashboard - FINAL VERSION */
+/* Dark Theme for KSkominici Dashboard - ULTRA STRONG VERSION */
 
-/* Base Styles */
-.dashboard-dark {
-  background-color: #000000;
-  color: #ffffff;
+/* Force dark theme globally */
+.dashboard-dark,
+.dashboard-dark * {
+  border-color: rgba(100, 116, 139, 0.4) !important;
 }
 
-/* Form Containers - Tmavé pozadí, světlý border */
-.dashboard-dark .bg-white {
+/* Base container styles */
+.dashboard-dark {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* ALL white backgrounds → dark */
+.dashboard-dark .bg-white,
+.dashboard-dark div[class*="bg-white"],
+.dashboard-dark section[class*="bg-white"] {
   background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.95), rgba(0, 0, 0, 0.95)) !important;
   border: 1px solid rgba(100, 116, 139, 0.4) !important;
   backdrop-filter: blur(24px);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
 }
 
-/* Input Fields - BÍLÉ/SVĚTLÉ aby bylo jasně vidět kde psát */
+/* Input Fields - WHITE or LIGHT GRAY */
+.dashboard-dark input[type="text"],
+.dashboard-dark input[type="email"],
+.dashboard-dark input[type="tel"],
+.dashboard-dark input[type="date"],
+.dashboard-dark input[type="number"],
+.dashboard-dark input[type="search"],
+.dashboard-dark textarea,
+.dashboard-dark select {
+  background-color: #f8fafc !important; /* Velmi světle šedá */
+  border: 2px solid #cbd5e1 !important;
+  color: #000000 !important;
+  font-weight: 500;
+}
+
+/* Pro úplně bílé inputy (pokud preferuješ) - odkomentuj: */
+/*
 .dashboard-dark input[type="text"],
 .dashboard-dark input[type="email"],
 .dashboard-dark input[type="tel"],
@@ -27,13 +52,12 @@
 .dashboard-dark textarea,
 .dashboard-dark select {
   background-color: #ffffff !important;
-  border: 2px solid #cbd5e1 !important;
-  color: #000000 !important;
-  font-weight: 500;
 }
+*/
 
 .dashboard-dark input::placeholder,
-.dashboard-dark textarea::placeholder {
+.dashboard-dark textarea::placeholder,
+.dashboard-dark select::placeholder {
   color: #94a3b8 !important;
 }
 
@@ -43,77 +67,58 @@
   border-color: #f97316 !important;
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2) !important;
   outline: none;
+  background-color: #ffffff !important;
 }
 
-/* Auto-filled Fields - Světle modré, stále čitelné */
+/* Auto-filled Fields */
 .dashboard-dark .bg-blue-50,
-.dashboard-dark .bg-blue-50 input {
+.dashboard-dark .bg-blue-50 input,
+.dashboard-dark input[class*="bg-blue"] {
   background-color: #dbeafe !important;
   border-color: #60a5fa !important;
   color: #000000 !important;
 }
 
-/* Labels - BÍLÉ aby byly jasně vidět */
-.dashboard-dark label {
+/* Labels - PURE WHITE */
+.dashboard-dark label,
+.dashboard-dark label span {
   color: #ffffff !important;
   font-weight: 600 !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Headings - BÍLÉ s glowem */
+/* Headings - PURE WHITE */
 .dashboard-dark h1,
 .dashboard-dark h2,
 .dashboard-dark h3,
 .dashboard-dark h4,
-.dashboard-dark h5 {
+.dashboard-dark h5,
+.dashboard-dark h6 {
   color: #ffffff !important;
   font-weight: 700 !important;
 }
 
-.dashboard-dark h1 {
-  font-size: 2rem !important;
+/* Paragraphs */
+.dashboard-dark p {
+  color: #e2e8f0 !important;
 }
 
-.dashboard-dark h2 {
-  font-size: 1.75rem !important;
-}
-
-.dashboard-dark h3 {
-  font-size: 1.5rem !important;
-}
-
-/* Paragraphs a obecný text - Světlý */
-.dashboard-dark p,
+/* Spans and divs with text */
 .dashboard-dark span,
 .dashboard-dark div {
   color: #e2e8f0;
 }
 
-/* Text v buttonech */
-.dashboard-dark button {
-  font-weight: 600;
-}
-
-/* Buttons with Shadows */
-.dashboard-dark button[class*="gradient"],
-.dashboard-dark button[class*="bg-gradient"] {
-  box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
-}
-
-.dashboard-dark button[class*="gradient"]:hover,
-.dashboard-dark button[class*="bg-gradient"]:hover {
-  box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.4);
-}
-
-/* Cards - Viditelné bordery */
+/* Cards and sections */
 .dashboard-dark .rounded-xl,
-.dashboard-dark .rounded-lg {
+.dashboard-dark .rounded-lg,
+.dashboard-dark .rounded-2xl {
   border-color: rgba(100, 116, 139, 0.4) !important;
 }
 
-/* Tables - Světlé, viditelné */
+/* Tables */
 .dashboard-dark table {
-  border-color: rgba(71, 85, 105, 0.5);
+  border-color: rgba(71, 85, 105, 0.5) !important;
 }
 
 .dashboard-dark table thead {
@@ -128,6 +133,7 @@
 
 .dashboard-dark table tbody tr {
   border-color: rgba(71, 85, 105, 0.3) !important;
+  background-color: transparent !important;
 }
 
 .dashboard-dark table tbody tr:hover {
@@ -139,50 +145,55 @@
   color: #f1f5f9 !important;
 }
 
-/* Badges - Živé barvy s dobrým kontrastem */
-.dashboard-dark .bg-green-100 {
+/* Badges - VIVID */
+.dashboard-dark .bg-green-100,
+.dashboard-dark [class*="bg-green-100"] {
   background-color: rgba(34, 197, 94, 0.25) !important;
   color: #4ade80 !important;
   border: 2px solid #22c55e !important;
   font-weight: 600;
 }
 
-.dashboard-dark .bg-yellow-100 {
+.dashboard-dark .bg-yellow-100,
+.dashboard-dark [class*="bg-yellow-100"] {
   background-color: rgba(234, 179, 8, 0.25) !important;
   color: #fbbf24 !important;
   border: 2px solid #eab308 !important;
   font-weight: 600;
 }
 
-.dashboard-dark .bg-red-100 {
+.dashboard-dark .bg-red-100,
+.dashboard-dark [class*="bg-red-100"] {
   background-color: rgba(239, 68, 68, 0.25) !important;
   color: #fca5a5 !important;
   border: 2px solid #ef4444 !important;
   font-weight: 600;
 }
 
-.dashboard-dark .bg-blue-100 {
+.dashboard-dark .bg-blue-100,
+.dashboard-dark [class*="bg-blue-100"]:not(input) {
   background-color: rgba(59, 130, 246, 0.25) !important;
   color: #93c5fd !important;
   border: 2px solid #3b82f6 !important;
   font-weight: 600;
 }
 
-.dashboard-dark .bg-purple-100 {
+.dashboard-dark .bg-purple-100,
+.dashboard-dark [class*="bg-purple-100"] {
   background-color: rgba(168, 85, 247, 0.25) !important;
   color: #d8b4fe !important;
   border: 2px solid #a855f7 !important;
   font-weight: 600;
 }
 
-.dashboard-dark .bg-slate-100 {
+.dashboard-dark .bg-slate-100:not(input),
+.dashboard-dark [class*="bg-slate-100"]:not(input) {
   background-color: rgba(71, 85, 105, 0.25) !important;
   color: #cbd5e1 !important;
   border: 2px solid #64748b !important;
-  font-weight: 600;
 }
 
-/* Text Colors - Všechny světlé */
+/* Text colors */
 .dashboard-dark .text-slate-900,
 .dashboard-dark .text-slate-800,
 .dashboard-dark .text-slate-700 {
@@ -198,16 +209,13 @@
   color: #94a3b8 !important;
 }
 
-/* Hover States */
-.dashboard-dark .hover\:bg-slate-50:hover {
+/* Hover states */
+.dashboard-dark .hover\:bg-slate-50:hover,
+.dashboard-dark .hover\:bg-slate-100:hover {
   background-color: rgba(30, 41, 59, 0.6) !important;
 }
 
-.dashboard-dark .hover\:bg-slate-100:hover {
-  background-color: rgba(30, 41, 59, 0.8) !important;
-}
-
-/* Disabled States - Viditelné ale šedé */
+/* Disabled states */
 .dashboard-dark input:disabled,
 .dashboard-dark select:disabled,
 .dashboard-dark textarea:disabled {
@@ -217,21 +225,20 @@
   opacity: 0.7;
 }
 
-/* Success Messages */
+/* Success/Error messages */
 .dashboard-dark .bg-green-50 {
   background-color: rgba(34, 197, 94, 0.2) !important;
   color: #4ade80 !important;
   border: 2px solid #22c55e !important;
 }
 
-/* Error Messages */
 .dashboard-dark .bg-red-50 {
   background-color: rgba(239, 68, 68, 0.2) !important;
   color: #fca5a5 !important;
   border: 2px solid #ef4444 !important;
 }
 
-/* Scrollbar - Světlejší */
+/* Scrollbar */
 .dashboard-dark ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
@@ -251,51 +258,54 @@
   background-color: #64748b;
 }
 
-/* Loading Spinner Glow */
+/* Loading spinner */
 .dashboard-dark .animate-spin {
   filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.6));
 }
 
-/* Stats Cards - Maximální viditelnost */
+/* Button text colors */
+.dashboard-dark button {
+  font-weight: 600;
+}
+
+/* Stats numbers */
 .dashboard-dark .text-3xl,
 .dashboard-dark .text-2xl {
   color: #ffffff !important;
   font-weight: 800 !important;
 }
 
+/* Helper text */
+.dashboard-dark .text-xs,
 .dashboard-dark .text-sm {
   color: #cbd5e1 !important;
 }
 
-/* Search Input - Bílý */
-.dashboard-dark input[type="search"] {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-}
-
-/* Helper text - Viditelný */
-.dashboard-dark .text-xs {
-  color: #94a3b8 !important;
-}
-
-/* Ikony - Světlé */
-.dashboard-dark svg {
-  color: inherit;
-}
-
-/* Specific fix pro CustomerList header */
-.dashboard-dark .bg-green-100.rounded-lg {
-  background-color: rgba(34, 197, 94, 0.3) !important;
-}
-
-/* Border pro lepší viditelnost sekcí */
+/* Border overrides */
 .dashboard-dark .border-slate-200,
 .dashboard-dark .border-slate-300 {
   border-color: rgba(100, 116, 139, 0.4) !important;
 }
 
-/* Dropdown menus */
+/* Dropdown options */
 .dashboard-dark select option {
   background-color: #ffffff;
   color: #000000;
+}
+
+/* Icon colors */
+.dashboard-dark svg {
+  color: inherit;
+}
+
+/* Form sections */
+.dashboard-dark .space-y-6 > div,
+.dashboard-dark .space-y-4 > div,
+.dashboard-dark .grid > div {
+  color: #ffffff;
+}
+
+/* Customer cards specific */
+.dashboard-dark .bg-green-100.rounded-lg {
+  background-color: rgba(34, 197, 94, 0.3) !important;
 }
