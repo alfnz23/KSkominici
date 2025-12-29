@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
           .from('jobs')
           .select('id, scheduled_at')
           .eq('customer_id', customer.id)
+          .eq('type', 'inspection')
           .order('inspection_date', { ascending: false })
           .limit(1);
 
