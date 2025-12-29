@@ -109,7 +109,7 @@ export default function PassportDetail({
     
     setIsSending(true);
     try {
-      const res = await fetch('/api/send_passport_package', {
+      const res = await fetch('/api/passports/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobId: passportId }),
