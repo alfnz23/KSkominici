@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark Theme for KSkominici Dashboard */
+/* Dark Theme for KSkominici Dashboard - FINAL VERSION */
 
 /* Base Styles */
 .dashboard-dark {
@@ -10,15 +10,15 @@
   color: #ffffff;
 }
 
-/* Form Containers */
+/* Form Containers - Tmavé pozadí, světlý border */
 .dashboard-dark .bg-white {
-  background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.9), rgba(0, 0, 0, 0.9));
-  border-color: rgba(30, 41, 59, 0.5);
+  background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.95), rgba(0, 0, 0, 0.95)) !important;
+  border: 1px solid rgba(100, 116, 139, 0.4) !important;
   backdrop-filter: blur(24px);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
 }
 
-/* Input Fields */
+/* Input Fields - BÍLÉ/SVĚTLÉ aby bylo jasně vidět kde psát */
 .dashboard-dark input[type="text"],
 .dashboard-dark input[type="email"],
 .dashboard-dark input[type="tel"],
@@ -26,176 +26,276 @@
 .dashboard-dark input[type="number"],
 .dashboard-dark textarea,
 .dashboard-dark select {
-  background-color: rgba(15, 23, 42, 0.5);
-  border-color: #334155;
-  color: #ffffff;
+  background-color: #ffffff !important;
+  border: 2px solid #cbd5e1 !important;
+  color: #000000 !important;
+  font-weight: 500;
 }
 
 .dashboard-dark input::placeholder,
 .dashboard-dark textarea::placeholder {
-  color: #64748b;
+  color: #94a3b8 !important;
 }
 
 .dashboard-dark input:focus,
 .dashboard-dark textarea:focus,
 .dashboard-dark select:focus {
-  border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+  border-color: #f97316 !important;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2) !important;
   outline: none;
 }
 
-/* Labels */
+/* Auto-filled Fields - Světle modré, stále čitelné */
+.dashboard-dark .bg-blue-50,
+.dashboard-dark .bg-blue-50 input {
+  background-color: #dbeafe !important;
+  border-color: #60a5fa !important;
+  color: #000000 !important;
+}
+
+/* Labels - BÍLÉ aby byly jasně vidět */
 .dashboard-dark label {
-  color: #cbd5e1;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Headings - BÍLÉ s glowem */
+.dashboard-dark h1,
+.dashboard-dark h2,
+.dashboard-dark h3,
+.dashboard-dark h4,
+.dashboard-dark h5 {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.dashboard-dark h1 {
+  font-size: 2rem !important;
+}
+
+.dashboard-dark h2 {
+  font-size: 1.75rem !important;
+}
+
+.dashboard-dark h3 {
+  font-size: 1.5rem !important;
+}
+
+/* Paragraphs a obecný text - Světlý */
+.dashboard-dark p,
+.dashboard-dark span,
+.dashboard-dark div {
+  color: #e2e8f0;
+}
+
+/* Text v buttonech */
+.dashboard-dark button {
+  font-weight: 600;
 }
 
 /* Buttons with Shadows */
-.dashboard-dark button[class*="gradient"] {
-  box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.25);
+.dashboard-dark button[class*="gradient"],
+.dashboard-dark button[class*="bg-gradient"] {
+  box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
 }
 
-.dashboard-dark button[class*="gradient"]:hover {
-  box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.3);
+.dashboard-dark button[class*="gradient"]:hover,
+.dashboard-dark button[class*="bg-gradient"]:hover {
+  box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.4);
 }
 
-/* Cards */
+/* Cards - Viditelné bordery */
 .dashboard-dark .rounded-xl,
 .dashboard-dark .rounded-lg {
-  border-color: rgba(30, 41, 59, 0.5);
+  border-color: rgba(100, 116, 139, 0.4) !important;
 }
 
-/* Tables */
+/* Tables - Světlé, viditelné */
+.dashboard-dark table {
+  border-color: rgba(71, 85, 105, 0.5);
+}
+
 .dashboard-dark table thead {
-  background-color: rgba(15, 23, 42, 0.5);
-  border-color: #1e293b;
+  background-color: rgba(30, 41, 59, 0.9) !important;
+  border-color: #475569 !important;
+}
+
+.dashboard-dark table thead th {
+  color: #ffffff !important;
+  font-weight: 700 !important;
 }
 
 .dashboard-dark table tbody tr {
-  border-color: rgba(30, 41, 59, 0.5);
+  border-color: rgba(71, 85, 105, 0.3) !important;
 }
 
 .dashboard-dark table tbody tr:hover {
-  background-color: rgba(15, 23, 42, 0.3);
+  background-color: rgba(30, 41, 59, 0.6) !important;
 }
 
 .dashboard-dark table td,
 .dashboard-dark table th {
-  color: #cbd5e1;
+  color: #f1f5f9 !important;
 }
 
-/* Badges - Green */
+/* Badges - Živé barvy s dobrým kontrastem */
 .dashboard-dark .bg-green-100 {
-  background-color: rgba(20, 83, 45, 0.3);
-  color: #4ade80;
-  border: 1px solid #166534;
+  background-color: rgba(34, 197, 94, 0.25) !important;
+  color: #4ade80 !important;
+  border: 2px solid #22c55e !important;
+  font-weight: 600;
 }
 
-/* Badges - Yellow */
 .dashboard-dark .bg-yellow-100 {
-  background-color: rgba(113, 63, 18, 0.3);
-  color: #facc15;
-  border: 1px solid #713f12;
+  background-color: rgba(234, 179, 8, 0.25) !important;
+  color: #fbbf24 !important;
+  border: 2px solid #eab308 !important;
+  font-weight: 600;
 }
 
-/* Badges - Red */
 .dashboard-dark .bg-red-100 {
-  background-color: rgba(127, 29, 29, 0.3);
-  color: #f87171;
-  border: 1px solid #7f1d1d;
+  background-color: rgba(239, 68, 68, 0.25) !important;
+  color: #fca5a5 !important;
+  border: 2px solid #ef4444 !important;
+  font-weight: 600;
 }
 
-/* Badges - Blue */
 .dashboard-dark .bg-blue-100 {
-  background-color: rgba(30, 58, 138, 0.3);
-  color: #60a5fa;
-  border: 1px solid #1e3a8a;
+  background-color: rgba(59, 130, 246, 0.25) !important;
+  color: #93c5fd !important;
+  border: 2px solid #3b82f6 !important;
+  font-weight: 600;
 }
 
-/* Badges - Purple */
 .dashboard-dark .bg-purple-100 {
-  background-color: rgba(88, 28, 135, 0.3);
-  color: #c084fc;
-  border: 1px solid #581c87;
+  background-color: rgba(168, 85, 247, 0.25) !important;
+  color: #d8b4fe !important;
+  border: 2px solid #a855f7 !important;
+  font-weight: 600;
 }
 
-/* Badges - Slate */
 .dashboard-dark .bg-slate-100 {
-  background-color: rgba(15, 23, 42, 0.3);
-  color: #94a3b8;
-  border: 1px solid #1e293b;
+  background-color: rgba(71, 85, 105, 0.25) !important;
+  color: #cbd5e1 !important;
+  border: 2px solid #64748b !important;
+  font-weight: 600;
 }
 
-/* Text Colors */
+/* Text Colors - Všechny světlé */
+.dashboard-dark .text-slate-900,
+.dashboard-dark .text-slate-800,
 .dashboard-dark .text-slate-700 {
-  color: #cbd5e1;
+  color: #f1f5f9 !important;
 }
 
-.dashboard-dark .text-slate-600 {
-  color: #94a3b8;
+.dashboard-dark .text-slate-600,
+.dashboard-dark .text-slate-500 {
+  color: #cbd5e1 !important;
 }
 
-.dashboard-dark .text-slate-900 {
-  color: #ffffff;
+.dashboard-dark .text-slate-400 {
+  color: #94a3b8 !important;
 }
 
 /* Hover States */
 .dashboard-dark .hover\:bg-slate-50:hover {
-  background-color: rgba(15, 23, 42, 0.3);
+  background-color: rgba(30, 41, 59, 0.6) !important;
 }
 
 .dashboard-dark .hover\:bg-slate-100:hover {
-  background-color: rgba(15, 23, 42, 0.5);
+  background-color: rgba(30, 41, 59, 0.8) !important;
 }
 
-/* Disabled States */
+/* Disabled States - Viditelné ale šedé */
 .dashboard-dark input:disabled,
 .dashboard-dark select:disabled,
 .dashboard-dark textarea:disabled {
-  background-color: rgba(15, 23, 42, 0.3);
-  color: #475569;
+  background-color: #e2e8f0 !important;
+  color: #64748b !important;
   cursor: not-allowed;
-}
-
-/* Auto-filled Fields */
-.dashboard-dark .bg-blue-50 {
-  background-color: rgba(23, 37, 84, 0.3);
-  border-color: rgba(30, 58, 138, 0.5);
+  opacity: 0.7;
 }
 
 /* Success Messages */
 .dashboard-dark .bg-green-50 {
-  background-color: rgba(20, 83, 45, 0.3);
-  color: #4ade80;
-  border-color: #166534;
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  color: #4ade80 !important;
+  border: 2px solid #22c55e !important;
 }
 
 /* Error Messages */
 .dashboard-dark .bg-red-50 {
-  background-color: rgba(127, 29, 29, 0.3);
-  color: #f87171;
-  border-color: #7f1d1d;
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5 !important;
+  border: 2px solid #ef4444 !important;
 }
 
-/* Scrollbar */
+/* Scrollbar - Světlejší */
 .dashboard-dark ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 .dashboard-dark ::-webkit-scrollbar-track {
-  background-color: #020617;
+  background-color: #0f172a;
 }
 
 .dashboard-dark ::-webkit-scrollbar-thumb {
-  background-color: #1e293b;
+  background-color: #475569;
   border-radius: 9999px;
+  border: 2px solid #0f172a;
 }
 
 .dashboard-dark ::-webkit-scrollbar-thumb:hover {
-  background-color: #334155;
+  background-color: #64748b;
 }
 
 /* Loading Spinner Glow */
 .dashboard-dark .animate-spin {
-  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.5));
+  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.6));
+}
+
+/* Stats Cards - Maximální viditelnost */
+.dashboard-dark .text-3xl,
+.dashboard-dark .text-2xl {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+.dashboard-dark .text-sm {
+  color: #cbd5e1 !important;
+}
+
+/* Search Input - Bílý */
+.dashboard-dark input[type="search"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Helper text - Viditelný */
+.dashboard-dark .text-xs {
+  color: #94a3b8 !important;
+}
+
+/* Ikony - Světlé */
+.dashboard-dark svg {
+  color: inherit;
+}
+
+/* Specific fix pro CustomerList header */
+.dashboard-dark .bg-green-100.rounded-lg {
+  background-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Border pro lepší viditelnost sekcí */
+.dashboard-dark .border-slate-200,
+.dashboard-dark .border-slate-300 {
+  border-color: rgba(100, 116, 139, 0.4) !important;
+}
+
+/* Dropdown menus */
+.dashboard-dark select option {
+  background-color: #ffffff;
+  color: #000000;
 }
