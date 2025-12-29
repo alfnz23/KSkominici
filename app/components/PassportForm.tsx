@@ -241,7 +241,8 @@ export default function PassportForm() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             job_id: job.id,
-            report_data: {
+            report_kind: 'passport_unit',
+            data: {
               // Zákaznická data
               customerName: customer.customerName,
               companyOrPersonName: customer.companyOrPersonName,
