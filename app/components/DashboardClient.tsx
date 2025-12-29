@@ -236,12 +236,6 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
                 // Přejít na formulář pro jednotlivou zprávu
                 setCurrentView('single-report');
               }}
-              onAddNewUnit={(passportData) => {
-                // Uložit základní data pasportu do sessionStorage
-                sessionStorage.setItem('newPassportUnit', JSON.stringify(passportData));
-                // Přejít na formulář pro jednotlivou zprávu
-                setCurrentView('single-report');
-              }}
             />
           </div>
         )}
