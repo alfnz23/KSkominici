@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
     // Najdi poslední job pro tohoto zákazníka
     const { data: jobs, error: jobsError } = await supabase
       .from('jobs')
-      .select('id')
+      .select('id, inspection_date')
       .eq('customer_id', customerId)
-      .order('created_at', { ascending: false })
+      .order('inspection_date', { ascending: false })
       .limit(1);
 
     if (jobsError || !jobs || jobs.length === 0) {
