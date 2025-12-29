@@ -80,6 +80,53 @@ export default function SingleReportForm() {
     loadProfile();
   }, []);
 
+  // Načíst data pro obnovení kontroly
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isRenew = urlParams.get('renew') === 'true';
+    
+    if (isRenew) {
+      const renewDataStr = sessionStorage.getItem('renewReportData');
+      if (renewDataStr) {
+        try {
+          const renewData = JSON.parse(renewDataStr);
+          
+          // Předvyplnit formulář s daty z renewal
+          setFormData(prev => ({
+            ...prev,
+            customerName: renewData.customerName || '',
+            companyOrPersonName: renewData.companyOrPersonName || renewData.customerName || '',
+            customerEmail: renewData.customerEmail || '',
+            customerPhone: renewData.customerPhone || '',
+            permanentAddress: renewData.permanentAddress || '',
+            inspectionAddress: renewData.inspectionAddress || '',
+            inspectionDate: new Date().toISOString().split('T')[0], // Nové datum
+            nextInspectionDate: '', // Vypočítá se automaticky
+            chimneyType: renewData.chimneyType || '',
+            chimneyDescription: renewData.chimneyDescription || '',
+            flue: renewData.flue || '',
+            flueType: renewData.flueType || '',
+            condition: renewData.condition || 'Vyhovuje',
+            defectsFound: renewData.defectsFound || '',
+            defectRemovalDate: renewData.defectRemovalDate || '',
+            recommendations: renewData.recommendations || '',
+            appliances: renewData.appliances && renewData.appliances.length > 0 
+              ? renewData.appliances 
+              : [{ type: '', manufacturer: '', power: '', location: '', floor: '' }],
+          }));
+
+          // Vyčistit sessionStorage
+          sessionStorage.removeItem('renewReportData');
+          
+          // Odstranit ?renew=true z URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (error) {
+          console.error('Chyba při načítání renewal dat:', error);
+        }
+      }
+    }
+  }, []);
+
   const handleInputChange = (field: keyof ReportFormData, value: any) => {
     setFormData((prev) => {
       const updates: Partial<ReportFormData> = { [field]: value };
