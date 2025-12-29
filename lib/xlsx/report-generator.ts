@@ -2,6 +2,7 @@ import ExcelJS from 'exceljs';
 
 interface ReportData {
   customerName: string;
+  companyOrPersonName: string;
   customerEmail: string;
   permanentAddress: string;
   inspectionAddress: string;
@@ -12,7 +13,6 @@ interface ReportData {
   technicianIco?: string;
   technicianAddress?: string;
   chimneyType: string;
-  chimneyHeight?: string;
   chimneyDescription?: string;
   flue?: string;
   flueType?: string;
@@ -111,6 +111,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   };
 
   addTableRow('Jméno zákazníka:', data.customerName);
+  addTableRow('Název firmy / Jméno fyzické osoby:', data.companyOrPersonName);
   addTableRow(
     'Kontakt zákazníka (email):',
     `${data.customerEmail} | tel: ${data.customerPhone || ''}`
@@ -194,7 +195,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   worksheet.mergeCells(`A${row}:B${row}`);
   const defectsRemovedValue = worksheet.getCell(`A${row}`);
   defectsRemovedValue.value =
-    data.condition !== 'Vyhovující' && data.defectsFound ? data.defectsFound : '';
+    data.condition !== 'Vyhovuje' && data.defectsFound ? data.defectsFound : '';
   defectsRemovedValue.border = {
     top: { style: 'thin' },
     left: { style: 'thin' },
@@ -220,7 +221,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   worksheet.mergeCells(`A${row}:B${row}`);
   const defectsNotRemovedValue = worksheet.getCell(`A${row}`);
   defectsNotRemovedValue.value =
-    data.condition !== 'Vyhovující' && data.defectsFound ? data.defectsFound : '';
+    data.condition !== 'Vyhovuje' && data.defectsFound ? data.defectsFound : '';
   defectsNotRemovedValue.border = {
     top: { style: 'thin' },
     left: { style: 'thin' },
@@ -257,33 +258,31 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     row++;
   }
 
-  // Poznámka - pokud vyhovující
-  if (data.condition === 'Vyhovující') {
-    worksheet.mergeCells(`A${row}:B${row}`);
-    const noteLabel = worksheet.getCell(`A${row}`);
-    noteLabel.value = 'POZNÁMKA:';
-    noteLabel.font = { bold: true };
-    noteLabel.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFD5D8DC' },
-    };
-    row++;
+  // Závěr
+  worksheet.mergeCells(`A${row}:B${row}`);
+  const conclusionLabel = worksheet.getCell(`A${row}`);
+  conclusionLabel.value = 'ZÁVĚR:';
+  conclusionLabel.font = { bold: true };
+  conclusionLabel.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFD5D8DC' },
+  };
+  row++;
 
-    worksheet.mergeCells(`A${row}:B${row}`);
-    const noteValue = worksheet.getCell(`A${row}`);
-    noteValue.value = `Spalinová cesta je čistá a vyhovuje bezpečnému provozu\n${data.recommendations || ''}`;
-    noteValue.alignment = { wrapText: true };
-    noteValue.border = {
-      top: { style: 'thin' },
-      left: { style: 'thin' },
-      right: { style: 'thin' },
-      bottom: { style: 'thin' },
-    };
-    worksheet.getRow(row).height = 30;
-    row++;
-    row++;
-  }
+  worksheet.mergeCells(`A${row}:B${row}`);
+  const conclusionValue = worksheet.getCell(`A${row}`);
+  conclusionValue.value = `${data.condition}\nSpalinová cesta vyhovuje bezpečnému provozu${data.recommendations ? '\n' + data.recommendations : ''}`;
+  conclusionValue.alignment = { wrapText: true };
+  conclusionValue.border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    right: { style: 'thin' },
+    bottom: { style: 'thin' },
+  };
+  worksheet.getRow(row).height = 30;
+  row++;
+  row++;
 
   // Podpis
   row++;
