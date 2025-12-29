@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         address,
         notes,
         technician_id,
-        profiles!calendar_events_technician_id_fkey(full_name)
+        profiles:technician_id(full_name)
       `)
       .eq('company_id', profile.company_id)
       .gte('date', `${year}-${month.padStart(2, '0')}-01`)
@@ -53,16 +53,19 @@ export async function GET(request: NextRequest) {
     }
 
     // Formátovat výsledky
-    const formattedEvents = events?.map(event => ({
-      id: event.id,
-      date: event.date,
-      time: event.time,
-      title: event.title,
-      address: event.address,
-      notes: event.notes,
-      technicianId: event.technician_id,
-      technicianName: event.profiles?.full_name || 'Neznámý',
-    })) || [];
+    const formattedEvents = events?.map(event => {
+      const profile = event.profiles as any;
+      return {
+        id: event.id,
+        date: event.date,
+        time: event.time,
+        title: event.title,
+        address: event.address,
+        notes: event.notes,
+        technicianId: event.technician_id,
+        technicianName: profile?.full_name || 'Neznámý',
+      };
+    }) || [];
 
     return NextResponse.json({ events: formattedEvents }, { status: 200 });
   } catch (error) {
