@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Home, Users, Calendar, Settings, LogOut } from 'lucide-react';
 import SingleReportForm from './SingleReportForm';
 import PassportForm from './PassportForm';
@@ -25,6 +25,16 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
   const [stats, setStats] = useState(initialStats);
   const router = useRouter();
   const supabase = createClient();
+
+  // Detekce URL parametru ?renew=true
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isRenew = urlParams.get('renew') === 'true';
+    
+    if (isRenew) {
+      setCurrentView('single-report');
+    }
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
