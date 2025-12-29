@@ -274,11 +274,11 @@ export default function PassportForm() {
         });
       }
 
-      // 3. Vygenerovat dokumenty (PDF + XLSX)
-      await fetch('/api/documents/generate', {
+      // 3. Vygenerovat dokumenty (PDF + XLSX) a odeslat technikovi
+      await fetch('/api/send_passport_package', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ job_id: job.id }),
+        body: JSON.stringify({ jobId: job.id }),
       });
 
       setSubmitStatus('success');
