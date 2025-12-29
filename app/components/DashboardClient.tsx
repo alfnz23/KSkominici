@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { FileText, Home, Users, Calendar, Settings, LogOut } from 'lucide-react';
 import SingleReportForm from './SingleReportForm';
 import PassportForm from './PassportForm';
+import PassportList from './PassportList';
+import PassportDetail from './PassportDetail';
 import CustomerList from './CustomerList';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
-type View = 'home' | 'single-report' | 'passport' | 'customers' | 'settings';
+type View = 'home' | 'single-report' | 'passport' | 'passport-list' | 'passport-detail' | 'customers' | 'settings';
 
 interface DashboardClientProps {
   user: any;
@@ -22,6 +24,7 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ user, profile, initialStats }: DashboardClientProps) {
   const [currentView, setCurrentView] = useState<View>('home');
+  const [selectedPassport, setSelectedPassport] = useState<string | null>(null);
   const [stats, setStats] = useState(initialStats);
   const router = useRouter();
   const supabase = createClient();
@@ -156,7 +159,7 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
 
                 {/* V2 - Pasport */}
                 <button
-                  onClick={() => setCurrentView('passport')}
+                  onClick={() => setCurrentView('passport-list')}
                   className="group bg-white rounded-xl shadow-sm border-2 border-slate-200 hover:border-orange-500 hover:shadow-lg transition-all p-8 text-left"
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -216,6 +219,47 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
               ← Zpět na dashboard
             </button>
             <PassportForm />
+          </div>
+        )}
+
+        {currentView === 'passport-list' && (
+          <div>
+            <button
+              onClick={() => setCurrentView('home')}
+              className="mb-6 text-slate-600 hover:text-slate-900 font-medium flex items-center"
+            >
+              ← Zpět na dashboard
+            </button>
+            <PassportList 
+              onSelectPassport={(passportId) => {
+                setSelectedPassport(passportId);
+                setCurrentView('passport-detail');
+              }}
+            />
+          </div>
+        )}
+
+        {currentView === 'passport-detail' && selectedPassport && (
+          <div>
+            <PassportDetail
+              passportId={selectedPassport}
+              onBack={() => {
+                setSelectedPassport(null);
+                setCurrentView('passport-list');
+              }}
+              onRenewUnit={(unitData) => {
+                // Uložit data jednotky do sessionStorage
+                sessionStorage.setItem('renewPassportUnit', JSON.stringify(unitData));
+                // Přejít na formulář pro jednotlivou zprávu
+                setCurrentView('single-report');
+              }}
+              onAddNewUnit={(passportData) => {
+                // Uložit základní data pasportu do sessionStorage
+                sessionStorage.setItem('newPassportUnit', JSON.stringify(passportData));
+                // Přejít na formulář pro jednotlivou zprávu
+                setCurrentView('single-report');
+              }}
+            />
           </div>
         )}
 
