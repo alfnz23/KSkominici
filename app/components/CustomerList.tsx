@@ -15,6 +15,7 @@ interface Customer {
   status: 'active' | 'expiring_soon' | 'expired';
   days_until_expiration: number;
   pdfUrl?: string | null;
+  is_passport?: boolean;
 }
 
 export default function CustomerList() {
@@ -244,6 +245,11 @@ export default function CustomerList() {
                         {customer.name}
                       </h3>
                       {getStatusBadge(customer.status)}
+                      {customer.is_passport && (
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                          Pasport
+                        </span>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-slate-600">
