@@ -6,6 +6,7 @@ import { FileText, Send, Loader2, CheckCircle } from 'lucide-react';
 interface ReportFormData {
   // Zákaznická data
   customerName: string;
+  companyOrPersonName: string;
   customerEmail: string;
   permanentAddress: string;
   inspectionAddress: string;
@@ -18,7 +19,6 @@ interface ReportFormData {
   
   // Technické údaje
   chimneyType: string;
-  chimneyHeight: string;
   chimneyDescription: string;
   flue: string;
   flueType: string;
@@ -40,6 +40,7 @@ interface ReportFormData {
 export default function SingleReportForm() {
   const [formData, setFormData] = useState<ReportFormData>({
     customerName: '',
+    companyOrPersonName: '',
     customerEmail: '',
     permanentAddress: '',
     inspectionAddress: '',
@@ -48,11 +49,10 @@ export default function SingleReportForm() {
     nextInspectionDate: '',
     technicianName: '',
     chimneyType: '',
-    chimneyHeight: '',
     chimneyDescription: '',
     flue: '',
     flueType: '',
-    condition: 'Vyhovující',
+    condition: 'Vyhovuje',
     defectsFound: '',
     defectRemovalDate: '',
     recommendations: '',
@@ -90,6 +90,11 @@ export default function SingleReportForm() {
         const nextDate = new Date(inspDate);
         nextDate.setFullYear(nextDate.getFullYear() + 1);
         updates.nextInspectionDate = nextDate.toISOString().split('T')[0];
+      }
+      
+      // Auto-vyplnit "Název firmy/Jméno fyzické osoby" = "Jméno zákazníka"
+      if (field === 'customerName' && value && !prev.companyOrPersonName) {
+        updates.companyOrPersonName = value;
       }
       
       return { ...prev, ...updates };
@@ -202,6 +207,7 @@ export default function SingleReportForm() {
       setTimeout(() => {
         setFormData({
           customerName: '',
+          companyOrPersonName: '',
           customerEmail: '',
           permanentAddress: '',
           inspectionAddress: '',
@@ -210,11 +216,10 @@ export default function SingleReportForm() {
           nextInspectionDate: '',
           technicianName: '',
           chimneyType: '',
-          chimneyHeight: '',
           chimneyDescription: '',
           flue: '',
           flueType: '',
-          condition: 'Vyhovující',
+          condition: 'Vyhovuje',
           defectsFound: '',
           defectRemovalDate: '',
           recommendations: '',
@@ -265,6 +270,20 @@ export default function SingleReportForm() {
                   onChange={(e) => handleInputChange('customerName', e.target.value)}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Jan Novák"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Název firmy / Jméno fyzické osoby *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.companyOrPersonName}
+                  onChange={(e) => handleInputChange('companyOrPersonName', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Jan Novák nebo Bytové družstvo"
                 />
               </div>
 
@@ -531,19 +550,6 @@ export default function SingleReportForm() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Výška komína (m)
-                </label>
-                <input
-                  type="text"
-                  value={formData.chimneyHeight}
-                  onChange={(e) => handleInputChange('chimneyHeight', e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="např. 12"
-                />
-              </div>
-
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Popis spalinové cesty
@@ -590,7 +596,7 @@ export default function SingleReportForm() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Stav *
+                  Závěr *
                 </label>
                 <select
                   required
@@ -598,9 +604,9 @@ export default function SingleReportForm() {
                   onChange={(e) => handleInputChange('condition', e.target.value)}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="Vyhovující">Vyhovující</option>
-                  <option value="Vyhovující s drobnými vadami">Vyhovující s drobnými vadami</option>
-                  <option value="Nevyhovující">Nevyhovující</option>
+                  <option value="Vyhovuje">Vyhovuje</option>
+                  <option value="Vyhovuje s drobnými vadami">Vyhovuje s drobnými vadami</option>
+                  <option value="Nevyhovuje">Nevyhovuje</option>
                 </select>
               </div>
             </div>
