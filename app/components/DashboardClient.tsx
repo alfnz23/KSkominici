@@ -170,8 +170,8 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
         )}
 
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto p-4 lg:p-8">
+        <div className="flex-1 overflow-y-auto dashboard-dark">
+          <div className="max-w-7xl mx-auto p-4 lg:p-8 dashboard-dark">
             {/* Home View */}
             {currentView === 'home' && (
               <div className="space-y-6">
