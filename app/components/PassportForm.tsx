@@ -35,6 +35,7 @@ interface CustomerData {
 
 interface PassportFormData {
   buildingAddress: string;
+  buildingCustomerName: string; // Jméno zákazníka (např. "Bytové družstvo")
   customerEmail: string; // Email zákazníka (společný pro všechny byty)
   inspectionDate: string;
   nextInspectionDate: string;
@@ -47,6 +48,7 @@ interface PassportFormData {
 export default function PassportForm() {
   const [formData, setFormData] = useState<PassportFormData>({
     buildingAddress: '',
+    buildingCustomerName: '',
     customerEmail: '',
     inspectionDate: new Date().toISOString().split('T')[0],
     nextInspectionDate: '',
@@ -97,7 +99,7 @@ export default function PassportForm() {
     const newCustomer: CustomerData = {
       id: crypto.randomUUID(),
       unitNumber: '',
-      customerName: '',
+      customerName: formData.buildingCustomerName, // AUTO-VYPLNĚNO z hlavičky
       companyOrPersonName: '',
       customerEmail: formData.customerEmail, // AUTO-VYPLNĚNO z hlavičky
       customerPhone: '',
@@ -204,12 +206,13 @@ export default function PassportForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          job_type: 'building_passport',
+          job_type: 'passport',
           inspection_address: formData.buildingAddress,
           inspection_date: formData.inspectionDate,
           building_data: {
             buildingType: formData.buildingType,
             totalUnits: formData.totalUnits,
+            buildingCustomerName: formData.buildingCustomerName,
             customerEmail: formData.customerEmail,
           },
         }),
@@ -283,6 +286,7 @@ export default function PassportForm() {
       setTimeout(() => {
         setFormData({
           buildingAddress: '',
+          buildingCustomerName: '',
           customerEmail: '',
           inspectionDate: new Date().toISOString().split('T')[0],
           nextInspectionDate: '',
@@ -343,6 +347,23 @@ export default function PassportForm() {
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="Slavická 1153, Praha"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Jméno zákazníka *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.buildingCustomerName}
+                  onChange={(e) => handleInputChange('buildingCustomerName', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Bytové družstvo Hanspalka"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Toto jméno se použije jako zákazník pro všechny jednotky
+                </p>
               </div>
 
               <div>
@@ -506,7 +527,7 @@ export default function PassportForm() {
 
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Jméno a příjmení *
+                        Jméno zákazníka (např. Bytové družstvo)
                       </label>
                       <input
                         type="text"
@@ -515,14 +536,17 @@ export default function PassportForm() {
                         onChange={(e) =>
                           updateCustomer(customer.id, 'customerName', e.target.value)
                         }
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Jan Novák"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-blue-50"
+                        placeholder="Bytové družstvo Hanspalka"
                       />
+                      <p className="text-xs text-blue-600 mt-1">
+                        ✓ Předvyplněno z hlavičky
+                      </p>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Název firmy / Jméno fyzické osoby *
+                        Jméno osoby v bytové jednotce *
                       </label>
                       <input
                         type="text"
@@ -532,7 +556,7 @@ export default function PassportForm() {
                           updateCustomer(customer.id, 'companyOrPersonName', e.target.value)
                         }
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Jan Novák nebo Bytové družstvo"
+                        placeholder="Jan Novák"
                       />
                     </div>
 
