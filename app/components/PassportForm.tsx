@@ -221,7 +221,9 @@ export default function PassportForm() {
       if (!jobRes.ok) throw new Error('Nepodařilo se vytvořit pasport');
       const { job } = await jobRes.json();
 
-      // 2. Pro každou jednotku uložit zprávu
+      // 2. Pro každou jednotku uložit zprávu a uschovat report_id
+      const reportIds = [];
+      
       for (const customer of formData.customers) {
         // Upsert zákazníka
         await fetch('/api/customers/upsert', {
@@ -236,7 +238,7 @@ export default function PassportForm() {
         });
 
         // Uložit zprávu pro tuto jednotku
-        await fetch('/api/reports/save', {
+        const reportRes = await fetch('/api/reports/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -272,10 +274,29 @@ export default function PassportForm() {
             },
           }),
         });
+
+        if (reportRes.ok) {
+          const { report } = await reportRes.json();
+          if (report?.id) {
+            reportIds.push(report.id);
+          }
+        }
       }
 
-      // 3. Vygenerovat dokumenty (PDF + XLSX) a odeslat technikovi
-      await fetch('/api/send_passport_package', {
+      // 3. Vygenerovat dokumenty (PDF + XLSX) pro každou jednotku
+      for (const reportId of reportIds) {
+        await fetch('/api/documents/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            job_id: job.id,
+            report_id: reportId,
+          }),
+        });
+      }
+
+      // 4. Odeslat pasport technikovi
+      await fetch('/api/passports/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobId: job.id }),
