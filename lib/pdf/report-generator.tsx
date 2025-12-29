@@ -17,6 +17,7 @@ Font.register({
 
 interface ReportData {
   customerName: string;
+  companyOrPersonName: string;
   customerEmail: string;
   permanentAddress: string;
   inspectionAddress: string;
@@ -27,7 +28,6 @@ interface ReportData {
   technicianIco?: string;
   technicianAddress?: string;
   chimneyType: string;
-  chimneyHeight?: string;
   chimneyDescription?: string;
   flue?: string;
   flueType?: string;
@@ -106,13 +106,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
   },
   section: {
-    marginTop: 8,
-    marginBottom: 8,
+    marginTop: 4,
+    marginBottom: 4,
   },
   sectionContent: {
     border: '1 solid black',
     padding: 5,
-    minHeight: 40,
+    minHeight: 30,
   },
   footer: {
     marginTop: 20,
@@ -158,6 +158,15 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
             </View>
             <View style={[styles.tableCell, styles.tableCellValue, { borderRight: 0 }]}>
               <Text>{data.customerName}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={[styles.tableCell, styles.tableCellLabel]}>
+              <Text>Název firmy / Jméno fyzické osoby:</Text>
+            </View>
+            <View style={[styles.tableCell, styles.tableCellValue, { borderRight: 0 }]}>
+              <Text>{data.companyOrPersonName}</Text>
             </View>
           </View>
 
@@ -284,7 +293,7 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
             ZJIŠTĚNÉ NEDOSTATKY, KTERÉ BYLY ODSTRANĚNY NA MÍSTĚ:
           </Text>
           <View style={styles.sectionContent}>
-            <Text>{data.condition !== 'Vyhovující' && data.defectsFound ? data.defectsFound : ''}</Text>
+            <Text>{data.condition !== 'Vyhovuje' && data.defectsFound ? data.defectsFound : ''}</Text>
           </View>
         </View>
 
@@ -294,7 +303,7 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
             ZJIŠTĚNÉ NEDOSTATKY, KTERÉ NEBYLY ODSTRANĚNY NA MÍSTĚ:
           </Text>
           <View style={styles.sectionContent}>
-            <Text>{data.condition !== 'Vyhovující' && data.defectsFound ? data.defectsFound : ''}</Text>
+            <Text>{data.condition !== 'Vyhovuje' && data.defectsFound ? data.defectsFound : ''}</Text>
           </View>
         </View>
 
@@ -308,16 +317,15 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
           </View>
         )}
 
-        {/* Poznámka - pokud vyhovující */}
-        {data.condition === 'Vyhovující' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>POZNÁMKA:</Text>
-            <View style={styles.sectionContent}>
-              <Text>Spalinová cesta je čistá a vyhovuje bezpečnému provozu</Text>
-              <Text>{data.recommendations}</Text>
-            </View>
+        {/* Závěr */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>ZÁVĚR:</Text>
+          <View style={styles.sectionContent}>
+            <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>{data.condition}</Text>
+            <Text>Spalinová cesta vyhovuje bezpečnému provozu</Text>
+            {data.recommendations && <Text>{data.recommendations}</Text>}
           </View>
-        )}
+        </View>
 
         {/* Podpis */}
         <View style={styles.footer}>
