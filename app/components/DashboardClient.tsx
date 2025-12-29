@@ -6,11 +6,12 @@ import SingleReportForm from './SingleReportForm';
 import PassportForm from './PassportForm';
 import PassportDetail from './PassportDetail';
 import CustomerManagement from './CustomerManagement';
+import SimpleCalendar from './SimpleCalendar';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-type View = 'home' | 'single-report' | 'passport' | 'passport-detail' | 'customers' | 'settings';
+type View = 'home' | 'single-report' | 'passport' | 'passport-detail' | 'customers' | 'calendar' | 'settings';
 
 interface DashboardClientProps {
   user: any;
@@ -49,6 +50,7 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
     { id: 'single-report' as View, icon: FileText, label: 'Nová zpráva' },
     { id: 'passport' as View, icon: Building2, label: 'Nový pasport' },
     { id: 'customers' as View, icon: Users, label: 'Správa zákazníků' },
+    { id: 'calendar' as View, icon: Calendar, label: 'Diář' },
   ];
 
   const handleMenuClick = (viewId: View) => {
@@ -274,6 +276,7 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
                 }}
               />
             )}
+            {currentView === 'calendar' && <SimpleCalendar />}
           </div>
         </div>
       </div>
