@@ -23,7 +23,7 @@ export async function PUT(
     }
 
     // UPDATE - kontrola vlastnictví
-    const { error, count } = await supabase
+    const { data, error } = await supabase
       .from('calendar_events')
       .update({
         date,
@@ -34,14 +34,14 @@ export async function PUT(
       })
       .eq('id', params.id)
       .eq('technician_id', user.id)
-      .select('id', { count: 'exact', head: true });
+      .select();
 
     if (error) {
       console.error('Error updating event:', error);
       return NextResponse.json({ error: 'Failed to update event' }, { status: 500 });
     }
 
-    if (count === 0) {
+    if (!data || data.length === 0) {
       return NextResponse.json({ 
         error: 'Event not found or you do not have permission to edit this event' 
       }, { status: 404 });
