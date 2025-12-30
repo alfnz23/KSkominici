@@ -33,6 +33,23 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Protokol');
 
+  // Nastavení pro tisk na A4
+  worksheet.pageSetup = {
+    paperSize: 9, // A4
+    orientation: 'portrait',
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0, // Automatická výška
+    margins: {
+      left: 0.5,
+      right: 0.5,
+      top: 0.5,
+      bottom: 0.5,
+      header: 0.3,
+      footer: 0.3,
+    },
+  };
+
   worksheet.columns = [
     { width: 30 },
     { width: 50 },
@@ -171,10 +188,11 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   row++;
 
   let chimneyDesc = data.chimneyType;
-  if (data.chimneyDescription) {
-    chimneyDesc += '\n' + data.chimneyDescription;
-  }
   addTableRow('Komín:', chimneyDesc);
+
+  if (data.chimneyDescription) {
+    addTableRow('Popis:', data.chimneyDescription);
+  }
 
   if (data.flue) {
     let flueDesc = data.flueType || '';
@@ -305,6 +323,10 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   row++;
   worksheet.getCell(`A${row}`).value = `Dne: ${new Date(data.inspectionDate).toLocaleDateString('cs-CZ')}`;
   worksheet.getCell(`B${row}`).value = `V: ${data.technicianAddress?.split(',')[1] || ''}`;
+
+  // Nastavení tisku
+  worksheet.pageSetup.printArea = `A1:B${row}`;
+  worksheet.pageSetup.horizontalCentered = true;
 
   const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);
