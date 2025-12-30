@@ -68,9 +68,10 @@ const styles = StyleSheet.create({
   companyInfo: {
     marginTop: 10,
     marginBottom: 10,
+    alignItems: 'center',
   },
   companyName: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   companyDetail: {
@@ -78,8 +79,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   table: {
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: 2,
+    marginBottom: 2,
     border: '1 solid black',
   },
   tableRow: {
@@ -100,19 +101,19 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 10,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 5,
+    marginTop: 5,
+    marginBottom: 2,
     padding: 3,
     backgroundColor: '#f0f0f0',
   },
   section: {
-    marginTop: 4,
-    marginBottom: 4,
+    marginTop: 2,
+    marginBottom: 2,
   },
   sectionContent: {
     border: '1 solid black',
     padding: 5,
-    minHeight: 20,
+    minHeight: 15,
   },
   footer: {
     marginTop: 20,
@@ -124,9 +125,9 @@ const styles = StyleSheet.create({
   },
   disclaimer: {
     fontSize: 7,
-    marginTop: 8,
-    marginBottom: 8,
-    padding: 5,
+    marginTop: 4,
+    marginBottom: 4,
+    padding: 4,
     border: '1 solid black',
     lineHeight: 1.3,
   },
@@ -266,9 +267,9 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
           </View>
         )}
 
-        {/* Specifické spalinové cesty */}
+        {/* Specifikace spalinové cesty */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>SPECIFICKÉ SPALINOVÉ CESTY:</Text>
+          <Text style={styles.sectionTitle}>SPECIFIKACE SPALINOVÉ CESTY:</Text>
           
           <View style={styles.table}>
             <View style={[styles.tableRow, { borderBottom: data.flue ? '1 solid black' : 0 }]}>
