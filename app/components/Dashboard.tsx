@@ -35,8 +35,8 @@ export default async function Dashboard() {
     .from('jobs')
     .select('*', { count: 'exact', head: true })
     .eq('company_id', profile.company_id)
-    .gte('inspection_date', `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`)
-    .lt('inspection_date', `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`);
+    .gte('created_at', `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`)
+    .lt('created_at', `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`);
 
   // Statistika - brzy vypršení (příští 14 dní)
   const today = new Date();
