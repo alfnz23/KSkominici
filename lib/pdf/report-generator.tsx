@@ -293,15 +293,26 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
             )}
             
             {data.flue && (
-              <View style={[styles.tableRow, { borderBottom: 0 }]}>
-                <View style={[styles.tableCell, { width: '20%', fontWeight: 'bold' }]}>
-                  <Text>Kouřovod:</Text>
+              <>
+                <View style={styles.tableRow}>
+                  <View style={[styles.tableCell, { width: '20%', fontWeight: 'bold' }]}>
+                    <Text>Kouřovod:</Text>
+                  </View>
+                  <View style={[styles.tableCell, { width: '80%', borderRight: 0 }]}>
+                    <Text>{data.flueType || ''}</Text>
+                  </View>
                 </View>
-                <View style={[styles.tableCell, { width: '80%', borderRight: 0 }]}>
-                  <Text>{data.flueType || ''}</Text>
-                  <Text>{data.flue}</Text>
-                </View>
-              </View>
+                {data.flue && (
+                  <View style={[styles.tableRow, { borderBottom: 0 }]}>
+                    <View style={[styles.tableCell, { width: '20%', fontWeight: 'bold' }]}>
+                      <Text>Popis:</Text>
+                    </View>
+                    <View style={[styles.tableCell, { width: '80%', borderRight: 0 }]}>
+                      <Text>{data.flue}</Text>
+                    </View>
+                  </View>
+                )}
+              </>
             )}
           </View>
         </View>
