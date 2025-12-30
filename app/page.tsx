@@ -60,43 +60,80 @@ export default function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+            {/* Montáže a vložkování */}
             <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200">
               <h3 className="text-xl font-bold mb-4 text-white">Montáže a vložkování</h3>
               <p className="text-gray-300 mb-4">Třívrstvé komíny - profesionální montáž a vložkování komínových systémů podle nejnovějších standardů a norem.</p>
               <ul className="text-gray-400 space-y-2">
                 <li>• Nerezové vložky</li>
-                <li>• Keramické systémy</li>
-                <li>• Třívrstvé komíny</li>
+                <li>• Plastové vložky</li>
+                <li>• Třívrstvé komíny pro kondenzační kotle i tuhá paliva</li>
               </ul>
             </div>
 
+            {/* Práce ve výškách */}
             <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200">
-              <h3 className="text-xl font-bold mb-4 text-white">Kouřovody a kondenzační systémy</h3>
-              <p className="text-gray-300 mb-4">Kouřovody, systémy pro kondenzační kotle - instalace a údržba moderních topných systémů.</p>
-              <ul className="text-gray-400 space-y-2">
-                <li>• Kondenzační kotle</li>
-                <li>• Plastové kouřovody</li>
-                <li>• Nerezové systémy</li>
-              </ul>
+              <h3 className="text-xl font-bold mb-4 text-white">Práce ve výškách a montáž komínových systémů</h3>
+              <p className="text-gray-300 mb-4">Provádíme odborné práce ve výškách pomocí lanové techniky se specializací na montáž, demontáž a rekonstrukce komínových systémů.</p>
+              
+              <div className="space-y-4 mt-6">
+                <div>
+                  <h4 className="font-semibold text-white mb-2">Montáž komínů pro velké zdroje</h4>
+                  <p className="text-gray-400 text-sm mb-2">Realizujeme komínové systémy pro kotelny a technologické celky:</p>
+                  <ul className="text-gray-400 text-sm space-y-1 ml-4">
+                    <li>• Plynové a pevnopalivové kotelny</li>
+                    <li>• Velké tepelné zdroje</li>
+                    <li>• Průmyslové provozy</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-white mb-2">Komínové systémy ve světlících</h4>
+                  <p className="text-gray-400 text-sm mb-2">Instalace komínů ve vnitřních světlících:</p>
+                  <ul className="text-gray-400 text-sm space-y-1 ml-4">
+                    <li>• Nové komínové vložky a systémy</li>
+                    <li>• Víceprůduchové i samostatné komíny</li>
+                    <li>• Práce bez zásahu do provozu objektu</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-white mb-2">Demontáž a výměna starých komínů</h4>
+                  <p className="text-gray-400 text-sm mb-2">Zajišťujeme náhradu moderním certifikovaným systémem dle aktuálních norem.</p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-white mb-2">Výhody lanové techniky</h4>
+                  <ul className="text-gray-400 text-sm space-y-1 ml-4">
+                    <li>• Minimální zásah do objektu</li>
+                    <li>• Bez omezení provozu budovy</li>
+                    <li>• Kratší doba realizace</li>
+                    <li>• Nižší celkové náklady</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
+            {/* Pravidelné kontroly */}
             <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200">
               <h3 className="text-xl font-bold mb-4 text-white">Pravidelné kontroly</h3>
               <p className="text-gray-300 mb-4">Pravidelné kontroly dle nařízení vlády č. 91/2010 Sb. - zajišťujeme bezpečnost vašich spalinových cest.</p>
               <ul className="text-gray-400 space-y-2">
                 <li>• Roční kontroly</li>
                 <li>• Čištění komínů</li>
-                <li>• Kontrola těsnosti</li>
+                <li>• Automatické připomínání vypršení platnosti zpráv o provedení kontroly - nemusíte na nic myslet, náš systém si to hlídá za vás</li>
               </ul>
             </div>
 
+            {/* Revizní zprávy */}
             <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200">
               <h3 className="text-xl font-bold mb-4 text-white">Revizní zprávy</h3>
               <p className="text-gray-300 mb-4">Kompletní dokumentace a revizní zprávy - všechna potřebná dokumentace pro pojišťovny a úřady.</p>
               <ul className="text-gray-400 space-y-2">
                 <li>• Protokoly o kontrole</li>
-                <li>• Kominické průkazy</li>
+                <li>• Výchozí revizní zprávy</li>
                 <li>• Certifikáty</li>
+                <li>• Výpočty spalinových cest</li>
               </ul>
             </div>
           </div>
@@ -150,6 +187,14 @@ export default function HomePage() {
                   <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
                   IČO: 87484510
                 </li>
+                <li className="flex items-center">
+                  <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
+                  Zkušenosti s technicky náročnými realizacemi
+                </li>
+                <li className="flex items-center">
+                  <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
+                  Certifikovaná lanová technika
+                </li>
               </ul>
             </div>
           </div>
@@ -175,7 +220,8 @@ export default function HomePage() {
                     </div>
                     <div>
                       <p className="font-semibold">Adresa</p>
-                      <p className="text-gray-300">Seradovská 435, 251 65 Ondřejov</p>
+                      <p className="text-gray-300">Dražice 85, Benátky nad Jizerou</p>
+                      <p className="text-gray-300 text-sm mt-1">Seradovská 435, 251 65 Ondřejov</p>
                     </div>
                   </div>
                 </div>
@@ -195,6 +241,13 @@ export default function HomePage() {
                         <span className="w-4 h-4 mr-2">✉️</span>
                         <a href="mailto:kracmer.tom@gmail.com" className="hover:text-white transition-colors">kracmer.tom@gmail.com</a>
                       </p>
+                      <p className="flex items-start mt-3">
+                        <span className="w-4 h-4 mr-2 mt-1">📍</span>
+                        <span className="text-sm">
+                          <span className="font-semibold text-white">Oblast působnosti:</span><br />
+                          Praha / Praha východ / okres Benešov a okolí
+                        </span>
+                      </p>
                     </div>
                   </div>
                   
@@ -204,6 +257,17 @@ export default function HomePage() {
                       <p className="flex items-center">
                         <span className="w-4 h-4 mr-2">📞</span>
                         <a href="tel:+420776724300" className="hover:text-white transition-colors">+420 776 724 300</a>
+                      </p>
+                      <p className="flex items-center">
+                        <span className="w-4 h-4 mr-2">✉️</span>
+                        <a href="mailto:kominici.stepanek@email.cz" className="hover:text-white transition-colors">kominici.stepanek@email.cz</a>
+                      </p>
+                      <p className="flex items-start mt-3">
+                        <span className="w-4 h-4 mr-2 mt-1">📍</span>
+                        <span className="text-sm">
+                          <span className="font-semibold text-white">Oblast působnosti:</span><br />
+                          Praha / Praha východ / okres Mladá Boleslav a okolí
+                        </span>
                       </p>
                     </div>
                   </div>
