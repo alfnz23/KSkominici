@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark Theme - CLEAN & READABLE */
+/* AGGRESSIVE DARK THEME - ALL SECTIONS */
 
-/* Base */
+/* Global dark mode */
 .dashboard-dark {
   background-color: #000000 !important;
   color: #ffffff !important;
@@ -14,22 +14,31 @@
   border-color: rgba(100, 116, 139, 0.3) !important;
 }
 
-/* White backgrounds → dark */
+/* FORCE ALL backgrounds to dark */
 .dashboard-dark .bg-white,
+.dashboard-dark .bg-gray-50,
+.dashboard-dark .bg-gray-100,
+.dashboard-dark .bg-slate-50,
+.dashboard-dark .bg-slate-100,
 .dashboard-dark div[class*="bg-white"],
-.dashboard-dark section[class*="bg-white"] {
+.dashboard-dark div[class*="bg-gray"],
+.dashboard-dark div[class*="bg-slate"],
+.dashboard-dark section[class*="bg-white"],
+.dashboard-dark section[class*="bg-gray"],
+.dashboard-dark form,
+.dashboard-dark fieldset {
   background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.95), rgba(0, 0, 0, 0.95)) !important;
   border: 1px solid rgba(100, 116, 139, 0.3) !important;
   backdrop-filter: blur(24px);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
   color: #ffffff !important;
 }
 
-/* Input Fields - SVĚTLÉ, OSTRÉ */
+/* Input Fields - WHITE/LIGHT GRAY */
 .dashboard-dark input[type="text"],
 .dashboard-dark input[type="email"],
 .dashboard-dark input[type="tel"],
 .dashboard-dark input[type="date"],
+.dashboard-dark input[type="time"],
 .dashboard-dark input[type="number"],
 .dashboard-dark input[type="search"],
 .dashboard-dark textarea,
@@ -39,6 +48,13 @@
   color: #000000 !important;
   font-weight: 500 !important;
   font-size: 0.95rem !important;
+}
+
+/* Date/Time inputs - FORCE black text */
+.dashboard-dark input[type="date"],
+.dashboard-dark input[type="time"] {
+  color: #000000 !important;
+  color-scheme: light;
 }
 
 .dashboard-dark input::placeholder,
@@ -53,6 +69,18 @@
   border-color: #f97316 !important;
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15) !important;
   outline: none;
+  background-color: #ffffff !important;
+}
+
+/* Select dropdowns */
+.dashboard-dark select {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.dashboard-dark select option {
+  background-color: #ffffff !important;
+  color: #000000 !important;
 }
 
 /* Auto-filled Fields */
@@ -63,46 +91,40 @@
   color: #000000 !important;
 }
 
-/* Labels - OSTRÉ, ČISTÉ (BEZ TEXT-SHADOW) */
+/* Labels - WHITE, BOLD, VISIBLE */
 .dashboard-dark label,
-.dashboard-dark label span {
+.dashboard-dark label span,
+.dashboard-dark legend {
   color: #ffffff !important;
   font-weight: 700 !important;
   font-size: 0.95rem !important;
   letter-spacing: 0.01em;
 }
 
-/* Headings - OSTRÉ, ČISTÉ */
+/* Headings - WHITE, BOLD */
 .dashboard-dark h1,
 .dashboard-dark h2,
 .dashboard-dark h3,
 .dashboard-dark h4,
-.dashboard-dark h5 {
+.dashboard-dark h5,
+.dashboard-dark h6 {
   color: #ffffff !important;
   font-weight: 800 !important;
   letter-spacing: -0.01em;
 }
 
-.dashboard-dark h1 {
-  font-size: 2rem !important;
-}
+.dashboard-dark h1 { font-size: 2rem !important; }
+.dashboard-dark h2 { font-size: 1.75rem !important; }
+.dashboard-dark h3 { font-size: 1.5rem !important; }
 
-.dashboard-dark h2 {
-  font-size: 1.75rem !important;
-}
-
-.dashboard-dark h3 {
-  font-size: 1.5rem !important;
-}
-
-/* Paragraphs - OSTRÉ */
+/* Paragraphs */
 .dashboard-dark p {
   color: #f1f5f9 !important;
   font-weight: 500 !important;
   font-size: 0.95rem !important;
 }
 
-/* Text v divech/spanech - ČITELNÝ */
+/* Text in divs/spans */
 .dashboard-dark span,
 .dashboard-dark div {
   color: #e2e8f0 !important;
@@ -122,34 +144,34 @@
   font-size: 0.875rem !important;
 }
 
-/* Specific text colors */
+/* Specific text colors - ALL LIGHT */
 .dashboard-dark .text-slate-900,
 .dashboard-dark .text-slate-800,
-.dashboard-dark .text-slate-700 {
-  color: #f1f5f9 !important;
-  font-weight: 600 !important;
-}
-
+.dashboard-dark .text-slate-700,
 .dashboard-dark .text-slate-600,
-.dashboard-dark .text-slate-500 {
-  color: #e2e8f0 !important;
+.dashboard-dark .text-slate-500,
+.dashboard-dark .text-slate-400,
+.dashboard-dark .text-gray-900,
+.dashboard-dark .text-gray-800,
+.dashboard-dark .text-gray-700,
+.dashboard-dark .text-gray-600,
+.dashboard-dark .text-gray-500,
+.dashboard-dark .text-gray-400 {
+  color: #f1f5f9 !important;
   font-weight: 500 !important;
 }
 
-.dashboard-dark .text-slate-400 {
-  color: #cbd5e1 !important;
-  font-weight: 500 !important;
-}
-
-/* Stats Cards - TMAVÉ pozadí, BÍLÝ text */
+/* Stats Cards - DARK background */
 .dashboard-dark .bg-slate-100:not(input),
-.dashboard-dark [class*="bg-slate-100"]:not(input) {
+.dashboard-dark [class*="bg-slate-100"]:not(input),
+.dashboard-dark .bg-gray-100:not(input),
+.dashboard-dark [class*="bg-gray-100"]:not(input) {
   background-color: rgba(15, 23, 42, 0.9) !important;
   color: #ffffff !important;
   border: 1px solid #475569 !important;
 }
 
-/* Stats numbers - EXTRA ČITELNÉ */
+/* Stats numbers */
 .dashboard-dark .text-3xl,
 .dashboard-dark .text-2xl {
   color: #ffffff !important;
@@ -157,7 +179,7 @@
   letter-spacing: -0.02em;
 }
 
-/* Badges - VELMI TLUMENÉ */
+/* Badges - SUBTLE */
 .dashboard-dark .bg-green-100,
 .dashboard-dark [class*="bg-green-100"] {
   background-color: rgba(34, 197, 94, 0.1) !important;
@@ -198,10 +220,10 @@
   font-weight: 600;
 }
 
-/* TAB Headers - TLUMENÉ, ČITELNÉ */
+/* TAB Headers - READABLE */
 .dashboard-dark [role="tablist"] button,
 .dashboard-dark [role="tab"] {
-  color: #94a3b8 !important;
+  color: #cbd5e1 !important;
   font-weight: 600 !important;
   border-bottom: 2px solid transparent !important;
 }
@@ -214,7 +236,7 @@
 
 .dashboard-dark [role="tablist"] button:hover,
 .dashboard-dark [role="tab"]:hover {
-  color: #cbd5e1 !important;
+  color: #e2e8f0 !important;
 }
 
 /* Tables */
@@ -258,7 +280,9 @@
 
 /* Hover states */
 .dashboard-dark .hover\:bg-slate-50:hover,
-.dashboard-dark .hover\:bg-slate-100:hover {
+.dashboard-dark .hover\:bg-slate-100:hover,
+.dashboard-dark .hover\:bg-gray-50:hover,
+.dashboard-dark .hover\:bg-gray-100:hover {
   background-color: rgba(30, 41, 59, 0.5) !important;
 }
 
@@ -316,14 +340,10 @@
 
 /* Border overrides */
 .dashboard-dark .border-slate-200,
-.dashboard-dark .border-slate-300 {
+.dashboard-dark .border-slate-300,
+.dashboard-dark .border-gray-200,
+.dashboard-dark .border-gray-300 {
   border-color: rgba(100, 116, 139, 0.3) !important;
-}
-
-/* Dropdown options */
-.dashboard-dark select option {
-  background-color: #ffffff;
-  color: #000000;
 }
 
 /* Icons */
@@ -338,37 +358,64 @@
   color: #ffffff;
 }
 
-/* Customer cards specific */
-.dashboard-dark .bg-green-100.rounded-lg {
-  background-color: rgba(34, 197, 94, 0.15) !important;
-}
-
-/* Grid items text - OSTRÉ */
+/* Grid items text */
 .dashboard-dark .grid .font-medium {
   font-weight: 700 !important;
 }
 
-/* Section headings in forms - OSTRÉ */
+/* Section headings in forms */
 .dashboard-dark .text-lg {
   color: #ffffff !important;
   font-weight: 800 !important;
   font-size: 1.125rem !important;
 }
 
-/* Small badges/labels - OSTRÉ, BEZ SHADOW */
+/* Small badges/labels */
 .dashboard-dark .text-xs.font-medium {
   font-weight: 700 !important;
 }
 
-/* Font smoothing for better text rendering */
+/* Font smoothing */
 .dashboard-dark {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Ensure crisp text everywhere */
 .dashboard-dark * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* SPECIFIC FIXES for problem areas */
+
+/* Spotřebiče section - FORCE dark */
+.dashboard-dark [class*="Spotřeb"],
+.dashboard-dark [class*="spotřeb"] {
+  background-color: rgba(15, 23, 42, 0.95) !important;
+  color: #ffffff !important;
+}
+
+/* Calendar date input - visible text */
+.dashboard-dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Make sure ALL text in forms is visible */
+.dashboard-dark form *,
+.dashboard-dark fieldset * {
+  color: inherit;
+}
+
+.dashboard-dark form label,
+.dashboard-dark fieldset label {
+  color: #ffffff !important;
+}
+
+/* Override ANY remaining light backgrounds */
+.dashboard-dark [style*="background: white"],
+.dashboard-dark [style*="background: #fff"],
+.dashboard-dark [style*="background-color: white"],
+.dashboard-dark [style*="background-color: #fff"] {
+  background: rgba(15, 23, 42, 0.95) !important;
 }
