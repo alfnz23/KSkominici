@@ -23,7 +23,7 @@ export async function PUT(
     }
 
     // Aktualizovat událost (pouze pokud je uživatel vlastník)
-    const { data: event, error } = await supabase
+    const { data, error } = await supabase
       .from('calendar_events')
       .update({
         date,
@@ -34,17 +34,20 @@ export async function PUT(
       })
       .eq('id', params.id)
       .eq('technician_id', user.id) // Pouze vlastní události
-      .select()
-      .single();
+      .select();
 
     if (error) {
       console.error('Error updating event:', error);
       return NextResponse.json({ error: 'Failed to update event' }, { status: 500 });
     }
 
-    if (!event) {
-      return NextResponse.json({ error: 'Event not found or unauthorized' }, { status: 404 });
+    if (!data || data.length === 0) {
+      return NextResponse.json({ 
+        error: 'Event not found or you do not have permission to edit this event' 
+      }, { status: 404 });
     }
+
+    const event = data[0];
 
     return NextResponse.json({ event }, { status: 200 });
   } catch (error) {
@@ -66,15 +69,22 @@ export async function DELETE(
     }
 
     // Smazat událost (pouze pokud je uživatel vlastník)
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('calendar_events')
       .delete()
       .eq('id', params.id)
-      .eq('technician_id', user.id); // Pouze vlastní události
+      .eq('technician_id', user.id) // Pouze vlastní události
+      .select();
 
     if (error) {
       console.error('Error deleting event:', error);
       return NextResponse.json({ error: 'Failed to delete event' }, { status: 500 });
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json({ 
+        error: 'Event not found or you do not have permission to delete this event' 
+      }, { status: 404 });
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
