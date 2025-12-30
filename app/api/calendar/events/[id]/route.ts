@@ -22,8 +22,8 @@ export async function PUT(
       }, { status: 400 });
     }
 
-    // Aktualizovat událost (pouze pokud je uživatel vlastník)
-    const { data, error } = await supabase
+    // UPDATE - RLS automaticky kontroluje že technician_id = auth.uid()
+    const { error } = await supabase
       .from('calendar_events')
       .update({
         date,
@@ -32,24 +32,16 @@ export async function PUT(
         address,
         notes: notes || null,
       })
-      .eq('id', params.id)
-      .eq('technician_id', user.id) // Pouze vlastní události
-      .select();
+      .eq('id', params.id);
 
     if (error) {
       console.error('Error updating event:', error);
       return NextResponse.json({ error: 'Failed to update event' }, { status: 500 });
     }
 
-    if (!data || data.length === 0) {
-      return NextResponse.json({ 
-        error: 'Event not found or you do not have permission to edit this event' 
-      }, { status: 404 });
-    }
+    // Success - RLS už zkontrolovalo oprávnění
+    return NextResponse.json({ success: true }, { status: 200 });
 
-    const event = data[0];
-
-    return NextResponse.json({ event }, { status: 200 });
   } catch (error) {
     console.error('Error in calendar PUT:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -68,26 +60,27 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Smazat událost (pouze pokud je uživatel vlastník)
-    const { data, error } = await supabase
+    // DELETE - RLS automaticky kontroluje že technician_id = auth.uid()
+    const { error, count } = await supabase
       .from('calendar_events')
-      .delete()
-      .eq('id', params.id)
-      .eq('technician_id', user.id) // Pouze vlastní události
-      .select();
+      .delete({ count: 'exact' })
+      .eq('id', params.id);
 
     if (error) {
       console.error('Error deleting event:', error);
       return NextResponse.json({ error: 'Failed to delete event' }, { status: 500 });
     }
 
-    if (!data || data.length === 0) {
+    // Kontrola že něco bylo smazáno
+    if (count === 0) {
       return NextResponse.json({ 
         error: 'Event not found or you do not have permission to delete this event' 
       }, { status: 404 });
     }
 
+    // Success
     return NextResponse.json({ success: true }, { status: 200 });
+
   } catch (error) {
     console.error('Error in calendar DELETE:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
