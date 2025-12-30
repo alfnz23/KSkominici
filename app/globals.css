@@ -463,3 +463,51 @@
 /* ═══════════════════════════════════════════════════════════
    KONEC
    ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   OPRAVA SPRÁVY ZÁKAZNÍKŮ - SPRÁVNÉ SELEKTORY
+   Přidej na KONEC app/globals.css
+   ═══════════════════════════════════════════════════════════ */
+
+/* 1. TABY (Zprávy/Pasporty) - targetuj přímo inline třídy */
+.dashboard-dark button.bg-orange-50,
+.dashboard-dark button[class*="bg-orange-50"],
+.dashboard-dark button.bg-blue-50,
+.dashboard-dark button[class*="bg-blue-50"] {
+  background-color: rgba(30, 64, 175, 0.3) !important; /* Tmavě modrá */
+  color: #ffffff !important;
+}
+
+/* Text v button badges (čísla) */
+.dashboard-dark button .bg-slate-100 {
+  background-color: rgba(71, 85, 105, 0.3) !important;
+  color: #e2e8f0 !important;
+}
+
+/* 2. STATISTIKA "Brzy vyprší" - správná třída je bg-orange-100! */
+.dashboard-dark .bg-orange-100,
+.dashboard-dark [class*="bg-orange-100"] {
+  background-color: rgba(154, 52, 18, 0.3) !important; /* Tmavě oranžová */
+  color: #fb923c !important;
+  border: 1px solid rgba(154, 52, 18, 0.4) !important;
+}
+
+/* Ikona v "Brzy vyprší" */
+.dashboard-dark .bg-orange-100 svg,
+.dashboard-dark [class*="bg-orange-100"] svg {
+  color: #fb923c !important;
+  opacity: 0.9;
+}
+
+/* Text oranžový */
+.dashboard-dark .text-orange-600 {
+  color: #fb923c !important;
+}
+
+/* 3. OBECNĚ: všechny button taby */
+.dashboard-dark button.border-b-2 {
+  border-color: #64748b !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KONEC
+   ═══════════════════════════════════════════════════════════ */
