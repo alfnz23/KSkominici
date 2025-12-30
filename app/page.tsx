@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import ContactForm from '@/app/components/ContactForm'
+
 
 export default function HomePage() {
   return (
@@ -362,50 +364,7 @@ export default function HomePage() {
             
             <div className="bg-gray-800 p-8 rounded-lg border border-gray-700">
               <h3 className="text-xl font-bold mb-6">Pošlete nám zprávu</h3>
-              <form className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">Jméno</label>
-                  <input
-                    type="text"
-                    id="name"
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                    placeholder="Vaše jméno"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                    placeholder="vas@email.cz"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium mb-2">Telefon</label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                    placeholder="+420 XXX XXX XXX"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium mb-2">Zpráva</label>
-                  <textarea
-                    id="message"
-                    rows={4}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                    placeholder="Popište váš požadavek..."
-                  ></textarea>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-white text-black py-3 px-6 rounded-md font-semibold hover:bg-gray-100 transition-colors duration-200"
-                >
-                  Odeslat zprávu
-                </button>
-              </form>
+              <ContactForm />
             </div>
           </div>
         </div>
