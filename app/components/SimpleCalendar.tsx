@@ -357,7 +357,7 @@ export default function SimpleCalendar() {
                   type="text"
                   value={newEvent.title}
                   onChange={e => setNewEvent({ ...newEvent, title: e.target.value })}
-                  className="w-full px-4 py-2 bg-white text-black rounded-lg border-2 border-slate-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none"
+                  className="w-full px-4 py-2 bg-white text-gray-600 rounded-lg border-2 border-slate-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none"
                   placeholder="např. Kontrola komína"
                 />
               </div>
@@ -390,7 +390,7 @@ export default function SimpleCalendar() {
                   type="text"
                   value={newEvent.address}
                   onChange={e => setNewEvent({ ...newEvent, address: e.target.value })}
-                  className="w-full px-4 py-2 bg-white text-black rounded-lg border-2 border-slate-300 focus:border-orange-500 outline-none"
+                  className="w-full px-4 py-2 bg-white text-gray-600 rounded-lg border-2 border-slate-300 focus:border-orange-500 outline-none"
                   placeholder="Dlouhá 123, Praha 1"
                 />
               </div>
