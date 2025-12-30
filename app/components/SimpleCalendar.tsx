@@ -45,6 +45,19 @@ export default function SimpleCalendar() {
     }
   };
 
+  const handleOpenForm = () => {
+    // Nastaví datum na vybraný den
+    const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+    setNewEvent({
+      date: dateStr,
+      time: '10:00',
+      title: '',
+      address: '',
+      notes: '',
+    });
+    setShowAddForm(true);
+  };
+
   const handleAddEvent = async () => {
     if (!newEvent.title || !newEvent.address) {
       alert('Vyplňte název a adresu');
@@ -120,7 +133,7 @@ export default function SimpleCalendar() {
             </div>
           </div>
           <button
-            onClick={() => setShowAddForm(true)}
+            onClick={handleOpenForm}
             className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:shadow-xl hover:shadow-orange-500/25 transition-all duration-200 flex items-center gap-2 font-semibold"
           >
             <Plus className="w-5 h-5" />
