@@ -419,3 +419,53 @@
 .dashboard-dark [style*="background-color: #fff"] {
   background: rgba(15, 23, 42, 0.95) !important;
 }
+/* ═══════════════════════════════════════════════════════════
+   CHIRURGICKÉ OPRAVY - PŘIDEJ NA KONEC globals.css
+   ═══════════════════════════════════════════════════════════ */
+
+/* 1. TABY (Zprávy/Pasporty) - méně výrazné pozadí */
+.dashboard-dark [role="tablist"] button[aria-selected="true"],
+.dashboard-dark [role="tab"][aria-selected="true"] {
+  color: #ffffff !important;
+  background-color: rgba(59, 130, 246, 0.15) !important; /* Velmi tlumené modré pozadí */
+  border-bottom: 2px solid #64748b !important;
+}
+
+/* 2. STATISTIKA "Brzy vyprší" - tlumenější béžová/žlutá */
+.dashboard-dark .bg-yellow-100,
+.dashboard-dark [class*="bg-yellow-100"] {
+  background-color: rgba(234, 179, 8, 0.08) !important; /* Ještě tlumenější */
+  color: #fde047 !important;
+  border: 1px solid rgba(234, 179, 8, 0.25) !important; /* Ještě světlejší border */
+  font-weight: 600;
+}
+
+/* Ikona v "Brzy vyprší" kartě */
+.dashboard-dark .bg-yellow-100 svg,
+.dashboard-dark [class*="bg-yellow-100"] svg {
+  opacity: 0.7; /* Tlumenější ikona */
+}
+
+/* 3. DATE INPUT v kalendáři - černý text viditelný na bílém */
+.dashboard-dark input[type="date"],
+.dashboard-dark input[type="time"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  color-scheme: light;
+}
+
+/* Ikona kalendáře invertovaná (viditelná) */
+.dashboard-dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dashboard-dark input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0); /* NE invertovat - nechat tmavou na bílém */
+}
+
+/* 4. BONUS: Ujisti se že všechny statistiky mají dobrou čitelnost */
+.dashboard-dark .bg-slate-100:not(input) svg,
+.dashboard-dark .bg-gray-100:not(input) svg {
+  opacity: 0.8; /* Mírně tlumené ikony ve statistikách */
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KONEC CHIRURGICKÝCH OPRAV
+   ═══════════════════════════════════════════════════════════ */
