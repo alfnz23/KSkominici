@@ -31,12 +31,18 @@ export default async function Dashboard() {
   const currentMonth = new Date().getMonth() + 1;
 
   // Statistika - zprávy tento měsíc
+  // Fix: Handle month 13 (December + 1)
+  const startDate = new Date(currentYear, currentMonth - 1, 1);
+  const endDate = new Date(currentYear, currentMonth, 1);
+  const startDateStr = startDate.toISOString().split('T')[0];
+  const endDateStr = endDate.toISOString().split('T')[0];
+
   const { count: reportsThisMonth } = await supabase
     .from('jobs')
     .select('*', { count: 'exact', head: true })
     .eq('company_id', profile.company_id)
-    .gte('created_at', `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`)
-    .lt('created_at', `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`);
+    .gte('created_at', startDateStr)
+    .lt('created_at', endDateStr);
 
   // Statistika - brzy vypršení (příští 14 dní)
   const today = new Date();
