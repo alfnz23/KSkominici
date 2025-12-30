@@ -202,7 +202,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 30;
+  worksheet.getRow(row).height = 20;
   row++;
   row++;
 
@@ -228,7 +228,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 30;
+  worksheet.getRow(row).height = 20;
   row++;
   row++;
 
@@ -258,6 +258,22 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     row++;
   }
 
+  // Klauzule
+  worksheet.mergeCells(`A${row}:B${row}`);
+  const disclaimerCell = worksheet.getCell(`A${row}`);
+  disclaimerCell.value = 'Kontrola spal. cesty byla provedena výše uvedeného data vizuálně a s maximální možnou pečlivostí, ale bez demontáže stavebních konstrukcí a prvků, které komínové těleso/spalinovou cestu zakrývají. Z tohoto důvodu nejsem schopen a odmítám ručit za škody, provedení, závady, vzdálenosti hořlavých či tavných materiálů a důsledky z toho vyplývající v úsecích komínu/spalinové cesty, které nelze vizuálně zkontrolovat bez nutnosti odkrývání nebo demontáže stavebních konstrukcí, tapet, podlahových krytin, deskových podhledů a příček, obložení, elektroinstalace apod.';
+  disclaimerCell.font = { size: 8 };
+  disclaimerCell.alignment = { wrapText: true, vertical: 'top' };
+  disclaimerCell.border = {
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    right: { style: 'thin' },
+    bottom: { style: 'thin' },
+  };
+  worksheet.getRow(row).height = 50;
+  row++;
+  row++;
+
   // Závěr
   worksheet.mergeCells(`A${row}:B${row}`);
   const conclusionLabel = worksheet.getCell(`A${row}`);
@@ -280,7 +296,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 30;
+  worksheet.getRow(row).height = 25;
   row++;
   row++;
 
