@@ -33,26 +33,30 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Protokol');
 
-  // Nastavení pro tisk na A4
+  // Nastavení pro tisk na A4 - BEZ fitToPage (způsobuje "zdrclení")
   worksheet.pageSetup = {
     paperSize: 9, // A4
     orientation: 'portrait',
-    fitToPage: true,
-    fitToWidth: 1,
-    fitToHeight: 0, // Automatická výška
+    fitToPage: false, // VYPNUTO - jinak se to scvrkne
+    scale: 100, // 100% scale
     margins: {
-      left: 0.5,
-      right: 0.5,
-      top: 0.5,
-      bottom: 0.5,
+      left: 0.7,
+      right: 0.7,
+      top: 0.75,
+      bottom: 0.75,
       header: 0.3,
       footer: 0.3,
     },
+    printTitlesRow: '1:1', // Opakovat hlavičku
+    showGridLines: false, // Skrýt mřížku
   };
 
+  // Nastavení pro zobrazení borderů při tisku
+  worksheet.properties.defaultRowHeight = 15;
+
   worksheet.columns = [
-    { width: 30 },
-    { width: 50 },
+    { width: 28 },
+    { width: 48 },
   ];
 
   let row = 1;
@@ -113,14 +117,14 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   row++; // Prázdný řádek
 
   // Údaje o zákazníkovi - tabulka
-  const addTableRow = (label: string, value: string, hasBottomBorder = true) => {
+  const addTableRow = (label: string, value: string, hasBottomBorder = true, hasTopBorder = false) => {
     const labelCell = worksheet.getCell(`A${row}`);
     labelCell.value = label;
     labelCell.font = { bold: true };
     labelCell.border = {
       left: { style: 'thin' },
       right: { style: 'thin' },
-      top: row === 9 ? { style: 'thin' } : undefined,
+      top: hasTopBorder ? { style: 'thin' } : undefined,
       bottom: hasBottomBorder ? { style: 'thin' } : undefined,
     };
 
@@ -129,13 +133,13 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     valueCell.border = {
       left: { style: 'thin' },
       right: { style: 'thin' },
-      top: row === 9 ? { style: 'thin' } : undefined,
+      top: hasTopBorder ? { style: 'thin' } : undefined,
       bottom: hasBottomBorder ? { style: 'thin' } : undefined,
     };
     row++;
   };
 
-  addTableRow('Jméno zákazníka:', data.customerName);
+  addTableRow('Jméno zákazníka:', data.customerName, true, true);
   addTableRow('Název firmy / Jméno fyzické osoby:', data.companyOrPersonName);
   addTableRow(
     'Kontakt zákazníka (email):',
@@ -171,7 +175,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     row++;
 
     const appliance = validAppliances[0];
-    addTableRow('Druh:', appliance.type || '');
+    addTableRow('Druh:', appliance.type || '', true, true);
     addTableRow('Typ:', appliance.manufacturer || '');
     addTableRow('Výkon:', appliance.power || '');
     addTableRow('Umístění:', appliance.location || '', false);
@@ -188,18 +192,17 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   row++;
 
   let chimneyDesc = data.chimneyType;
-  addTableRow('Komín:', chimneyDesc);
+  addTableRow('Komín:', chimneyDesc, true, true);
 
   if (data.chimneyDescription) {
-    addTableRow('Popis:', data.chimneyDescription);
+    addTableRow('Popis:', data.chimneyDescription, !data.flue);
   }
 
   if (data.flue) {
-    let flueDesc = data.flueType || '';
+    addTableRow('Kouřovod:', data.flueType || '', data.flue ? true : false);
     if (data.flue) {
-      flueDesc += (flueDesc ? '\n' : '') + data.flue;
+      addTableRow('Popis:', data.flue, false);
     }
-    addTableRow('Kouřovod:', flueDesc, false);
   }
 
   // Zjištěné nedostatky odstraněné
