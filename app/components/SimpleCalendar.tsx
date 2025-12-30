@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, Plus, X, Users, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, X, Users, Clock, Edit, Trash2 } from 'lucide-react';
 
 interface CalendarEvent {
   id: string;
@@ -19,6 +19,7 @@ export default function SimpleCalendar() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [newEvent, setNewEvent] = useState({
     date: new Date().toISOString().split('T')[0],
     time: '10:00',
@@ -55,7 +56,39 @@ export default function SimpleCalendar() {
       address: '',
       notes: '',
     });
+    setEditingEvent(null);
     setShowAddForm(true);
+  };
+
+  const handleEditEvent = (event: CalendarEvent) => {
+    setNewEvent({
+      date: event.date,
+      time: event.time,
+      title: event.title,
+      address: event.address,
+      notes: event.notes || '',
+    });
+    setEditingEvent(event);
+    setShowAddForm(true);
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!confirm('Opravdu smazat tuto událost?')) return;
+
+    try {
+      const res = await fetch(`/api/calendar/events/${eventId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        await loadEvents();
+      } else {
+        alert('Chyba při mazání události');
+      }
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      alert('Chyba při mazání události');
+    }
   };
 
   const handleAddEvent = async () => {
@@ -65,25 +98,53 @@ export default function SimpleCalendar() {
     }
 
     try {
-      const res = await fetch('/api/calendar/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEvent),
-      });
-
-      if (res.ok) {
-        await loadEvents();
-        setShowAddForm(false);
-        setNewEvent({
-          date: new Date().toISOString().split('T')[0],
-          time: '10:00',
-          title: '',
-          address: '',
-          notes: '',
+      if (editingEvent) {
+        // UPDATE
+        const res = await fetch(`/api/calendar/events/${editingEvent.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newEvent),
         });
+
+        if (res.ok) {
+          await loadEvents();
+          setShowAddForm(false);
+          setEditingEvent(null);
+          setNewEvent({
+            date: new Date().toISOString().split('T')[0],
+            time: '10:00',
+            title: '',
+            address: '',
+            notes: '',
+          });
+        } else {
+          alert('Chyba při úpravě události');
+        }
+      } else {
+        // CREATE
+        const res = await fetch('/api/calendar/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newEvent),
+        });
+
+        if (res.ok) {
+          await loadEvents();
+          setShowAddForm(false);
+          setNewEvent({
+            date: new Date().toISOString().split('T')[0],
+            time: '10:00',
+            title: '',
+            address: '',
+            notes: '',
+          });
+        } else {
+          alert('Chyba při vytváření události');
+        }
       }
     } catch (error) {
-      console.error('Error adding event:', error);
+      console.error('Error saving event:', error);
+      alert('Chyba při ukládání události');
     }
   };
 
@@ -232,7 +293,7 @@ export default function SimpleCalendar() {
                   className="p-4 bg-slate-800/50 rounded-lg border border-slate-700 hover:bg-slate-800/70 transition-colors"
                 >
                   <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-orange-400 mt-0.5" />
+                    <Clock className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-white font-semibold">{event.time}</span>
@@ -245,6 +306,22 @@ export default function SimpleCalendar() {
                       {event.notes && (
                         <p className="text-slate-400 text-sm mt-2">{event.notes}</p>
                       )}
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleEditEvent(event)}
+                        className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
+                        title="Upravit"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEvent(event.id)}
+                        className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                        title="Smazat"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -259,9 +336,14 @@ export default function SimpleCalendar() {
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-slate-900/95 to-black/95 backdrop-blur-xl rounded-2xl border border-slate-800/50 p-6 max-w-md w-full shadow-2xl">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-white">Přidat událost</h3>
+              <h3 className="text-2xl font-bold text-white">
+                {editingEvent ? 'Upravit událost' : 'Přidat událost'}
+              </h3>
               <button
-                onClick={() => setShowAddForm(false)}
+                onClick={() => {
+                  setShowAddForm(false);
+                  setEditingEvent(null);
+                }}
                 className="text-slate-400 hover:text-white transition-colors"
               >
                 <X className="w-6 h-6" />
