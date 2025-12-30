@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   sectionContent: {
     border: '1 solid black',
     padding: 5,
-    minHeight: 30,
+    minHeight: 20,
   },
   footer: {
     marginTop: 20,
@@ -121,6 +121,14 @@ const styles = StyleSheet.create({
   },
   signature: {
     fontSize: 9,
+  },
+  disclaimer: {
+    fontSize: 7,
+    marginTop: 8,
+    marginBottom: 8,
+    padding: 5,
+    border: '1 solid black',
+    lineHeight: 1.3,
   },
 });
 
@@ -316,6 +324,13 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
             </View>
           </View>
         )}
+
+        {/* Klauzule */}
+        <View style={styles.disclaimer}>
+          <Text>
+            Kontrola spal. cesty byla provedena výše uvedeného data vizuálně a s maximální možnou pečlivostí, ale bez demontáže stavebních konstrukcí a prvků, které komínové těleso/spalinovou cestu zakrývají. Z tohoto důvodu nejsem schopen a odmítám ručit za škody, provedení, závady, vzdálenosti hořlavých či tavných materiálů a důsledky z toho vyplývající v úsecích komínu/spalinové cesty, které nelze vizuálně zkontrolovat bez nutnosti odkrývání nebo demontáže stavebních konstrukcí, tapet, podlahových krytin, deskových podhledů a příček, obložení, elektroinstalace apod.
+          </Text>
+        </View>
 
         {/* Závěr */}
         <View style={styles.section}>
