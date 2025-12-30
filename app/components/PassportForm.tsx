@@ -868,6 +868,7 @@ export default function PassportForm() {
                             <option value="technická místnost">technická místnost</option>
                             <option value="koupelna">koupelna</option>
                             <option value="WC">WC</option>
+                            <option value="chodba">chodba</option>
                             <option value="pokoj">pokoj</option>
                           </select>
                         </div>
