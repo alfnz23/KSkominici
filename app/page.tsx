@@ -51,7 +51,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Services Section */}
+      {/* Services Section - MODERNIZED LAYOUT */}
       <section id="sluzby" className="py-20 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -59,81 +59,164 @@ export default function HomePage() {
             <p className="text-xl text-gray-300">Kompletní kominické služby pro vaši bezpečnost</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-            {/* Montáže a vložkování */}
-            <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200">
-              <h3 className="text-xl font-bold mb-4 text-white">Montáže a vložkování</h3>
-              <p className="text-gray-300 mb-4">Třívrstvé komíny - profesionální montáž a vložkování komínových systémů podle nejnovějších standardů a norem.</p>
-              <ul className="text-gray-400 space-y-2">
-                <li>• Nerezové vložky</li>
-                <li>• Plastové vložky</li>
-                <li>• Třívrstvé komíny pro kondenzační kotle i tuhá paliva</li>
-              </ul>
+          {/* Service Cards - Better Layout */}
+          <div className="space-y-8">
+            {/* Row 1: Montáže + Pravidelné kontroly */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Montáže a vložkování */}
+              <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200 h-full">
+                <h3 className="text-2xl font-bold mb-4 text-white">Montáže a vložkování</h3>
+                <p className="text-gray-300 mb-6">Třívrstvé komíny - profesionální montáž a vložkování komínových systémů podle nejnovějších standardů a norem.</p>
+                <ul className="text-gray-400 space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-white mr-2">•</span>
+                    <span>Nerezové vložky</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white mr-2">•</span>
+                    <span>Plastové vložky</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white mr-2">•</span>
+                    <span>Třívrstvé komíny pro kondenzační kotle i tuhá paliva</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Pravidelné kontroly */}
+              <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200 h-full">
+                <h3 className="text-2xl font-bold mb-4 text-white">Pravidelné kontroly</h3>
+                <p className="text-gray-300 mb-6">Pravidelné kontroly dle nařízení vlády č. 91/2010 Sb. - zajišťujeme bezpečnost vašich spalinových cest.</p>
+                <ul className="text-gray-400 space-y-2">
+                  <li className="flex items-start">
+                    <span className="text-white mr-2">•</span>
+                    <span>Roční kontroly</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white mr-2">•</span>
+                    <span>Čištění komínů</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white mr-2">•</span>
+                    <span>Automatické připomínání vypršení platnosti zpráv o provedení kontroly - nemusíte na nic myslet, náš systém si to hlídá za vás</span>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-            {/* Práce ve výškách */}
-            <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200">
-              <h3 className="text-xl font-bold mb-4 text-white">Práce ve výškách a montáž komínových systémů</h3>
-              <p className="text-gray-300 mb-4">Provádíme odborné práce ve výškách pomocí lanové techniky se specializací na montáž, demontáž a rekonstrukce komínových systémů.</p>
+            {/* Row 2: Práce ve výškách - FULL WIDTH */}
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200">
+              <h3 className="text-2xl font-bold mb-4 text-white">Práce ve výškách a montáž komínových systémů</h3>
+              <p className="text-gray-300 mb-8">Provádíme odborné práce ve výškách pomocí lanové techniky se specializací na montáž, demontáž a rekonstrukce komínových systémů.</p>
               
-              <div className="space-y-4 mt-6">
-                <div>
-                  <h4 className="font-semibold text-white mb-2">Montáž komínů pro velké zdroje</h4>
-                  <p className="text-gray-400 text-sm mb-2">Realizujeme komínové systémy pro kotelny a technologické celky:</p>
-                  <ul className="text-gray-400 text-sm space-y-1 ml-4">
-                    <li>• Plynové a pevnopalivové kotelny</li>
-                    <li>• Velké tepelné zdroje</li>
-                    <li>• Průmyslové provozy</li>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Montáž komínů pro velké zdroje */}
+                <div className="bg-black/30 p-6 rounded-lg">
+                  <h4 className="font-bold text-white mb-3 text-lg">Montáž komínů pro velké zdroje</h4>
+                  <p className="text-gray-400 text-sm mb-3">Realizujeme komínové systémy pro kotelny a technologické celky:</p>
+                  <ul className="text-gray-400 text-sm space-y-1">
+                    <li className="flex items-start">
+                      <span className="text-white mr-2 text-xs">•</span>
+                      <span>Plynové a pevnopalivové kotelny</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-white mr-2 text-xs">•</span>
+                      <span>Velké tepelné zdroje</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-white mr-2 text-xs">•</span>
+                      <span>Průmyslové provozy</span>
+                    </li>
                   </ul>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold text-white mb-2">Komínové systémy ve světlících</h4>
-                  <p className="text-gray-400 text-sm mb-2">Instalace komínů ve vnitřních světlících:</p>
-                  <ul className="text-gray-400 text-sm space-y-1 ml-4">
-                    <li>• Nové komínové vložky a systémy</li>
-                    <li>• Víceprůduchové i samostatné komíny</li>
-                    <li>• Práce bez zásahu do provozu objektu</li>
+                {/* Komínové systémy ve světlících */}
+                <div className="bg-black/30 p-6 rounded-lg">
+                  <h4 className="font-bold text-white mb-3 text-lg">Komínové systémy ve světlících</h4>
+                  <p className="text-gray-400 text-sm mb-3">Instalace komínů ve vnitřních světlících:</p>
+                  <ul className="text-gray-400 text-sm space-y-1">
+                    <li className="flex items-start">
+                      <span className="text-white mr-2 text-xs">•</span>
+                      <span>Nové komínové vložky a systémy</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-white mr-2 text-xs">•</span>
+                      <span>Víceprůduchové i samostatné komíny</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-white mr-2 text-xs">•</span>
+                      <span>Práce bez zásahu do provozu objektu</span>
+                    </li>
                   </ul>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold text-white mb-2">Demontáž a výměna starých komínů</h4>
-                  <p className="text-gray-400 text-sm mb-2">Zajišťujeme náhradu moderním certifikovaným systémem dle aktuálních norem.</p>
+                {/* Demontáž a výměna */}
+                <div className="bg-black/30 p-6 rounded-lg">
+                  <h4 className="font-bold text-white mb-3 text-lg">Demontáž a výměna starých komínů</h4>
+                  <p className="text-gray-400 text-sm mb-3">Provádíme demontáž nevyhovujících komínů:</p>
+                  <ul className="text-gray-400 text-sm space-y-1">
+                    <li className="flex items-start">
+                      <span className="text-white mr-2 text-xs">•</span>
+                      <span>Ve světlících</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-white mr-2 text-xs">•</span>
+                      <span>Na fasádách domů</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-white mr-2 text-xs">•</span>
+                      <span>V těžko přístupných místech</span>
+                    </li>
+                  </ul>
+                  <p className="text-gray-400 text-sm mt-3">Následně zajišťujeme náhradu moderním certifikovaným systémem.</p>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold text-white mb-2">Výhody lanové techniky</h4>
-                  <ul className="text-gray-400 text-sm space-y-1 ml-4">
-                    <li>• Minimální zásah do objektu</li>
-                    <li>• Bez omezení provozu budovy</li>
-                    <li>• Kratší doba realizace</li>
-                    <li>• Nižší celkové náklady</li>
+                {/* Výhody lanové techniky */}
+                <div className="bg-black/30 p-6 rounded-lg">
+                  <h4 className="font-bold text-white mb-3 text-lg">Výhody lanové techniky</h4>
+                  <ul className="text-gray-400 text-sm space-y-2 mt-4">
+                    <li className="flex items-start">
+                      <span className="text-green-400 mr-2">✓</span>
+                      <span>Minimální zásah do objektu</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-400 mr-2">✓</span>
+                      <span>Bez omezení provozu budovy</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-400 mr-2">✓</span>
+                      <span>Kratší doba realizace</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-400 mr-2">✓</span>
+                      <span>Nižší celkové náklady</span>
+                    </li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            {/* Pravidelné kontroly */}
+            {/* Row 3: Revizní zprávy - FULL WIDTH */}
             <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200">
-              <h3 className="text-xl font-bold mb-4 text-white">Pravidelné kontroly</h3>
-              <p className="text-gray-300 mb-4">Pravidelné kontroly dle nařízení vlády č. 91/2010 Sb. - zajišťujeme bezpečnost vašich spalinových cest.</p>
-              <ul className="text-gray-400 space-y-2">
-                <li>• Roční kontroly</li>
-                <li>• Čištění komínů</li>
-                <li>• Automatické připomínání vypršení platnosti zpráv o provedení kontroly - nemusíte na nic myslet, náš systém si to hlídá za vás</li>
-              </ul>
-            </div>
-
-            {/* Revizní zprávy */}
-            <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors duration-200">
-              <h3 className="text-xl font-bold mb-4 text-white">Revizní zprávy</h3>
-              <p className="text-gray-300 mb-4">Kompletní dokumentace a revizní zprávy - všechna potřebná dokumentace pro pojišťovny a úřady.</p>
-              <ul className="text-gray-400 space-y-2">
-                <li>• Protokoly o kontrole</li>
-                <li>• Výchozí revizní zprávy</li>
-                <li>• Certifikáty</li>
-                <li>• Výpočty spalinových cest</li>
+              <h3 className="text-2xl font-bold mb-4 text-white">Revizní zprávy</h3>
+              <p className="text-gray-300 mb-6">Kompletní dokumentace a revizní zprávy - všechna potřebná dokumentace pro pojišťovny a úřady.</p>
+              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-gray-400">
+                <li className="flex items-start">
+                  <span className="text-white mr-2">•</span>
+                  <span>Protokoly o kontrole</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-white mr-2">•</span>
+                  <span>Výchozí revizní zprávy</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-white mr-2">•</span>
+                  <span>Certifikáty</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-white mr-2">•</span>
+                  <span>Výpočty spalinových cest</span>
+                </li>
               </ul>
             </div>
           </div>
@@ -177,15 +260,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                  Certifikace pro práci s plynovými zařízeními
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
                   Pojištění profesní odpovědnosti
-                </li>
-                <li className="flex items-center">
-                  <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
-                  IČO: 87484510
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-white rounded-full mr-3"></span>
@@ -230,42 +305,52 @@ export default function HomePage() {
               <div>
                 <h3 className="text-xl font-bold mb-4">Naši specialisté</h3>
                 <div className="space-y-6">
+                  {/* Tomáš Kračmer */}
                   <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-                    <h4 className="font-bold text-lg mb-2">Tomáš Kračmer</h4>
-                    <div className="space-y-2 text-gray-300">
+                    <h4 className="font-bold text-lg mb-3 text-white">Tomáš Kračmer</h4>
+                    <div className="space-y-2 text-gray-300 text-sm">
                       <p className="flex items-center">
-                        <span className="w-4 h-4 mr-2">📞</span>
+                        <span className="w-5 h-5 mr-2">📞</span>
                         <a href="tel:+420721977044" className="hover:text-white transition-colors">+420 721 977 044</a>
                       </p>
                       <p className="flex items-center">
-                        <span className="w-4 h-4 mr-2">✉️</span>
+                        <span className="w-5 h-5 mr-2">✉️</span>
                         <a href="mailto:kracmer.tom@gmail.com" className="hover:text-white transition-colors">kracmer.tom@gmail.com</a>
                       </p>
-                      <p className="flex items-start mt-3">
-                        <span className="w-4 h-4 mr-2 mt-1">📍</span>
-                        <span className="text-sm">
-                          <span className="font-semibold text-white">Oblast působnosti:</span><br />
+                      <p className="flex items-center">
+                        <span className="w-5 h-5 mr-2">🏢</span>
+                        <span>IČO: 87484510</span>
+                      </p>
+                      <p className="flex items-start mt-3 pt-3 border-t border-gray-700">
+                        <span className="w-5 h-5 mr-2 mt-0.5">📍</span>
+                        <span>
+                          <span className="font-semibold text-white block mb-1">Oblast působnosti:</span>
                           Praha / Praha východ / okres Benešov a okolí
                         </span>
                       </p>
                     </div>
                   </div>
                   
+                  {/* Jakub Štěpánek */}
                   <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-                    <h4 className="font-bold text-lg mb-2">Jakub Štěpánek</h4>
-                    <div className="space-y-2 text-gray-300">
+                    <h4 className="font-bold text-lg mb-3 text-white">Jakub Štěpánek</h4>
+                    <div className="space-y-2 text-gray-300 text-sm">
                       <p className="flex items-center">
-                        <span className="w-4 h-4 mr-2">📞</span>
+                        <span className="w-5 h-5 mr-2">📞</span>
                         <a href="tel:+420776724300" className="hover:text-white transition-colors">+420 776 724 300</a>
                       </p>
                       <p className="flex items-center">
-                        <span className="w-4 h-4 mr-2">✉️</span>
+                        <span className="w-5 h-5 mr-2">✉️</span>
                         <a href="mailto:kominici.stepanek@email.cz" className="hover:text-white transition-colors">kominici.stepanek@email.cz</a>
                       </p>
-                      <p className="flex items-start mt-3">
-                        <span className="w-4 h-4 mr-2 mt-1">📍</span>
-                        <span className="text-sm">
-                          <span className="font-semibold text-white">Oblast působnosti:</span><br />
+                      <p className="flex items-center">
+                        <span className="w-5 h-5 mr-2">🏢</span>
+                        <span>IČO: 88054667</span>
+                      </p>
+                      <p className="flex items-start mt-3 pt-3 border-t border-gray-700">
+                        <span className="w-5 h-5 mr-2 mt-0.5">📍</span>
+                        <span>
+                          <span className="font-semibold text-white block mb-1">Oblast působnosti:</span>
                           Praha / Praha východ / okres Mladá Boleslav a okolí
                         </span>
                       </p>
@@ -339,7 +424,6 @@ export default function HomePage() {
             </div>
             <div className="border-t border-gray-800 pt-6">
               <p className="text-gray-500">© 2024 KSKominíci. Všechna práva vyhrazena.</p>
-              <p className="text-gray-500 mt-2">IČO: 87484510</p>
             </div>
           </div>
         </div>
