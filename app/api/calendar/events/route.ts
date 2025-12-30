@@ -28,6 +28,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Year and month required' }, { status: 400 });
     }
 
+    // Vypočítat začátek a konec měsíce
+    const startDate = new Date(Number(year), Number(month) - 1, 1);
+    const endDate = new Date(Number(year), Number(month), 1);
+    
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
     // Načíst události pro daný měsíc a firmu
     const { data: events, error } = await supabase
       .from('calendar_events')
@@ -42,8 +49,8 @@ export async function GET(request: NextRequest) {
         profiles:technician_id(full_name)
       `)
       .eq('company_id', profile.company_id)
-      .gte('date', `${year}-${month.padStart(2, '0')}-01`)
-      .lt('date', `${year}-${String(Number(month) + 1).padStart(2, '0')}-01`)
+      .gte('date', startDateStr)
+      .lt('date', endDateStr)
       .order('date', { ascending: true })
       .order('time', { ascending: true });
 
