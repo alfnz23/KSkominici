@@ -69,19 +69,27 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
 
   // Informace o firmě
   worksheet.getCell(`A${row}`).value = 'KS Kominíci.cz';
-  worksheet.getCell(`A${row}`).font = { bold: true, size: 11 };
+  worksheet.getCell(`A${row}`).font = { bold: true, size: 13 };
+  worksheet.getCell(`A${row}`).alignment = { horizontal: 'center' };
+  worksheet.mergeCells(`A${row}:B${row}`);
   row++;
 
   worksheet.getCell(`A${row}`).value = data.technicianName;
+  worksheet.getCell(`A${row}`).alignment = { horizontal: 'center' };
+  worksheet.mergeCells(`A${row}:B${row}`);
   row++;
 
   if (data.technicianAddress) {
     worksheet.getCell(`A${row}`).value = data.technicianAddress;
+    worksheet.getCell(`A${row}`).alignment = { horizontal: 'center' };
+    worksheet.mergeCells(`A${row}:B${row}`);
     row++;
   }
 
   if (data.technicianIco) {
     worksheet.getCell(`A${row}`).value = `IČO odborně způsobilé osoby: ${data.technicianIco}`;
+    worksheet.getCell(`A${row}`).alignment = { horizontal: 'center' };
+    worksheet.mergeCells(`A${row}:B${row}`);
     row++;
   }
 
@@ -150,12 +158,10 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     addTableRow('Typ:', appliance.manufacturer || '');
     addTableRow('Výkon:', appliance.power || '');
     addTableRow('Umístění:', appliance.location || '', false);
-
-    row++;
   }
 
-  // SPECIFICKÉ SPALINOVÉ CESTY
-  worksheet.getCell(`A${row}`).value = 'SPECIFICKÉ SPALINOVÉ CESTY:';
+  // SPECIFIKACE SPALINOVÉ CESTY
+  worksheet.getCell(`A${row}`).value = 'SPECIFIKACE SPALINOVÉ CESTY:';
   worksheet.getCell(`A${row}`).font = { bold: true };
   worksheet.getCell(`A${row}`).fill = {
     type: 'pattern',
@@ -177,8 +183,6 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     }
     addTableRow('Kouřovod:', flueDesc, false);
   }
-
-  row++;
 
   // Zjištěné nedostatky odstraněné
   worksheet.mergeCells(`A${row}:B${row}`);
@@ -202,8 +206,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 20;
-  row++;
+  worksheet.getRow(row).height = 15;
   row++;
 
   // Zjištěné nedostatky neodstraněné
@@ -228,8 +231,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 20;
-  row++;
+  worksheet.getRow(row).height = 15;
   row++;
 
   // Termín odstranění
@@ -255,7 +257,6 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       bottom: { style: 'thin' },
     };
     row++;
-    row++;
   }
 
   // Klauzule
@@ -270,8 +271,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 50;
-  row++;
+  worksheet.getRow(row).height = 45;
   row++;
 
   // Závěr
@@ -296,8 +296,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 25;
-  row++;
+  worksheet.getRow(row).height = 20;
   row++;
 
   // Podpis
