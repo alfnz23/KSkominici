@@ -278,9 +278,19 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
               </View>
               <View style={[styles.tableCell, { width: '80%', borderRight: 0 }]}>
                 <Text>{data.chimneyType}</Text>
-                {data.chimneyDescription && <Text>{data.chimneyDescription}</Text>}
               </View>
             </View>
+            
+            {data.chimneyDescription && (
+              <View style={[styles.tableRow, { borderBottom: data.flue ? '1 solid black' : 0 }]}>
+                <View style={[styles.tableCell, { width: '20%', fontWeight: 'bold' }]}>
+                  <Text>Popis:</Text>
+                </View>
+                <View style={[styles.tableCell, { width: '80%', borderRight: 0 }]}>
+                  <Text>{data.chimneyDescription}</Text>
+                </View>
+              </View>
+            )}
             
             {data.flue && (
               <View style={[styles.tableRow, { borderBottom: 0 }]}>
