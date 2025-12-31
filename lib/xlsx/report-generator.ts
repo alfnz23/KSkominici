@@ -33,7 +33,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Protokol');
 
-  // Úprava pro tisk: 95% je bezpečnější pro čitelnost, mírně zvětšené okraje
+  // Nastavení pro tisk: 95% měřítko pro dobrou čitelnost na A4
   worksheet.pageSetup = {
     paperSize: 9, // A4
     orientation: 'portrait',
@@ -51,15 +51,22 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     horizontalCentered: true,
   };
 
-  // 4 SLOUPCE - Celková šířka cca 90 jednotek pro A4
+  // 4 SLOUPCE - Šířky optimalizované pro tvou předlohu
   worksheet.columns = [
     { width: 32 },  // Sloupec A - Label
     { width: 28 },  // Sloupec B - Hodnota
-    { width: 12 },  // Sloupec C - Krátký label (tel, podlaží)
+    { width: 12 },  // Sloupec C - Krátký label
     { width: 18 },  // Sloupec D - Hodnota
   ];
 
   let row = 1;
+
+  const borderThin = {
+    top: { style: 'thin' as const },
+    left: { style: 'thin' as const },
+    right: { style: 'thin' as const },
+    bottom: { style: 'thin' as const },
+  };
 
   // ═══════════════════════════════════════════════════════
   // HLAVIČKA
@@ -142,18 +149,14 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     const labelCell = worksheet.getCell(`A${row}`);
     labelCell.value = label;
     labelCell.font = { bold: true, size: 10, name: 'Arial' };
-    labelCell.border = {
-        top: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }, bottom: { style: 'thin' },
-    };
+    labelCell.border = borderThin;
     labelCell.alignment = { vertical: 'middle', indent: 1 };
 
     worksheet.mergeCells(`B${row}:D${row}`);
     const valueCell = worksheet.getCell(`B${row}`);
     valueCell.value = value;
     valueCell.font = { size: 10, name: 'Arial' };
-    valueCell.border = {
-        top: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }, bottom: { style: 'thin' },
-    };
+    valueCell.border = borderThin;
     valueCell.alignment = { vertical: 'middle', indent: 1 };
     worksheet.getRow(row).height = height;
     row++;
@@ -163,25 +166,25 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     const cellA = worksheet.getCell(`A${row}`);
     cellA.value = label1;
     cellA.font = { bold: true, size: 10, name: 'Arial' };
-    cellA.border = { top: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }, bottom: { style: 'thin' } };
+    cellA.border = borderThin;
     cellA.alignment = { vertical: 'middle', indent: 1 };
 
     const cellB = worksheet.getCell(`B${row}`);
     cellB.value = value1;
     cellB.font = { size: 10, name: 'Arial' };
-    cellB.border = { top: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }, bottom: { style: 'thin' } };
+    cellB.border = borderThin;
     cellB.alignment = { vertical: 'middle', indent: 1 };
 
     const cellC = worksheet.getCell(`C${row}`);
     cellC.value = label2;
     cellC.font = { bold: true, size: 10, name: 'Arial' };
-    cellC.border = { top: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }, bottom: { style: 'thin' } };
+    cellC.border = borderThin;
     cellC.alignment = { vertical: 'middle', indent: 1 };
 
     const cellD = worksheet.getCell(`D${row}`);
     cellD.value = value2;
     cellD.font = { size: 10, name: 'Arial' };
-    cellD.border = { top: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }, bottom: { style: 'thin' } };
+    cellD.border = borderThin;
     cellD.alignment = { vertical: 'middle', indent: 1 };
     
     worksheet.getRow(row).height = height;
@@ -287,16 +290,16 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   }
 
   // ═══════════════════════════════════════════════════════
-  // KLAUZULE A ZÁVĚR
+  // KLAUZULE
   // ═══════════════════════════════════════════════════════
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const disclaimer = worksheet.getCell(`A${row}`);
-  disclaimer.value = 'Kontrola spal. cesty byla provedena výše uvedeného data vizuálně a s maximální možnou pečlivostí, ale bez demontáže stavebních konstrukcí...';
+  disclaimer.value = 'Kontrola spal. cesty byla provedena výše uvedeného data vizuálně a s maximální možnou pečlivostí, ale bez demontáže stavebních konstrukcí a prvků, které komínové těleso/spalinovou cestu zakrývají. Z tohoto důvodu nejsem schopen a odmítám ručit za škody, provedení, závady, vzdálenosti hořlavých či tavných materiálů a důsledky z toho vyplývající v úsecích komínu/spalinové cesty, které nelze vizuálně zkontrolovat bez nutnosti odkrývání nebo demontáže stavebních konstrukcí, tapet, podlahových krytin, deskových podhledů a příček, obložení, elektroinstalace apod.';
   disclaimer.font = { size: 7.5, name: 'Arial' };
   disclaimer.alignment = { wrapText: true, vertical: 'top' };
   disclaimer.border = borderThin;
-  worksheet.getRow(row).height = 45;
+  worksheet.getRow(row).height = 55; // Mírně zvýšeno pro jistotu, že se vejde vše
   row++;
 
   addSectionLabel('ZÁVĚR:');
@@ -331,11 +334,3 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer);
 }
-
-// Pomocná konstanta pro okraje
-const borderThin = {
-    top: { style: 'thin' as const },
-    left: { style: 'thin' as const },
-    right: { style: 'thin' as const },
-    bottom: { style: 'thin' as const },
-};
