@@ -50,12 +50,12 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     showGridLines: false,
   };
 
-  // 4 SLOUPCE - UPRAVENÉ ŠÍŘKY pro lepší vzhled
+  // 4 SLOUPCE - ŠIRŠÍ SLOUPEC A PRO DLOUHÉ LABELY!
   worksheet.columns = [
-    { width: 20 },  // Sloupec A - o trochu širší
-    { width: 30 },  // Sloupec B - o trochu širší
-    { width: 15 },  // Sloupec C - o trochu širší
-    { width: 18 },  // Sloupec D - o trochu širší
+    { width: 28 },  // Sloupec A - HODNĚ ŠIRŠÍ! (bylo 20)
+    { width: 28 },  // Sloupec B - mírně zmenšený
+    { width: 15 },  // Sloupec C
+    { width: 18 },  // Sloupec D
   ];
 
   // Výchozí výška řádků
@@ -70,7 +70,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   worksheet.mergeCells(`A${row}:D${row}`);
   const headerCell = worksheet.getCell(`A${row}`);
   headerCell.value = 'ZPRÁVA';
-  headerCell.font = { size: 15, bold: true, name: 'Arial' }; // Větší font
+  headerCell.font = { size: 15, bold: true, name: 'Arial' };
   headerCell.alignment = { horizontal: 'center', vertical: 'middle' };
   headerCell.border = {
     top: { style: 'medium' },
@@ -78,7 +78,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'medium' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 20; // Větší výška
+  worksheet.getRow(row).height = 20;
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
@@ -103,7 +103,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   worksheet.mergeCells(`A${row}:D${row}`);
   const companyNameCell = worksheet.getCell(`A${row}`);
   companyNameCell.value = 'KS Kominíci.cz';
-  companyNameCell.font = { size: 14, bold: true, name: 'Arial' }; // Větší font
+  companyNameCell.font = { size: 14, bold: true, name: 'Arial' };
   companyNameCell.alignment = { horizontal: 'center' };
   worksheet.getRow(row).height = 18;
   row++;
@@ -153,7 +153,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
-    labelCell.alignment = { vertical: 'middle' };
+    labelCell.alignment = { vertical: 'middle', wrapText: false }; // NO WRAP!
 
     worksheet.mergeCells(`B${row}:D${row}`);
     const valueCell = worksheet.getCell(`B${row}`);
@@ -180,7 +180,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
-    cellA.alignment = { vertical: 'middle' };
+    cellA.alignment = { vertical: 'middle', wrapText: false }; // NO WRAP!
 
     const cellB = worksheet.getCell(`B${row}`);
     cellB.value = value1;
@@ -202,7 +202,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
-    cellC.alignment = { vertical: 'middle' };
+    cellC.alignment = { vertical: 'middle', wrapText: false }; // NO WRAP!
 
     const cellD = worksheet.getCell(`D${row}`);
     cellD.value = value2;
@@ -218,16 +218,16 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     row++;
   };
 
-  addFullRow('Jméno zákazníka:', data.customerName, 18);
-  addFullRow('Název firmy / Jméno fyzické osoby:', data.companyOrPersonName, 18);
-  addSplitRow('Kontakt zákazníka (email):', data.customerEmail, 'tel:', data.customerPhone || '', 18);
+  addFullRow('Jméno zákazníka:', data.customerName, 19);
+  addFullRow('Název firmy / Jméno fyzické osoby:', data.companyOrPersonName, 19);
+  addSplitRow('Kontakt zákazníka (email):', data.customerEmail, 'tel:', data.customerPhone || '', 19);
   
   if (data.permanentAddress) {
-    addFullRow('Sídlo firmy/Bydliště:', data.permanentAddress, 18);
+    addFullRow('Sídlo firmy/Bydliště:', data.permanentAddress, 19);
   }
 
-  addSplitRow('Adresa kontrolovaného objektu:', data.inspectionAddress, 'Podlaží:', validAppliances[0]?.floor || '', 18);
-  addFullRow('Datum provedení kontroly:', new Date(data.inspectionDate).toLocaleDateString('cs-CZ'), 18);
+  addSplitRow('Adresa kontrolovaného objektu:', data.inspectionAddress, 'Podlaží:', validAppliances[0]?.floor || '', 19);
+  addFullRow('Datum provedení kontroly:', new Date(data.inspectionDate).toLocaleDateString('cs-CZ'), 19);
 
   row++; // Prázdný řádek
 
@@ -239,7 +239,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     worksheet.mergeCells(`A${row}:D${row}`);
     const spotrebicHeader = worksheet.getCell(`A${row}`);
     spotrebicHeader.value = 'SPOTŘEBIČ:';
-    spotrebicHeader.font = { bold: true, size: 11, name: 'Arial' }; // Větší font
+    spotrebicHeader.font = { bold: true, size: 11, name: 'Arial' };
     spotrebicHeader.fill = {
       type: 'pattern',
       pattern: 'solid',
@@ -251,8 +251,8 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
 
     const appliance = validAppliances[0];
     
-    addSplitRow('Druh:', appliance.type || '', 'Výkon:', appliance.power || '', 18);
-    addSplitRow('Typ:', appliance.manufacturer || '', 'Umístění:', appliance.location || '', 18);
+    addSplitRow('Druh:', appliance.type || '', 'Výkon:', appliance.power || '', 19);
+    addSplitRow('Typ:', appliance.manufacturer || '', 'Umístění:', appliance.location || '', 19);
 
     row++; // Prázdný řádek
   }
@@ -264,7 +264,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   worksheet.mergeCells(`A${row}:D${row}`);
   const specHeader = worksheet.getCell(`A${row}`);
   specHeader.value = 'SPECIFIKACE SPALINOVÉ CESTY:';
-  specHeader.font = { bold: true, size: 11, name: 'Arial' }; // Větší font
+  specHeader.font = { bold: true, size: 11, name: 'Arial' };
   specHeader.fill = {
     type: 'pattern',
     pattern: 'solid',
@@ -274,16 +274,16 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   worksheet.getRow(row).height = 18;
   row++;
 
-  addFullRow('Komín:', data.chimneyType, 18);
+  addFullRow('Komín:', data.chimneyType, 19);
   
   if (data.chimneyDescription) {
-    addFullRow('Popis:', data.chimneyDescription, 18);
+    addFullRow('Popis:', data.chimneyDescription, 19);
   }
 
   if (data.flue) {
-    addFullRow('Kouřovod:', data.flueType || '', 18);
+    addFullRow('Kouřovod:', data.flueType || '', 19);
     if (data.flue) {
-      addFullRow('Popis:', data.flue, 18);
+      addFullRow('Popis:', data.flue, 19);
     }
   }
 
@@ -394,7 +394,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 48; // Větší výška pro klauzuli
+  worksheet.getRow(row).height = 50; // Ještě větší výška
   row++;
 
   // ═══════════════════════════════════════════════════════
@@ -425,20 +425,21 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 22; // Větší výška
+  worksheet.getRow(row).height = 24; // Větší výška
   row++;
 
   row++; // Prázdný řádek
+  row++; // Extra prázdný řádek
 
   // ═══════════════════════════════════════════════════════
-  // PODPIS
+  // PODPIS - větší výšky
   // ═══════════════════════════════════════════════════════
 
   worksheet.mergeCells(`A${row}:B${row}`);
   const signCell = worksheet.getCell(`A${row}`);
   signCell.value = `Kontrolu provedl: ${data.technicianName}`;
   signCell.font = { size: 10, name: 'Arial' };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 20; // Větší výška
   row++;
   
   const dateCell = worksheet.getCell(`A${row}`);
@@ -450,7 +451,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   locationCell.value = `V: ${data.technicianAddress?.split(',')[1]?.trim() || ''}`;
   locationCell.font = { size: 10, name: 'Arial' };
   locationCell.alignment = { horizontal: 'right' };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 20; // Větší výška
 
   // Nastavení print area
   worksheet.pageSetup.printArea = `A1:D${row}`;
