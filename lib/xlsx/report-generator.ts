@@ -33,7 +33,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Protokol');
 
-  // Nastavení pro tisk na A4 - IDENTICKÝ S PDF
+  // Nastavení pro tisk na A4
   worksheet.pageSetup = {
     paperSize: 9, // A4
     orientation: 'portrait',
@@ -50,24 +50,27 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     showGridLines: false,
   };
 
-  // 4 SLOUPCE jako v PDF
+  // 4 SLOUPCE - UPRAVENÉ ŠÍŘKY pro lepší vzhled
   worksheet.columns = [
-    { width: 18 },  // Sloupec A
-    { width: 28 },  // Sloupec B
-    { width: 14 },  // Sloupec C
-    { width: 16 },  // Sloupec D
+    { width: 20 },  // Sloupec A - o trochu širší
+    { width: 30 },  // Sloupec B - o trochu širší
+    { width: 15 },  // Sloupec C - o trochu širší
+    { width: 18 },  // Sloupec D - o trochu širší
   ];
+
+  // Výchozí výška řádků
+  worksheet.properties.defaultRowHeight = 16;
 
   let row = 1;
 
   // ═══════════════════════════════════════════════════════
-  // HLAVIČKA - MERGE přes všechny 4 sloupce, CENTROVANÁ
+  // HLAVIČKA
   // ═══════════════════════════════════════════════════════
   
   worksheet.mergeCells(`A${row}:D${row}`);
   const headerCell = worksheet.getCell(`A${row}`);
   headerCell.value = 'ZPRÁVA';
-  headerCell.font = { size: 14, bold: true };
+  headerCell.font = { size: 15, bold: true, name: 'Arial' }; // Větší font
   headerCell.alignment = { horizontal: 'center', vertical: 'middle' };
   headerCell.border = {
     top: { style: 'medium' },
@@ -75,22 +78,24 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'medium' },
     bottom: { style: 'thin' },
   };
+  worksheet.getRow(row).height = 20; // Větší výška
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const subtitleCell = worksheet.getCell(`A${row}`);
   subtitleCell.value = 'o provedení kontroly a čištění spalinové cesty';
-  subtitleCell.font = { size: 11 };
+  subtitleCell.font = { size: 11, name: 'Arial' };
   subtitleCell.alignment = { horizontal: 'center' };
   subtitleCell.border = {
     left: { style: 'medium' },
     right: { style: 'medium' },
     bottom: { style: 'medium' },
   };
+  worksheet.getRow(row).height = 18;
   row++;
 
   // ═══════════════════════════════════════════════════════
-  // INFORMACE O FIRMĚ - MERGE přes všechny 4 sloupce, CENTROVANÉ
+  // INFORMACE O FIRMĚ
   // ═══════════════════════════════════════════════════════
   
   row++; // Prázdný řádek
@@ -98,13 +103,15 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   worksheet.mergeCells(`A${row}:D${row}`);
   const companyNameCell = worksheet.getCell(`A${row}`);
   companyNameCell.value = 'KS Kominíci.cz';
-  companyNameCell.font = { size: 13, bold: true };
+  companyNameCell.font = { size: 14, bold: true, name: 'Arial' }; // Větší font
   companyNameCell.alignment = { horizontal: 'center' };
+  worksheet.getRow(row).height = 18;
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const techNameCell = worksheet.getCell(`A${row}`);
   techNameCell.value = data.technicianName;
+  techNameCell.font = { size: 10, name: 'Arial' };
   techNameCell.alignment = { horizontal: 'center' };
   row++;
 
@@ -112,6 +119,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     worksheet.mergeCells(`A${row}:D${row}`);
     const techAddressCell = worksheet.getCell(`A${row}`);
     techAddressCell.value = data.technicianAddress;
+    techAddressCell.font = { size: 10, name: 'Arial' };
     techAddressCell.alignment = { horizontal: 'center' };
     row++;
   }
@@ -120,6 +128,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     worksheet.mergeCells(`A${row}:D${row}`);
     const techIcoCell = worksheet.getCell(`A${row}`);
     techIcoCell.value = `IČO odborně způsobilé osoby: ${data.technicianIco}`;
+    techIcoCell.font = { size: 10, name: 'Arial' };
     techIcoCell.alignment = { horizontal: 'center' };
     row++;
   }
@@ -127,198 +136,217 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   row++; // Prázdný řádek
 
   // ═══════════════════════════════════════════════════════
-  // TABULKA ZÁKAZNÍK - 4 sloupce
+  // TABULKA ZÁKAZNÍK
   // ═══════════════════════════════════════════════════════
 
   const validAppliances = data.appliances.filter(a => a.type || a.manufacturer);
 
-  // Helper funkce pro tabulkové řádky
-  const addFullRow = (label: string, value: string) => {
+  // Helper funkce
+  const addFullRow = (label: string, value: string, height: number = 16) => {
     worksheet.mergeCells(`A${row}:A${row}`);
     const labelCell = worksheet.getCell(`A${row}`);
     labelCell.value = label;
-    labelCell.font = { bold: true };
+    labelCell.font = { bold: true, size: 10, name: 'Arial' };
     labelCell.border = {
       top: { style: 'thin' },
       left: { style: 'thin' },
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
+    labelCell.alignment = { vertical: 'middle' };
 
     worksheet.mergeCells(`B${row}:D${row}`);
     const valueCell = worksheet.getCell(`B${row}`);
     valueCell.value = value;
+    valueCell.font = { size: 10, name: 'Arial' };
     valueCell.border = {
       top: { style: 'thin' },
       left: { style: 'thin' },
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
+    valueCell.alignment = { vertical: 'middle' };
+    worksheet.getRow(row).height = height;
     row++;
   };
 
-  // Speciální řádek s více hodnotami
-  const addSplitRow = (label1: string, value1: string, label2: string, value2: string) => {
+  const addSplitRow = (label1: string, value1: string, label2: string, value2: string, height: number = 16) => {
     const cellA = worksheet.getCell(`A${row}`);
     cellA.value = label1;
-    cellA.font = { bold: true };
+    cellA.font = { bold: true, size: 10, name: 'Arial' };
     cellA.border = {
       top: { style: 'thin' },
       left: { style: 'thin' },
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
+    cellA.alignment = { vertical: 'middle' };
 
     const cellB = worksheet.getCell(`B${row}`);
     cellB.value = value1;
+    cellB.font = { size: 10, name: 'Arial' };
     cellB.border = {
       top: { style: 'thin' },
       left: { style: 'thin' },
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
+    cellB.alignment = { vertical: 'middle' };
 
     const cellC = worksheet.getCell(`C${row}`);
     cellC.value = label2;
-    cellC.font = { bold: true };
+    cellC.font = { bold: true, size: 10, name: 'Arial' };
     cellC.border = {
       top: { style: 'thin' },
       left: { style: 'thin' },
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
+    cellC.alignment = { vertical: 'middle' };
 
     const cellD = worksheet.getCell(`D${row}`);
     cellD.value = value2;
+    cellD.font = { size: 10, name: 'Arial' };
     cellD.border = {
       top: { style: 'thin' },
       left: { style: 'thin' },
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
+    cellD.alignment = { vertical: 'middle' };
+    worksheet.getRow(row).height = height;
     row++;
   };
 
-  addFullRow('Jméno zákazníka:', data.customerName);
-  addFullRow('Název firmy / Jméno fyzické osoby:', data.companyOrPersonName);
-  addSplitRow('Kontakt zákazníka (email):', data.customerEmail, 'tel:', data.customerPhone || '');
+  addFullRow('Jméno zákazníka:', data.customerName, 18);
+  addFullRow('Název firmy / Jméno fyzické osoby:', data.companyOrPersonName, 18);
+  addSplitRow('Kontakt zákazníka (email):', data.customerEmail, 'tel:', data.customerPhone || '', 18);
   
   if (data.permanentAddress) {
-    addFullRow('Sídlo firmy/Bydliště:', data.permanentAddress);
+    addFullRow('Sídlo firmy/Bydliště:', data.permanentAddress, 18);
   }
 
-  addSplitRow('Adresa kontrolovaného objektu:', data.inspectionAddress, 'Podlaží:', validAppliances[0]?.floor || '');
-  addFullRow('Datum provedení kontroly:', new Date(data.inspectionDate).toLocaleDateString('cs-CZ'));
+  addSplitRow('Adresa kontrolovaného objektu:', data.inspectionAddress, 'Podlaží:', validAppliances[0]?.floor || '', 18);
+  addFullRow('Datum provedení kontroly:', new Date(data.inspectionDate).toLocaleDateString('cs-CZ'), 18);
 
   row++; // Prázdný řádek
 
   // ═══════════════════════════════════════════════════════
-  // SPOTŘEBIČ - 4 sloupce jako PDF
+  // SPOTŘEBIČ
   // ═══════════════════════════════════════════════════════
 
   if (validAppliances.length > 0) {
     worksheet.mergeCells(`A${row}:D${row}`);
     const spotrebicHeader = worksheet.getCell(`A${row}`);
     spotrebicHeader.value = 'SPOTŘEBIČ:';
-    spotrebicHeader.font = { bold: true };
+    spotrebicHeader.font = { bold: true, size: 11, name: 'Arial' }; // Větší font
     spotrebicHeader.fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: 'FFD5D8DC' },
     };
+    spotrebicHeader.alignment = { vertical: 'middle' };
+    worksheet.getRow(row).height = 18;
     row++;
 
     const appliance = validAppliances[0];
     
-    // Druh | hodnota | Výkon | hodnota
-    addSplitRow('Druh:', appliance.type || '', 'Výkon:', appliance.power || '');
-    
-    // Typ | hodnota | Umístění | hodnota
-    addSplitRow('Typ:', appliance.manufacturer || '', 'Umístění:', appliance.location || '');
+    addSplitRow('Druh:', appliance.type || '', 'Výkon:', appliance.power || '', 18);
+    addSplitRow('Typ:', appliance.manufacturer || '', 'Umístění:', appliance.location || '', 18);
 
     row++; // Prázdný řádek
   }
 
   // ═══════════════════════════════════════════════════════
-  // SPECIFIKACE SPALINOVÉ CESTY - 4 sloupce
+  // SPECIFIKACE SPALINOVÉ CESTY
   // ═══════════════════════════════════════════════════════
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const specHeader = worksheet.getCell(`A${row}`);
   specHeader.value = 'SPECIFIKACE SPALINOVÉ CESTY:';
-  specHeader.font = { bold: true };
+  specHeader.font = { bold: true, size: 11, name: 'Arial' }; // Větší font
   specHeader.fill = {
     type: 'pattern',
     pattern: 'solid',
     fgColor: { argb: 'FFD5D8DC' },
   };
+  specHeader.alignment = { vertical: 'middle' };
+  worksheet.getRow(row).height = 18;
   row++;
 
-  addFullRow('Komín:', data.chimneyType);
+  addFullRow('Komín:', data.chimneyType, 18);
   
   if (data.chimneyDescription) {
-    addFullRow('Popis:', data.chimneyDescription);
+    addFullRow('Popis:', data.chimneyDescription, 18);
   }
 
   if (data.flue) {
-    addFullRow('Kouřovod:', data.flueType || '');
+    addFullRow('Kouřovod:', data.flueType || '', 18);
     if (data.flue) {
-      addFullRow('Popis:', data.flue);
+      addFullRow('Popis:', data.flue, 18);
     }
   }
 
   row++; // Prázdný řádek
 
   // ═══════════════════════════════════════════════════════
-  // ZJIŠTĚNÉ NEDOSTATKY - MERGE přes všechny 4 sloupce
+  // ZJIŠTĚNÉ NEDOSTATKY
   // ═══════════════════════════════════════════════════════
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const defectsRemovedLabel = worksheet.getCell(`A${row}`);
   defectsRemovedLabel.value = 'ZJIŠTĚNÉ NEDOSTATKY, KTERÉ BYLY ODSTRANĚNY NA MÍSTĚ:';
-  defectsRemovedLabel.font = { bold: true };
+  defectsRemovedLabel.font = { bold: true, size: 11, name: 'Arial' };
   defectsRemovedLabel.fill = {
     type: 'pattern',
     pattern: 'solid',
     fgColor: { argb: 'FFD5D8DC' },
   };
+  defectsRemovedLabel.alignment = { vertical: 'middle' };
+  worksheet.getRow(row).height = 18;
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const defectsRemovedValue = worksheet.getCell(`A${row}`);
   defectsRemovedValue.value =
     data.condition !== 'Vyhovuje' && data.defectsFound ? data.defectsFound : '';
+  defectsRemovedValue.font = { size: 10, name: 'Arial' };
   defectsRemovedValue.border = {
     top: { style: 'thin' },
     left: { style: 'thin' },
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 15;
+  defectsRemovedValue.alignment = { vertical: 'top', wrapText: true };
+  worksheet.getRow(row).height = 18;
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const defectsNotRemovedLabel = worksheet.getCell(`A${row}`);
   defectsNotRemovedLabel.value = 'ZJIŠTĚNÉ NEDOSTATKY, KTERÉ NEBYLY ODSTRANĚNY NA MÍSTĚ:';
-  defectsNotRemovedLabel.font = { bold: true };
+  defectsNotRemovedLabel.font = { bold: true, size: 11, name: 'Arial' };
   defectsNotRemovedLabel.fill = {
     type: 'pattern',
     pattern: 'solid',
     fgColor: { argb: 'FFD5D8DC' },
   };
+  defectsNotRemovedLabel.alignment = { vertical: 'middle' };
+  worksheet.getRow(row).height = 18;
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const defectsNotRemovedValue = worksheet.getCell(`A${row}`);
   defectsNotRemovedValue.value =
     data.condition !== 'Vyhovuje' && data.defectsFound ? data.defectsFound : '';
+  defectsNotRemovedValue.font = { size: 10, name: 'Arial' };
   defectsNotRemovedValue.border = {
     top: { style: 'thin' },
     left: { style: 'thin' },
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 15;
+  defectsNotRemovedValue.alignment = { vertical: 'top', wrapText: true };
+  worksheet.getRow(row).height = 18;
   row++;
 
   // Termín odstranění
@@ -326,34 +354,39 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     worksheet.mergeCells(`A${row}:D${row}`);
     const removalDateLabel = worksheet.getCell(`A${row}`);
     removalDateLabel.value = 'TERMÍN ODSTRANĚNÍ NEDOSTATKŮ:';
-    removalDateLabel.font = { bold: true };
+    removalDateLabel.font = { bold: true, size: 11, name: 'Arial' };
     removalDateLabel.fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: 'FFD5D8DC' },
     };
+    removalDateLabel.alignment = { vertical: 'middle' };
+    worksheet.getRow(row).height = 18;
     row++;
 
     worksheet.mergeCells(`A${row}:D${row}`);
     const removalDateValue = worksheet.getCell(`A${row}`);
     removalDateValue.value = new Date(data.defectRemovalDate).toLocaleDateString('cs-CZ');
+    removalDateValue.font = { size: 10, name: 'Arial' };
     removalDateValue.border = {
       top: { style: 'thin' },
       left: { style: 'thin' },
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
+    removalDateValue.alignment = { vertical: 'middle' };
+    worksheet.getRow(row).height = 18;
     row++;
   }
 
   // ═══════════════════════════════════════════════════════
-  // KLAUZULE - MERGE přes všechny 4 sloupce
+  // KLAUZULE
   // ═══════════════════════════════════════════════════════
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const disclaimerCell = worksheet.getCell(`A${row}`);
   disclaimerCell.value = 'Kontrola spal. cesty byla provedena výše uvedeného data vizuálně a s maximální možnou pečlivostí, ale bez demontáže stavebních konstrukcí a prvků, které komínové těleso/spalinovou cestu zakrývají. Z tohoto důvodu nejsem schopen a odmítám ručit za škody, provedení, závady, vzdálenosti hořlavých či tavných materiálů a důsledky z toho vyplývající v úsecích komínu/spalinové cesty, které nelze vizuálně zkontrolovat bez nutnosti odkrývání nebo demontáže stavebních konstrukcí, tapet, podlahových krytin, deskových podhledů a příček, obložení, elektroinstalace apod.';
-  disclaimerCell.font = { size: 8 };
+  disclaimerCell.font = { size: 8, name: 'Arial' };
   disclaimerCell.alignment = { wrapText: true, vertical: 'top' };
   disclaimerCell.border = {
     top: { style: 'thin' },
@@ -361,55 +394,63 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 45;
+  worksheet.getRow(row).height = 48; // Větší výška pro klauzuli
   row++;
 
   // ═══════════════════════════════════════════════════════
-  // ZÁVĚR - MERGE přes všechny 4 sloupce
+  // ZÁVĚR
   // ═══════════════════════════════════════════════════════
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const conclusionLabel = worksheet.getCell(`A${row}`);
   conclusionLabel.value = 'ZÁVĚR:';
-  conclusionLabel.font = { bold: true };
+  conclusionLabel.font = { bold: true, size: 11, name: 'Arial' };
   conclusionLabel.fill = {
     type: 'pattern',
     pattern: 'solid',
     fgColor: { argb: 'FFD5D8DC' },
   };
+  conclusionLabel.alignment = { vertical: 'middle' };
+  worksheet.getRow(row).height = 18;
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
   const conclusionValue = worksheet.getCell(`A${row}`);
   conclusionValue.value = `${data.condition}\nSpalinová cesta vyhovuje bezpečnému provozu${data.recommendations ? '\n' + data.recommendations : ''}`;
-  conclusionValue.alignment = { wrapText: true };
+  conclusionValue.font = { size: 10, name: 'Arial' };
+  conclusionValue.alignment = { wrapText: true, vertical: 'top' };
   conclusionValue.border = {
     top: { style: 'thin' },
     left: { style: 'thin' },
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 20;
+  worksheet.getRow(row).height = 22; // Větší výška
   row++;
 
   row++; // Prázdný řádek
 
   // ═══════════════════════════════════════════════════════
-  // PODPIS - 4 sloupce
+  // PODPIS
   // ═══════════════════════════════════════════════════════
 
   worksheet.mergeCells(`A${row}:B${row}`);
   const signCell = worksheet.getCell(`A${row}`);
   signCell.value = `Kontrolu provedl: ${data.technicianName}`;
+  signCell.font = { size: 10, name: 'Arial' };
+  worksheet.getRow(row).height = 18;
   row++;
   
   const dateCell = worksheet.getCell(`A${row}`);
   dateCell.value = `Dne: ${new Date(data.inspectionDate).toLocaleDateString('cs-CZ')}`;
+  dateCell.font = { size: 10, name: 'Arial' };
   
   worksheet.mergeCells(`C${row}:D${row}`);
   const locationCell = worksheet.getCell(`C${row}`);
   locationCell.value = `V: ${data.technicianAddress?.split(',')[1]?.trim() || ''}`;
+  locationCell.font = { size: 10, name: 'Arial' };
   locationCell.alignment = { horizontal: 'right' };
+  worksheet.getRow(row).height = 18;
 
   // Nastavení print area
   worksheet.pageSetup.printArea = `A1:D${row}`;
