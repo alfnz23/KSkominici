@@ -33,12 +33,12 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Protokol');
 
-  // Nastavení pro tisk na A4
+  // Nastavení pro tisk na A4 - SCALE 93% aby se to vešlo na 1 stránku!
   worksheet.pageSetup = {
     paperSize: 9, // A4
     orientation: 'portrait',
     fitToPage: false,
-    scale: 100,
+    scale: 93, // ZMENŠENO z 100% aby se to vešlo!
     margins: {
       left: 0.7,
       right: 0.7,
@@ -50,16 +50,16 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     showGridLines: false,
   };
 
-  // 4 SLOUPCE - ŠIRŠÍ SLOUPEC A PRO DLOUHÉ LABELY!
+  // 4 SLOUPCE - optimální šířky
   worksheet.columns = [
-    { width: 28 },  // Sloupec A - HODNĚ ŠIRŠÍ! (bylo 20)
-    { width: 28 },  // Sloupec B - mírně zmenšený
+    { width: 28 },  // Sloupec A - široký pro dlouhé labely
+    { width: 28 },  // Sloupec B
     { width: 15 },  // Sloupec C
     { width: 18 },  // Sloupec D
   ];
 
-  // Výchozí výška řádků
-  worksheet.properties.defaultRowHeight = 16;
+  // Výchozí výška řádků - KOMPAKTNÍ
+  worksheet.properties.defaultRowHeight = 15;
 
   let row = 1;
 
@@ -78,7 +78,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'medium' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 20;
+  worksheet.getRow(row).height = 18; // Kompaktní
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
@@ -91,7 +91,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'medium' },
     bottom: { style: 'medium' },
   };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 16; // Kompaktní
   row++;
 
   // ═══════════════════════════════════════════════════════
@@ -105,7 +105,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   companyNameCell.value = 'KS Kominíci.cz';
   companyNameCell.font = { size: 14, bold: true, name: 'Arial' };
   companyNameCell.alignment = { horizontal: 'center' };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 16; // Kompaktní
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
@@ -141,8 +141,8 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
 
   const validAppliances = data.appliances.filter(a => a.type || a.manufacturer);
 
-  // Helper funkce
-  const addFullRow = (label: string, value: string, height: number = 16) => {
+  // Helper funkce - KOMPAKTNÍ VÝŠKY
+  const addFullRow = (label: string, value: string, height: number = 15) => {
     worksheet.mergeCells(`A${row}:A${row}`);
     const labelCell = worksheet.getCell(`A${row}`);
     labelCell.value = label;
@@ -153,7 +153,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
-    labelCell.alignment = { vertical: 'middle', wrapText: false }; // NO WRAP!
+    labelCell.alignment = { vertical: 'middle', wrapText: false };
 
     worksheet.mergeCells(`B${row}:D${row}`);
     const valueCell = worksheet.getCell(`B${row}`);
@@ -170,7 +170,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     row++;
   };
 
-  const addSplitRow = (label1: string, value1: string, label2: string, value2: string, height: number = 16) => {
+  const addSplitRow = (label1: string, value1: string, label2: string, value2: string, height: number = 15) => {
     const cellA = worksheet.getCell(`A${row}`);
     cellA.value = label1;
     cellA.font = { bold: true, size: 10, name: 'Arial' };
@@ -180,7 +180,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
-    cellA.alignment = { vertical: 'middle', wrapText: false }; // NO WRAP!
+    cellA.alignment = { vertical: 'middle', wrapText: false };
 
     const cellB = worksheet.getCell(`B${row}`);
     cellB.value = value1;
@@ -202,7 +202,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       right: { style: 'thin' },
       bottom: { style: 'thin' },
     };
-    cellC.alignment = { vertical: 'middle', wrapText: false }; // NO WRAP!
+    cellC.alignment = { vertical: 'middle', wrapText: false };
 
     const cellD = worksheet.getCell(`D${row}`);
     cellD.value = value2;
@@ -218,16 +218,16 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     row++;
   };
 
-  addFullRow('Jméno zákazníka:', data.customerName, 19);
-  addFullRow('Název firmy / Jméno fyzické osoby:', data.companyOrPersonName, 19);
-  addSplitRow('Kontakt zákazníka (email):', data.customerEmail, 'tel:', data.customerPhone || '', 19);
+  addFullRow('Jméno zákazníka:', data.customerName, 17);
+  addFullRow('Název firmy / Jméno fyzické osoby:', data.companyOrPersonName, 17);
+  addSplitRow('Kontakt zákazníka (email):', data.customerEmail, 'tel:', data.customerPhone || '', 17);
   
   if (data.permanentAddress) {
-    addFullRow('Sídlo firmy/Bydliště:', data.permanentAddress, 19);
+    addFullRow('Sídlo firmy/Bydliště:', data.permanentAddress, 17);
   }
 
-  addSplitRow('Adresa kontrolovaného objektu:', data.inspectionAddress, 'Podlaží:', validAppliances[0]?.floor || '', 19);
-  addFullRow('Datum provedení kontroly:', new Date(data.inspectionDate).toLocaleDateString('cs-CZ'), 19);
+  addSplitRow('Adresa kontrolovaného objektu:', data.inspectionAddress, 'Podlaží:', validAppliances[0]?.floor || '', 17);
+  addFullRow('Datum provedení kontroly:', new Date(data.inspectionDate).toLocaleDateString('cs-CZ'), 17);
 
   row++; // Prázdný řádek
 
@@ -246,13 +246,13 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       fgColor: { argb: 'FFD5D8DC' },
     };
     spotrebicHeader.alignment = { vertical: 'middle' };
-    worksheet.getRow(row).height = 18;
+    worksheet.getRow(row).height = 16; // Kompaktní
     row++;
 
     const appliance = validAppliances[0];
     
-    addSplitRow('Druh:', appliance.type || '', 'Výkon:', appliance.power || '', 19);
-    addSplitRow('Typ:', appliance.manufacturer || '', 'Umístění:', appliance.location || '', 19);
+    addSplitRow('Druh:', appliance.type || '', 'Výkon:', appliance.power || '', 17);
+    addSplitRow('Typ:', appliance.manufacturer || '', 'Umístění:', appliance.location || '', 17);
 
     row++; // Prázdný řádek
   }
@@ -271,19 +271,19 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     fgColor: { argb: 'FFD5D8DC' },
   };
   specHeader.alignment = { vertical: 'middle' };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 16; // Kompaktní
   row++;
 
-  addFullRow('Komín:', data.chimneyType, 19);
+  addFullRow('Komín:', data.chimneyType, 17);
   
   if (data.chimneyDescription) {
-    addFullRow('Popis:', data.chimneyDescription, 19);
+    addFullRow('Popis:', data.chimneyDescription, 17);
   }
 
   if (data.flue) {
-    addFullRow('Kouřovod:', data.flueType || '', 19);
+    addFullRow('Kouřovod:', data.flueType || '', 17);
     if (data.flue) {
-      addFullRow('Popis:', data.flue, 19);
+      addFullRow('Popis:', data.flue, 17);
     }
   }
 
@@ -303,7 +303,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     fgColor: { argb: 'FFD5D8DC' },
   };
   defectsRemovedLabel.alignment = { vertical: 'middle' };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 16; // Kompaktní
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
@@ -318,7 +318,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     bottom: { style: 'thin' },
   };
   defectsRemovedValue.alignment = { vertical: 'top', wrapText: true };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 15; // Kompaktní
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
@@ -331,7 +331,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     fgColor: { argb: 'FFD5D8DC' },
   };
   defectsNotRemovedLabel.alignment = { vertical: 'middle' };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 16; // Kompaktní
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
@@ -346,7 +346,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     bottom: { style: 'thin' },
   };
   defectsNotRemovedValue.alignment = { vertical: 'top', wrapText: true };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 15; // Kompaktní
   row++;
 
   // Termín odstranění
@@ -361,7 +361,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       fgColor: { argb: 'FFD5D8DC' },
     };
     removalDateLabel.alignment = { vertical: 'middle' };
-    worksheet.getRow(row).height = 18;
+    worksheet.getRow(row).height = 16;
     row++;
 
     worksheet.mergeCells(`A${row}:D${row}`);
@@ -375,7 +375,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
       bottom: { style: 'thin' },
     };
     removalDateValue.alignment = { vertical: 'middle' };
-    worksheet.getRow(row).height = 18;
+    worksheet.getRow(row).height = 15;
     row++;
   }
 
@@ -394,7 +394,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 50; // Ještě větší výška
+  worksheet.getRow(row).height = 44; // KOMPAKTNÍ (bylo 50)
   row++;
 
   // ═══════════════════════════════════════════════════════
@@ -411,7 +411,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     fgColor: { argb: 'FFD5D8DC' },
   };
   conclusionLabel.alignment = { vertical: 'middle' };
-  worksheet.getRow(row).height = 18;
+  worksheet.getRow(row).height = 16; // Kompaktní
   row++;
 
   worksheet.mergeCells(`A${row}:D${row}`);
@@ -425,21 +425,20 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     right: { style: 'thin' },
     bottom: { style: 'thin' },
   };
-  worksheet.getRow(row).height = 24; // Větší výška
+  worksheet.getRow(row).height = 20; // KOMPAKTNÍ (bylo 24)
   row++;
 
   row++; // Prázdný řádek
-  row++; // Extra prázdný řádek
 
   // ═══════════════════════════════════════════════════════
-  // PODPIS - větší výšky
+  // PODPIS
   // ═══════════════════════════════════════════════════════
 
   worksheet.mergeCells(`A${row}:B${row}`);
   const signCell = worksheet.getCell(`A${row}`);
   signCell.value = `Kontrolu provedl: ${data.technicianName}`;
   signCell.font = { size: 10, name: 'Arial' };
-  worksheet.getRow(row).height = 20; // Větší výška
+  worksheet.getRow(row).height = 17; // Kompaktní
   row++;
   
   const dateCell = worksheet.getCell(`A${row}`);
@@ -451,7 +450,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   locationCell.value = `V: ${data.technicianAddress?.split(',')[1]?.trim() || ''}`;
   locationCell.font = { size: 10, name: 'Arial' };
   locationCell.alignment = { horizontal: 'right' };
-  worksheet.getRow(row).height = 20; // Větší výška
+  worksheet.getRow(row).height = 17; // Kompaktní
 
   // Nastavení print area
   worksheet.pageSetup.printArea = `A1:D${row}`;
