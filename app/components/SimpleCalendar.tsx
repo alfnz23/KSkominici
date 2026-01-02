@@ -47,7 +47,6 @@ export default function SimpleCalendar() {
   };
 
   const handleOpenForm = () => {
-    // Nastaví datum na vybraný den
     const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
     setNewEvent({
       date: dateStr,
@@ -99,7 +98,6 @@ export default function SimpleCalendar() {
 
     try {
       if (editingEvent) {
-        // UPDATE
         const res = await fetch(`/api/calendar/events/${editingEvent.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -121,7 +119,6 @@ export default function SimpleCalendar() {
           alert('Chyba při úpravě události');
         }
       } else {
-        // CREATE
         const res = await fetch('/api/calendar/events', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -234,7 +231,7 @@ export default function SimpleCalendar() {
             ))}
           </div>
 
-          {/* Days */}
+          {/* Days - UPRAVENÝ KÓD */}
           <div className="grid grid-cols-7 gap-2">
             {[...Array(startingDayOfWeek)].map((_, i) => (
               <div key={`empty-${i}`} className="aspect-square" />
@@ -255,8 +252,10 @@ export default function SimpleCalendar() {
                   onClick={() => setSelectedDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day))}
                   className={`
                     aspect-square rounded-lg border-2 transition-all duration-200
-                    ${isSelected 
-                      ? 'bg-orange-500/20 border-orange-500 text-white' 
+                    ${dayEvents.length > 0
+                      ? 'bg-orange-500 border-orange-600 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/50'
+                      : isSelected 
+                      ? 'bg-slate-700 border-slate-600 text-white' 
                       : isToday
                       ? 'bg-blue-500/20 border-blue-500 text-white'
                       : 'border-slate-800 text-slate-300 hover:bg-slate-800/50'
@@ -264,10 +263,12 @@ export default function SimpleCalendar() {
                   `}
                 >
                   <div className="flex flex-col items-center justify-center h-full">
-                    <span className="font-bold">{day}</span>
+                    <span className={`font-bold text-lg ${dayEvents.length > 0 ? 'text-white' : ''}`}>
+                      {day}
+                    </span>
                     {dayEvents.length > 0 && (
-                      <span className="text-xs mt-1">
-                        {dayEvents.length} {dayEvents.length === 1 ? 'událost' : 'události'}
+                      <span className="text-sm font-bold text-white mt-1">
+                        {dayEvents.length}
                       </span>
                     )}
                   </div>
