@@ -50,9 +50,26 @@ export async function POST(request: NextRequest) {
       technicianAddress: profile.technician_address,
     };
 
+    // ============================================
+    // VYTVOŘ PĚKNÝ NÁZEV SOUBORU
+    // ============================================
+    const customerName = reportData.customerName || 'Zakaznik';
+    const inspectionDate = reportData.inspectionDate || new Date().toISOString().split('T')[0];
+    
+    // Vyčistit jméno (odstranit diakritiku a speciální znaky)
+    const cleanName = customerName
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // odstranit diakritiku
+      .replace(/[^a-zA-Z0-9]/g, '_')   // speciální znaky na _
+      .replace(/_+/g, '_')              // vícenásobné _ na jedno
+      .substring(0, 30);                // max 30 znaků
+
+    const baseFilename = `Zprava_${cleanName}_${inspectionDate}`;
+    // ============================================
+
     // Vygenerovat PDF
     const pdfBuffer = await generateReportPDF(reportData);
-    const pdfFilename = `zprava-${crypto.randomUUID()}-${Date.now()}.pdf`;
+    const pdfFilename = `${baseFilename}.pdf`;
     const pdfPath = `${profile.company_id}/${job_id}/${pdfFilename}`;
 
     const { error: pdfUploadError } = await supabase.storage
@@ -84,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     // Vygenerovat XLSX
     const xlsxBuffer = await generateReportXLSX(reportData);
-    const xlsxFilename = `zprava-${crypto.randomUUID()}-${Date.now()}.xlsx`;
+    const xlsxFilename = `${baseFilename}.xlsx`;
     const xlsxPath = `${profile.company_id}/${job_id}/${xlsxFilename}`;
 
     const { error: xlsxUploadError } = await supabase.storage
