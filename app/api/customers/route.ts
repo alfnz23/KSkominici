@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       .eq('assigned_to', user.id)
       .neq('type', 'passport');
 
-    const ownCustomerIds = [...new Set(ownJobs?.map(j => j.customer_id) || [])];
+    const ownCustomerIds = Array.from(new Set(ownJobs?.map(j => j.customer_id) || []));
 
     // 2. Zákazníci z passport jobů firmy (SDÍLENÉ)
     const { data: passportJobs } = await supabase
@@ -45,10 +45,10 @@ export async function GET(request: NextRequest) {
       .eq('company_id', profile.company_id)
       .eq('type', 'passport');
 
-    const passportCustomerIds = [...new Set(passportJobs?.map(j => j.customer_id) || [])];
+    const passportCustomerIds = Array.from(new Set(passportJobs?.map(j => j.customer_id) || []));
 
     // 3. Spojit ID zákazníků
-    const allowedCustomerIds = [...new Set([...ownCustomerIds, ...passportCustomerIds])];
+    const allowedCustomerIds = Array.from(new Set([...ownCustomerIds, ...passportCustomerIds]));
 
     // Pokud nemá žádné zákazníky, vrať prázdný array
     if (allowedCustomerIds.length === 0) {
@@ -66,10 +66,6 @@ export async function GET(request: NextRequest) {
       console.error('Customers error:', customersError);
       return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 });
     }
-
-    // ============================================
-    // Zbytek kódu stejný (načítání jobů, reports, PDF)
-    // ============================================
 
     // Pro každého zákazníka načti poslední job + report + dokument
     const customersWithJobs = await Promise.all(
@@ -154,7 +150,7 @@ export async function GET(request: NextRequest) {
           // Vytvoř signed URL pro PDF
           const { data: signedUrl } = await supabase.storage
             .from('documents')
-            .createSignedUrl(pdfDoc.storage_path, 3600); // 1 hodina platnost
+            .createSignedUrl(pdfDoc.storage_path, 3600);
 
           pdfUrl = signedUrl?.signedUrl || null;
         }
