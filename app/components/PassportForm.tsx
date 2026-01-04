@@ -117,7 +117,7 @@ export default function PassportForm() {
     };
     setFormData((prev) => ({
       ...prev,
-      customers: [...prev.customers, newCustomer],
+      customers: [newCustomer, ...prev.customers],
     }));
   };
 
