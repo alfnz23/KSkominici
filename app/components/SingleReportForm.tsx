@@ -38,6 +38,11 @@ interface ReportFormData {
 }
 
 export default function SingleReportForm() {
+  // Vypočítat datum příští kontroly (+1 rok od dneška)
+  const todayDate = new Date();
+  const nextYearDate = new Date(todayDate);
+  nextYearDate.setFullYear(nextYearDate.getFullYear() + 1);
+
   const [formData, setFormData] = useState<ReportFormData>({
     customerName: '',
     companyOrPersonName: '',
@@ -45,8 +50,8 @@ export default function SingleReportForm() {
     permanentAddress: '',
     inspectionAddress: '',
     customerPhone: '',
-    inspectionDate: new Date().toISOString().split('T')[0],
-    nextInspectionDate: '',
+    inspectionDate: todayDate.toISOString().split('T')[0],
+    nextInspectionDate: nextYearDate.toISOString().split('T')[0],
     technicianName: '',
     chimneyType: '',
     chimneyDescription: '',
