@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { FileText, Send, Loader2, CheckCircle } from 'lucide-react';
 
 interface ReportFormData {
@@ -38,6 +39,8 @@ interface ReportFormData {
 }
 
 export default function SingleReportForm() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState<ReportFormData>({
     customerName: '',
     companyOrPersonName: '',
@@ -311,30 +314,10 @@ export default function SingleReportForm() {
 
       setSubmitStatus('success');
 
-      // Reset formuláře po 2 sekundách
+      // Redirect na dashboard po 1 sekundě
       setTimeout(() => {
-        setFormData({
-          customerName: '',
-          companyOrPersonName: '',
-          customerEmail: '',
-          permanentAddress: '',
-          inspectionAddress: '',
-          customerPhone: '',
-          inspectionDate: new Date().toISOString().split('T')[0],
-          nextInspectionDate: '',
-          technicianName: '',
-          chimneyType: '',
-          chimneyDescription: '',
-          flue: '',
-          flueType: '',
-          condition: 'Vyhovuje',
-          defectsFound: '',
-          defectRemovalDate: '',
-          recommendations: '',
-          appliances: [{ type: '', manufacturer: '', power: '', location: '', floor: '' }],
-        });
-        setSubmitStatus('idle');
-      }, 2000);
+        router.push('/dashboard');
+      }, 1000);
     } catch (error) {
       console.error('Chyba při odesílání:', error);
       setSubmitStatus('error');
