@@ -25,17 +25,51 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    // Get customers
+    // ============================================
+    // FILTROVÁNÍ ZÁKAZNÍKŮ (jako u reports)
+    // ============================================
+    
+    // 1. Zákazníci z vlastních non-passport jobů (SOUKROMÉ)
+    const { data: ownJobs } = await supabase
+      .from('jobs')
+      .select('customer_id')
+      .eq('assigned_to', user.id)
+      .neq('type', 'passport');
+
+    const ownCustomerIds = [...new Set(ownJobs?.map(j => j.customer_id) || [])];
+
+    // 2. Zákazníci z passport jobů firmy (SDÍLENÉ)
+    const { data: passportJobs } = await supabase
+      .from('jobs')
+      .select('customer_id')
+      .eq('company_id', profile.company_id)
+      .eq('type', 'passport');
+
+    const passportCustomerIds = [...new Set(passportJobs?.map(j => j.customer_id) || [])];
+
+    // 3. Spojit ID zákazníků
+    const allowedCustomerIds = [...new Set([...ownCustomerIds, ...passportCustomerIds])];
+
+    // Pokud nemá žádné zákazníky, vrať prázdný array
+    if (allowedCustomerIds.length === 0) {
+      return NextResponse.json({ customers: [] }, { status: 200 });
+    }
+
+    // 4. Načti jen povolené zákazníky
     const { data: customers, error: customersError } = await supabase
       .from('customers')
       .select('*')
-      .eq('company_id', profile.company_id)
+      .in('id', allowedCustomerIds)
       .order('created_at', { ascending: false });
 
     if (customersError) {
       console.error('Customers error:', customersError);
       return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 });
     }
+
+    // ============================================
+    // Zbytek kódu stejný (načítání jobů, reports, PDF)
+    // ============================================
 
     // Pro každého zákazníka načti poslední job + report + dokument
     const customersWithJobs = await Promise.all(
