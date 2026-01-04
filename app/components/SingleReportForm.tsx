@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { FileText, Send, Loader2, CheckCircle } from 'lucide-react';
 
 interface ReportFormData {
@@ -39,8 +38,6 @@ interface ReportFormData {
 }
 
 export default function SingleReportForm() {
-  const router = useRouter();
-
   const [formData, setFormData] = useState<ReportFormData>({
     customerName: '',
     companyOrPersonName: '',
@@ -316,7 +313,7 @@ export default function SingleReportForm() {
 
       // Redirect na dashboard po 1 sekundě
       setTimeout(() => {
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
       }, 1000);
     } catch (error) {
       console.error('Chyba při odesílání:', error);
