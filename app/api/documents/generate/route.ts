@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       .from('documents')
       .upload(pdfPath, pdfBuffer, {
         contentType: 'application/pdf',
-        upsert: false,
+        upsert: true, // Přepsat pokud existuje
       });
 
     if (pdfUploadError) {
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       .from('documents')
       .upload(xlsxPath, xlsxBuffer, {
         contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        upsert: false,
+        upsert: true, // Přepsat pokud existuje
       });
 
     if (xlsxUploadError) {
