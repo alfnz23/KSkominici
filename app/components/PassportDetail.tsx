@@ -96,6 +96,13 @@ export default function PassportDetail({
   };
 
   const handleRenewUnit = (unit: Unit) => {
+    // Uložit info že editujeme jednotku z pasportu
+    sessionStorage.setItem('editingPassportUnit', JSON.stringify({
+      passportId: passportId,
+      reportId: unit.id, // ID reportu pro update
+      unitNumber: unit.unitNumber,
+    }));
+    
     onRenewUnit({
       ...unit.reportData,
       unitNumber: unit.unitNumber,
