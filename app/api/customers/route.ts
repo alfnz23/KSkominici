@@ -48,8 +48,9 @@ export async function GET(request: NextRequest) {
     const passportCustomerIds = Array.from(new Set(passportJobs?.map(j => j.customer_id) || []));
     console.log('🔍 Passport customer IDs:', passportCustomerIds);
 
-    // 3. Spojit ID zákazníků
-    const allowedCustomerIds = Array.from(new Set([...ownCustomerIds, ...passportCustomerIds]));
+    // 3. Spojit ID zákazníků a filtrovat null
+    const allowedCustomerIds = Array.from(new Set([...ownCustomerIds, ...passportCustomerIds]))
+      .filter(id => id !== null && id !== undefined); // ← FILTROVAT NULL!
     console.log('🔍 Total allowed customer IDs:', allowedCustomerIds.length, allowedCustomerIds);
 
     if (allowedCustomerIds.length === 0) {
