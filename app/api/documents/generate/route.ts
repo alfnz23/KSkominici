@@ -81,12 +81,21 @@ export async function POST(request: NextRequest) {
       .substring(0, 30);                // max 30 znaků
 
     // Vyčistit číslo jednotky
-    const cleanUnit = unitNumber
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]/g, '_')
-      .replace(/_+/g, '_')
-      .substring(0, 10);
+    // EXTRAHOVAT jen poslední část (číslo) z unitNumber
+    // "Výborná Hana 1NP" → "1NP"
+    let cleanUnit = '';
+    if (unitNumber) {
+      // Zkusit extrahovat poslední část (po poslední mezeře)
+      const parts = unitNumber.trim().split(/\s+/);
+      const lastPart = parts[parts.length - 1]; // Poslední část
+      
+      cleanUnit = lastPart
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9]/g, '_')
+        .replace(/_+/g, '_')
+        .substring(0, 20); // Zvětšit na 20 znaků
+    }
 
     // Pokud je unitNumber → přidat do názvu (pro pasporty)
     const baseFilename = cleanUnit 
