@@ -89,8 +89,13 @@ export async function POST(request: NextRequest) {
     // PDF + XLSX pro technika
     const technicianAttachments = validAttachments;
 
-    // 1. Email zákazníkovi (jen PDF)
-    const customerEmailData = await resend.emails.send({
+    // Zjistit jestli je "Na fakturu" (invoiceOnly)
+    const invoiceOnly = reportData.invoiceOnly === true;
+
+    // 1. Email zákazníkovi (jen PDF) - POUZE pokud NENÍ "Na fakturu"
+    let customerEmailData = null;
+    if (!invoiceOnly) {
+      customerEmailData = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@kskominici.com',
       to: [to_email],
       subject: `Protokol o kontrole spalinové cesty - ${reportData.inspectionAddress || ''}`,
@@ -140,14 +145,36 @@ export async function POST(request: NextRequest) {
       `,
       attachments: customerAttachments,
     });
+    }
 
     // 2. Email technikovi (PDF + XLSX) - použít přihlášeného uživatele
-    if (profile.email && profile.email !== to_email) {
+    // Pokud "Na fakturu" → vždy poslat technikovi
+    // Jinak → poslat jen pokud email technika != email zákazníka
+    if (profile.email && (invoiceOnly || profile.email !== to_email)) {
       await resend.emails.send({
         from: process.env.EMAIL_FROM || 'noreply@kskominici.com',
         to: [profile.email],
-        subject: `Protokol odeslán - ${reportData.customerName || to_email}`,
-        html: `
+        subject: invoiceOnly 
+          ? `Protokol - NA FAKTURU - ${reportData.customerName || to_email}`
+          : `Protokol odeslán - ${reportData.customerName || to_email}`,
+        html: invoiceOnly ? `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #E67E22;">Protokol - NA FAKTURU</h2>
+            <p style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
+              <strong>⚠️ Tento protokol je označen jako "NA FAKTURU"</strong><br>
+              Zákazník <strong>NEDOSTAL</strong> email s protokolem.<br>
+              Po úhradě faktury zašlete dokumenty manuálně.
+            </p>
+            <p>V příloze naleznete dokumenty (PDF + XLSX).</p>
+            
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <strong>Zákazník:</strong> ${reportData.customerName}<br>
+              <strong>Email:</strong> ${to_email}<br>
+              <strong>Adresa:</strong> ${reportData.inspectionAddress}<br>
+              <strong>Datum kontroly:</strong> ${reportData.inspectionDate ? new Date(reportData.inspectionDate).toLocaleDateString('cs-CZ') : 'N/A'}
+            </div>
+          </div>
+        ` : `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Protokol byl úspěšně odeslán</h2>
             <p>Protokol byl odeslán zákazníkovi: <strong>${to_email}</strong></p>
@@ -171,7 +198,7 @@ export async function POST(request: NextRequest) {
       to_email,
       cc_email: profile.email || null,
       subject: `Protokol o kontrole spalinové cesty - ${reportData.inspectionAddress || ''}`,
-      payload: { report_id, documents: documents.map((d) => d.id) },
+      payload: { report_id, documents: documents.map((d) => d.id), invoice_only: invoiceOnly },
       status: 'sent',
       provider_message_id: customerEmailData.data?.id || null,
       sent_at: new Date().toISOString(),
@@ -186,8 +213,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Email byl úspěšně odeslán',
-        email_id: customerEmailData.data?.id,
+        message: invoiceOnly 
+          ? 'Email odeslán pouze technikovi (NA FAKTURU)'
+          : 'Email byl úspěšně odeslán',
+        email_id: customerEmailData?.data?.id || null,
+        invoice_only: invoiceOnly,
       },
       { status: 200 }
     );
