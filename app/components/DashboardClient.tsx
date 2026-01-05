@@ -34,9 +34,14 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const isRenew = urlParams.get('renew') === 'true';
+    const passportId = urlParams.get('passport');
     
     if (isRenew) {
       setCurrentView('single-report');
+    } else if (passportId) {
+      // Redirect na passport detail
+      setSelectedPassport(passportId);
+      setCurrentView('passport-detail');
     }
   }, []);
 
