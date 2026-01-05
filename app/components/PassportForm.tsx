@@ -14,10 +14,8 @@ interface CustomerData {
   inspectionAddress: string;
   
   // Technické údaje
-  chimneyType: string;
   chimneyDescription: string;
   flue: string;
-  flueType: string;
   condition: string;
   defectsFound: string;
   defectRemovalDate: string;
@@ -46,12 +44,17 @@ interface PassportFormData {
 }
 
 export default function PassportForm() {
+  // Počáteční datum + 1 rok
+  const todayDate = new Date();
+  const nextYearDate = new Date(todayDate);
+  nextYearDate.setFullYear(nextYearDate.getFullYear() + 1);
+
   const [formData, setFormData] = useState<PassportFormData>({
     buildingAddress: '',
     buildingCustomerName: '',
     customerEmail: '',
-    inspectionDate: new Date().toISOString().split('T')[0],
-    nextInspectionDate: '',
+    inspectionDate: todayDate.toISOString().split('T')[0],
+    nextInspectionDate: nextYearDate.toISOString().split('T')[0],
     technicianName: '',
     buildingType: 'Bytový dům',
     totalUnits: 0,
@@ -105,10 +108,8 @@ export default function PassportForm() {
       customerPhone: '',
       permanentAddress: formData.buildingAddress, // AUTO-VYPLNĚNO = adresa budovy
       inspectionAddress: formData.buildingAddress, // AUTO-VYPLNĚNO = adresa budovy
-      chimneyType: '',
       chimneyDescription: '',
       flue: '',
-      flueType: '',
       condition: 'Vyhovuje',
       defectsFound: '',
       defectRemovalDate: '',
@@ -261,10 +262,8 @@ export default function PassportForm() {
               technicianName: formData.technicianName,
               
               // Technické údaje
-              chimneyType: customer.chimneyType,
               chimneyDescription: customer.chimneyDescription,
               flue: customer.flue,
-              flueType: customer.flueType,
               condition: customer.condition,
               defectsFound: customer.defectsFound,
               defectRemovalDate: customer.defectRemovalDate,
@@ -649,41 +648,6 @@ export default function PassportForm() {
                   <div className="border-t border-slate-200 pt-4 mt-4">
                     <h5 className="font-medium text-slate-900 mb-3">Technické údaje</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Typ komína
-                        </label>
-                        <select
-                          value={customer.chimneyType}
-                          onChange={(e) =>
-                            updateCustomer(customer.id, 'chimneyType', e.target.value)
-                          }
-                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        >
-                          <option value="">Vyberte typ</option>
-                          <option value="zděný vestavěný">zděný vestavěný</option>
-                          <option value="systémový montovaný">systémový montovaný</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Typ kouřovodu
-                        </label>
-                        <select
-                          value={customer.flueType}
-                          onChange={(e) =>
-                            updateCustomer(customer.id, 'flueType', e.target.value)
-                          }
-                          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        >
-                          <option value="">Vyberte typ</option>
-                          <option value="samostatný">samostatný</option>
-                          <option value="vícevrstvý">vícevrstvý</option>
-                          <option value="koncentrický">koncentrický</option>
-                        </select>
-                      </div>
-
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-slate-700 mb-2">
                           Popis spalinové cesty
@@ -853,11 +817,10 @@ export default function PassportForm() {
                             className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                           >
                             <option value="">Vyberte</option>
-                            <option value="do 24kW">do 24kW</option>
-                            <option value="do 35kW">do 35kW</option>
-                            <option value="do 50kW">do 50kW</option>
-                            <option value="do 70kW">do 70kW</option>
-                            <option value="do 100kW">do 100kW</option>
+                            <option value="do 5kW">do 5kW</option>
+                            <option value="do 10kW">do 10kW</option>
+                            <option value="do 15kW">do 15kW</option>
+                          </select>
                           </select>
                         </div>
 
