@@ -51,9 +51,10 @@ export async function POST(request: NextRequest) {
     };
 
     // ============================================
-    // VYTVOŘ PĚKNÝ NÁZEV SOUBORU
+    // VYTVOŘ UNIKÁTNÍ NÁZEV SOUBORU
     // ============================================
     const customerName = reportData.customerName || 'Zakaznik';
+    const unitNumber = reportData.unitNumber || '';
     const inspectionDate = reportData.inspectionDate || new Date().toISOString().split('T')[0];
     
     // Vyčistit jméno (odstranit diakritiku a speciální znaky)
@@ -64,7 +65,18 @@ export async function POST(request: NextRequest) {
       .replace(/_+/g, '_')              // vícenásobné _ na jedno
       .substring(0, 30);                // max 30 znaků
 
-    const baseFilename = `Zprava_${cleanName}_${inspectionDate}`;
+    // Vyčistit číslo jednotky
+    const cleanUnit = unitNumber
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .substring(0, 10);
+
+    // Pokud je unitNumber → přidat do názvu (pro pasporty)
+    const baseFilename = cleanUnit 
+      ? `Zprava_${cleanName}_${cleanUnit}_${inspectionDate}`
+      : `Zprava_${cleanName}_${inspectionDate}`;
     // ============================================
 
     // Vygenerovat PDF
@@ -81,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     if (pdfUploadError) {
       console.error('PDF upload error:', pdfUploadError);
-      return NextResponse.json({ error: 'Failed to upload PDF' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to upload PDF', details: pdfUploadError }, { status: 500 });
     }
 
     // Uložit PDF metadata
@@ -113,7 +125,7 @@ export async function POST(request: NextRequest) {
 
     if (xlsxUploadError) {
       console.error('XLSX upload error:', xlsxUploadError);
-      return NextResponse.json({ error: 'Failed to upload XLSX' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to upload XLSX', details: xlsxUploadError }, { status: 500 });
     }
 
     // Uložit XLSX metadata
