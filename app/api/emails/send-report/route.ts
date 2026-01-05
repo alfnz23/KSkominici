@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       subject: `Protokol o kontrole spalinové cesty - ${reportData.inspectionAddress || ''}`,
       payload: { report_id, documents: documents.map((d) => d.id), invoice_only: invoiceOnly },
       status: 'sent',
-      provider_message_id: customerEmailData.data?.id || null,
+      provider_message_id: customerEmailData?.data?.id ?? null,
       sent_at: new Date().toISOString(),
     });
 
