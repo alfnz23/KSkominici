@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Send, Loader2, CheckCircle } from 'lucide-react';
+import { FileText, Send, Loader2, CheckCircle, Save } from 'lucide-react';
 
 interface ReportFormData {
   // Zákaznická data
@@ -68,6 +68,8 @@ export default function SingleReportForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [isEditingPassportUnit, setIsEditingPassportUnit] = useState(false);
+  const [passportEditData, setPassportEditData] = useState<any>(null);
 
   // Načíst profil technika při načtení komponenty
   useEffect(() => {
@@ -196,6 +198,22 @@ export default function SingleReportForm() {
     }
   }, []);
 
+  // Detekovat jestli editujeme jednotku z pasportu
+  useEffect(() => {
+    const editingPassportStr = sessionStorage.getItem('editingPassportUnit');
+    if (editingPassportStr) {
+      try {
+        const editData = JSON.parse(editingPassportStr);
+        setIsEditingPassportUnit(true);
+        setPassportEditData(editData);
+        console.log('📝 Editace jednotky z pasportu:', editData);
+        // NEČISTIT sessionStorage - nechat pro submit!
+      } catch (e) {
+        console.error('Error parsing editingPassportUnit:', e);
+      }
+    }
+  }, []);
+
   const handleInputChange = (field: keyof ReportFormData, value: any) => {
     setFormData((prev) => {
       const updates: Partial<ReportFormData> = { [field]: value };
@@ -249,6 +267,80 @@ export default function SingleReportForm() {
     setSubmitStatus('idle');
 
     try {
+      // ============================================
+      // POKUD EDITUJEME JEDNOTKU Z PASPORTU → UPDATE
+      // ============================================
+      if (isEditingPassportUnit && passportEditData) {
+        console.log('📝 Aktualizuji jednotku v pasportu...');
+        
+        // 1. Update report data
+        const updateRes = await fetch('/api/reports/update', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            report_id: passportEditData.reportId,
+            data: {
+              ...formData,
+              unitNumber: passportEditData.unitNumber,
+            }
+          })
+        });
+        
+        if (!updateRes.ok) {
+          const errorText = await updateRes.text();
+          throw new Error(`Failed to update report: ${errorText}`);
+        }
+        
+        console.log('✅ Report aktualizován');
+        
+        // 2. Smazat staré documents
+        const deleteDocsRes = await fetch(`/api/documents/delete-by-report`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            report_id: passportEditData.reportId,
+          })
+        });
+        
+        if (!deleteDocsRes.ok) {
+          console.warn('⚠️ Nepodařilo se smazat staré documents');
+        }
+        
+        // 3. Vygenerovat nové documents
+        const docRes = await fetch('/api/documents/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            job_id: passportEditData.passportId,
+            report_id: passportEditData.reportId,
+          })
+        });
+        
+        if (!docRes.ok) {
+          throw new Error('Failed to generate documents');
+        }
+        
+        console.log('✅ Documents vygenerovány');
+        
+        // 4. Vyčistit sessionStorage
+        sessionStorage.removeItem('editingPassportUnit');
+        sessionStorage.removeItem('renewPassportUnit');
+        
+        setSubmitStatus('success');
+        
+        // 5. Redirect zpět na passport detail
+        setTimeout(() => {
+          window.location.href = `/dashboard`;
+        }, 1500);
+        
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // ============================================
+      // JINAK → NORMÁLNÍ SUBMIT (vytvoření nové zprávy)
+      // ============================================
+
       // 1. Vytvořit/upsertovat zákazníka
       const customerRes = await fetch('/api/customers/upsert', {
         method: 'POST',
@@ -787,12 +879,21 @@ export default function SingleReportForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Odesílám...
+                  {isEditingPassportUnit ? 'Ukládám...' : 'Odesílám...'}
                 </>
               ) : (
                 <>
-                  <Send className="w-5 h-5 mr-2" />
-                  Odeslat zprávu
+                  {isEditingPassportUnit ? (
+                    <>
+                      <Save className="w-5 h-5 mr-2" />
+                      Uložit změny
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5 mr-2" />
+                      Odeslat zprávu
+                    </>
+                  )}
                 </>
               )}
             </button>
