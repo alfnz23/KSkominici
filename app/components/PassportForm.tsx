@@ -44,17 +44,16 @@ interface PassportFormData {
 }
 
 export default function PassportForm() {
-  // Počáteční datum + 1 rok
-  const todayDate = new Date();
-  const nextYearDate = new Date(todayDate);
-  nextYearDate.setFullYear(nextYearDate.getFullYear() + 1);
-
   const [formData, setFormData] = useState<PassportFormData>({
     buildingAddress: '',
     buildingCustomerName: '',
     customerEmail: '',
-    inspectionDate: todayDate.toISOString().split('T')[0],
-    nextInspectionDate: nextYearDate.toISOString().split('T')[0],
+    inspectionDate: new Date().toISOString().split('T')[0],
+    nextInspectionDate: (() => {
+      const nextYear = new Date();
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+      return nextYear.toISOString().split('T')[0];
+    })(),
     technicianName: '',
     buildingType: 'Bytový dům',
     totalUnits: 0,
@@ -817,10 +816,9 @@ export default function PassportForm() {
                             className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                           >
                             <option value="">Vyberte</option>
-                            <option value="do 5kW">do 5kW</option>
-                            <option value="do 10kW">do 10kW</option>
-                            <option value="do 15kW">do 15kW</option>
-                          </select>
+                            <option value="do 5kW">do 24kW</option>
+                            <option value="do 10kW">do 35kW</option>
+                            <option value="do 15kW">do 50kW</option>
                           </select>
                         </div>
 
