@@ -279,10 +279,7 @@ export default function SingleReportForm() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             report_id: passportEditData.reportId,
-            data: {
-              ...formData,
-              unitNumber: passportEditData.unitNumber,
-            }
+            data: formData, // Použít celý formData (včetně upraveného unitNumber)
           })
         });
         
