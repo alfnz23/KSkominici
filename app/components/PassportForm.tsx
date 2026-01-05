@@ -816,9 +816,14 @@ export default function PassportForm() {
                             className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                           >
                             <option value="">Vyberte</option>
-                            <option value="do 5kW">do 24kW</option>
-                            <option value="do 10kW">do 35kW</option>
-                            <option value="do 15kW">do 50kW</option>
+                            <option value="do 5kW">do 5kW</option>
+                            <option value="do 10kW">do 10kW</option>
+                            <option value="do 15kW">do 15kW</option>
+                            <option value="do 24kW">do 24kW</option>
+                            <option value="do 35kW">do 35kW</option>
+                            <option value="do 50kW">do 50kW</option>
+                            <option value="do 75kW">do 75kW</option>
+                            <option value="do 100kW">do 100kW</option>
                           </select>
                         </div>
 
