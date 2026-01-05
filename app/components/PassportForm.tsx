@@ -207,6 +207,7 @@ export default function PassportForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           job_type: 'passport',
+          customer_email: formData.customerEmail, // Přidat pro vytvoření customer_id
           inspection_address: formData.buildingAddress,
           inspection_date: formData.inspectionDate,
           building_data: {
@@ -285,14 +286,23 @@ export default function PassportForm() {
 
       // 3. Vygenerovat dokumenty (PDF + XLSX) pro každou jednotku
       for (const reportId of reportIds) {
-        await fetch('/api/documents/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            job_id: job.id,
-            report_id: reportId,
-          }),
-        });
+        try {
+          const docRes = await fetch('/api/documents/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              job_id: job.id,
+              report_id: reportId,
+            }),
+          });
+          
+          if (!docRes.ok) {
+            const error = await docRes.text();
+            console.error(`Chyba při generování dokumentů pro report ${reportId}:`, error);
+          }
+        } catch (error) {
+          console.error(`Chyba při generování dokumentů pro report ${reportId}:`, error);
+        }
       }
 
       // 4. Odeslat pasport technikovi
