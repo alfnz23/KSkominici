@@ -5,7 +5,6 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
     
-    // Auth check
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
@@ -13,7 +12,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's company_id
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('company_id')
@@ -25,37 +23,42 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    // ============================================
-    // FILTROVÁNÍ ZÁKAZNÍKŮ (jako u reports)
-    // ============================================
-    
-    // 1. Zákazníci z vlastních non-passport jobů (SOUKROMÉ)
-    const { data: ownJobs } = await supabase
+    console.log('🔍 User ID:', user.id);
+    console.log('🔍 Company ID:', profile.company_id);
+
+    // 1. Zákazníci z vlastních non-passport jobů
+    const { data: ownJobs, error: ownJobsError } = await supabase
       .from('jobs')
       .select('customer_id')
       .eq('assigned_to', user.id)
       .neq('type', 'passport');
 
+    console.log('🔍 Own jobs:', ownJobs?.length || 0, ownJobsError);
     const ownCustomerIds = Array.from(new Set(ownJobs?.map(j => j.customer_id) || []));
+    console.log('🔍 Own customer IDs:', ownCustomerIds);
 
-    // 2. Zákazníci z passport jobů firmy (SDÍLENÉ)
-    const { data: passportJobs } = await supabase
+    // 2. Zákazníci z passport jobů firmy
+    const { data: passportJobs, error: passportJobsError } = await supabase
       .from('jobs')
       .select('customer_id')
       .eq('company_id', profile.company_id)
       .eq('type', 'passport');
 
+    console.log('🔍 Passport jobs:', passportJobs?.length || 0, passportJobsError);
     const passportCustomerIds = Array.from(new Set(passportJobs?.map(j => j.customer_id) || []));
+    console.log('🔍 Passport customer IDs:', passportCustomerIds);
 
     // 3. Spojit ID zákazníků
     const allowedCustomerIds = Array.from(new Set([...ownCustomerIds, ...passportCustomerIds]));
+    console.log('🔍 Total allowed customer IDs:', allowedCustomerIds.length, allowedCustomerIds);
 
-    // Pokud nemá žádné zákazníky, vrať prázdný array
     if (allowedCustomerIds.length === 0) {
+      console.log('⚠️ NO CUSTOMER IDS FOUND!');
       return NextResponse.json({ customers: [] }, { status: 200 });
     }
 
-    // 4. Načti jen povolené zákazníky
+    // 4. Načti zákazníky
+    console.log('🔍 Fetching customers...');
     const { data: customers, error: customersError } = await supabase
       .from('customers')
       .select('*')
@@ -63,14 +66,18 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (customersError) {
-      console.error('Customers error:', customersError);
+      console.error('❌ Customers error:', customersError);
       return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 });
     }
+
+    console.log('✅ Customers fetched:', customers?.length || 0);
 
     // Pro každého zákazníka načti poslední job + report + dokument
     const customersWithJobs = await Promise.all(
       (customers || []).map(async (customer) => {
-        // 1. Zkus najít inspection job (standardní zpráva)
+        console.log('🔍 Processing customer:', customer.name);
+
+        // 1. Zkus najít inspection job
         const { data: inspectionJobs } = await supabase
           .from('jobs')
           .select('id, type, inspection_date')
@@ -82,22 +89,19 @@ export async function GET(request: NextRequest) {
         let lastJob = inspectionJobs?.[0];
         let isPassportCustomer = false;
 
-        // 2. Pokud nemá inspection job, zkus najít passport job podle emailu
+        // 2. Pokud nemá inspection job, zkus najít passport job
         if (!lastJob) {
-          // Najdi reports kde email = customer.email
           const { data: passportReports } = await supabase
             .from('reports')
             .select('job_id, data, created_at')
             .eq('company_id', profile.company_id)
             .order('created_at', { ascending: false });
 
-          // Filtruj reports podle emailu v data
           const customerReport = passportReports?.find(r => 
             r.data?.customerEmail === customer.email
           );
 
           if (customerReport) {
-            // Načti passport job
             const { data: passportJobs } = await supabase
               .from('jobs')
               .select('id, type, inspection_date')
@@ -113,6 +117,7 @@ export async function GET(request: NextRequest) {
         }
 
         if (!lastJob) {
+          console.log('⚠️ No job found for customer:', customer.name);
           return {
             ...customer,
             last_inspection_date: null,
@@ -124,6 +129,8 @@ export async function GET(request: NextRequest) {
             is_passport: false,
           };
         }
+
+        console.log('✅ Found job for customer:', customer.name, 'Job ID:', lastJob.id);
 
         // Načti report pro tento job
         const { data: reports } = await supabase
@@ -147,7 +154,6 @@ export async function GET(request: NextRequest) {
         let pdfUrl = null;
 
         if (pdfDoc) {
-          // Vytvoř signed URL pro PDF
           const { data: signedUrl } = await supabase.storage
             .from('documents')
             .createSignedUrl(pdfDoc.storage_path, 3600);
@@ -185,9 +191,10 @@ export async function GET(request: NextRequest) {
       })
     );
 
+    console.log('✅ Returning customers:', customersWithJobs.length);
     return NextResponse.json({ customers: customersWithJobs }, { status: 200 });
   } catch (error) {
-    console.error('Error fetching customers:', error);
+    console.error('❌ CATCH ERROR:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
