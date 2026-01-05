@@ -330,7 +330,10 @@ export default function SingleReportForm() {
         
         // 5. Redirect zpět na passport detail
         setTimeout(() => {
-          window.location.href = `/dashboard`;
+          // Použít router.push místo location.href pro správný routing v Next.js
+          const passportId = passportEditData.passportId;
+          // Redirect do správy zákazníků → pasporty → detail
+          window.location.href = `/dashboard?passport=${passportId}`;
         }, 1500);
         
         setIsSubmitting(false);
