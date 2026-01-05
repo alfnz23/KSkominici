@@ -658,6 +658,11 @@ export default function SingleReportForm() {
                         <option value="do 5kW">do 5kW</option>
                         <option value="do 10kW">do 10kW</option>
                         <option value="do 15kW">do 15kW</option>
+                        <option value="do 24kW">do 24kW</option>
+                        <option value="do 35kW">do 35kW</option>
+                        <option value="do 50kW">do 50kW</option>
+                        <option value="do 75kW">do 75kW</option>
+                        <option value="do 100kW">do 100kW</option>
                       </select>
                     </div>
 
