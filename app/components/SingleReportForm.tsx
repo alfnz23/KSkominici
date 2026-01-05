@@ -11,6 +11,7 @@ interface ReportFormData {
   permanentAddress: string;
   inspectionAddress: string;
   customerPhone: string;
+  unitNumber?: string; // Číslo bytu (pro pasporty)
 
   // Data o kontrole
   inspectionDate: string;
@@ -50,6 +51,7 @@ export default function SingleReportForm() {
     permanentAddress: '',
     inspectionAddress: '',
     customerPhone: '',
+    unitNumber: '', // Číslo bytu
     inspectionDate: todayDate.toISOString().split('T')[0],
     nextInspectionDate: nextYearDate.toISOString().split('T')[0],
     technicianName: '',
@@ -147,6 +149,7 @@ export default function SingleReportForm() {
           companyOrPersonName: unitData.companyOrPersonName || unitData.customerName || '',
           customerEmail: unitData.customerEmail || unitData.email || '',
           customerPhone: unitData.customerPhone || unitData.phone || '',
+          unitNumber: unitData.unitNumber || '', // Číslo bytu
           permanentAddress: unitData.permanentAddress || '',
           inspectionAddress: unitData.buildingAddress || unitData.inspectionAddress || '',
           inspectionDate: new Date().toISOString().split('T')[0], // Nové datum
@@ -404,6 +407,19 @@ export default function SingleReportForm() {
                   onChange={(e) => handleInputChange('customerPhone', e.target.value)}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="+420 123 456 789"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Číslo bytu / jednotky <span className="text-slate-400">(volitelné)</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.unitNumber || ''}
+                  onChange={(e) => handleInputChange('unitNumber', e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="např. 2.01, A3, atd."
                 />
               </div>
 
