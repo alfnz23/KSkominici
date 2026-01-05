@@ -19,14 +19,15 @@ interface ReportFormData {
   technicianName: string;
   
   // Technické údaje
-  chimneyType: string;
   chimneyDescription: string;
   flue: string;
-  flueType: string;
   condition: string;
   defectsFound: string;
   defectRemovalDate: string;
   recommendations: string;
+  
+  // Fakturace
+  invoiceOnly: boolean; // Na fakturu (jen technik dostane email)
   
   // Spotřebiče
   appliances: Array<{
@@ -55,14 +56,13 @@ export default function SingleReportForm() {
     inspectionDate: todayDate.toISOString().split('T')[0],
     nextInspectionDate: nextYearDate.toISOString().split('T')[0],
     technicianName: '',
-    chimneyType: '',
     chimneyDescription: '',
     flue: '',
-    flueType: '',
     condition: 'Vyhovuje',
     defectsFound: '',
     defectRemovalDate: '',
     recommendations: '',
+    invoiceOnly: false, // Default: posílat email zákazníkovi
     appliances: [{ type: '', manufacturer: '', power: '', location: '', floor: '' }],
   });
 
@@ -111,10 +111,8 @@ export default function SingleReportForm() {
             inspectionAddress: renewData.inspectionAddress || '',
             inspectionDate: new Date().toISOString().split('T')[0], // Nové datum
             nextInspectionDate: '', // Vypočítá se automaticky
-            chimneyType: renewData.chimneyType || '',
             chimneyDescription: renewData.chimneyDescription || '',
             flue: renewData.flue || '',
-            flueType: renewData.flueType || '',
             condition: renewData.condition || 'Vyhovuje',
             defectsFound: renewData.defectsFound || '',
             defectRemovalDate: renewData.defectRemovalDate || '',
@@ -156,10 +154,8 @@ export default function SingleReportForm() {
           inspectionAddress: unitData.buildingAddress || unitData.inspectionAddress || '',
           inspectionDate: new Date().toISOString().split('T')[0], // Nové datum
           nextInspectionDate: '', // Vypočítá se automaticky
-          chimneyType: unitData.chimneyType || '',
           chimneyDescription: unitData.chimneyDescription || '',
           flue: unitData.flue || '',
-          flueType: unitData.flueType || '',
           condition: unitData.condition || 'Vyhovuje',
           defectsFound: unitData.defectsFound || '',
           defectRemovalDate: unitData.defectRemovalDate || '',
@@ -659,11 +655,9 @@ export default function SingleReportForm() {
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                       >
                         <option value="">Vyberte výkon</option>
-                        <option value="do 24kW">do 24kW</option>
-                        <option value="do 35kW">do 35kW</option>
-                        <option value="do 50kW">do 50kW</option>
-                        <option value="do 70kW">do 70kW</option>
-                        <option value="do 100kW">do 100kW</option>
+                        <option value="do 5kW">do 5kW</option>
+                        <option value="do 10kW">do 10kW</option>
+                        <option value="do 15kW">do 15kW</option>
                       </select>
                     </div>
 
@@ -736,22 +730,6 @@ export default function SingleReportForm() {
               Technické údaje
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Typ komína *
-                </label>
-                <select
-                  required
-                  value={formData.chimneyType}
-                  onChange={(e) => handleInputChange('chimneyType', e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Vyberte typ</option>
-                  <option value="zděný vestavěný">zděný vestavěný</option>
-                  <option value="systémový montovaný">systémový montovaný</option>
-                </select>
-              </div>
-
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Popis spalinové cesty
@@ -764,24 +742,6 @@ export default function SingleReportForm() {
                   placeholder="Například: Zděný komín opatřen ochrannou komínovou vložkou..."
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Typ kouřovodu
-                </label>
-                <select
-                  value={formData.flueType}
-                  onChange={(e) => handleInputChange('flueType', e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Vyberte typ</option>
-                  <option value="samostatný">samostatný</option>
-                  <option value="vícevrstvý">vícevrstvý</option>
-                  <option value="koncentrický">koncentrický</option>
-                </select>
-              </div>
-
-              <div></div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -870,6 +830,26 @@ export default function SingleReportForm() {
                 </div>
               )}
             </div>
+
+            {/* Checkbox "Na fakturu" - jen pro single zprávu */}
+            {!isEditingPassportUnit && (
+              <div className="mb-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.invoiceOnly}
+                    onChange={(e) => handleInputChange('invoiceOnly', e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-sm font-medium text-slate-700">
+                    Na fakturu (email pouze technikovi)
+                  </span>
+                </label>
+                <p className="ml-7 mt-1 text-xs text-slate-500">
+                  Pokud je zaškrtnuto, zpráva se odešle pouze technikovi. Zákazník nedostane email.
+                </p>
+              </div>
+            )}
 
             <button
               type="submit"
