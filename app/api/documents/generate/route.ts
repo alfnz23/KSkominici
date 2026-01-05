@@ -51,6 +51,21 @@ export async function POST(request: NextRequest) {
     };
 
     // ============================================
+    // SMAZAT STARÉ DOCUMENTS (pokud existují)
+    // ============================================
+    console.log('🗑️ Mažu staré documents pro report:', report_id);
+    const { error: deleteError } = await supabase
+      .from('documents')
+      .delete()
+      .eq('report_id', report_id);
+    
+    if (deleteError) {
+      console.warn('⚠️ Chyba při mazání starých documents:', deleteError);
+    } else {
+      console.log('✅ Staré documents smazány');
+    }
+
+    // ============================================
     // VYTVOŘ UNIKÁTNÍ NÁZEV SOUBORU
     // ============================================
     const customerName = reportData.customerName || 'Zakaznik';
