@@ -21,82 +21,76 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { customerData, reportData } = body;
+    const { job_id, report_kind, data } = body;
     
-    // Zjistit jestli je "Na fakturu"
-    const invoiceOnly = reportData.invoiceOnly === true;
-    
-    // 1. VYTVOŘIT nebo NAJÍT zákazníka
-    const { data: existingCustomer } = await supabase
-      .from('customers')
-      .select('*')
-      .eq('email', customerData.email)
-      .eq('company_id', profile.company_id)
-      .single();
-    
-    let customerId;
-    
-    if (existingCustomer) {
-      // Zákazník už existuje
-      customerId = existingCustomer.id;
-      
-      // Pokud je "Na fakturu" → update na shared = true
-      if (invoiceOnly && !existingCustomer.shared) {
-        await supabase
-          .from('customers')
-          .update({ shared: true })
-          .eq('id', customerId);
-        
-        console.log('✅ Existující zákazník nastaven jako sdílený');
-      }
-    } else {
-      // Vytvořit nového zákazníka
-      const { data: newCustomer } = await supabase
-        .from('customers')
-        .insert({
-          name: customerData.name,
-          email: customerData.email,
-          phone: customerData.phone,
-          permanent_address: customerData.permanentAddress,
-          company_id: profile.company_id,
-          created_by: user.id,
-          shared: invoiceOnly, // ← Pokud "Na fakturu" → shared = true
-        })
-        .select()
-        .single();
-      
-      customerId = newCustomer.id;
-      console.log(`✅ Nový zákazník vytvořen (shared = ${invoiceOnly})`);
+    // Kontrola povinných dat
+    if (!job_id || !data) {
+      return NextResponse.json(
+        { error: 'Missing job_id or data' },
+        { status: 400 }
+      );
     }
     
-    // 2. VYTVOŘIT JOB
-    const { data: job } = await supabase
-      .from('jobs')
-      .insert({
-        type: 'single',
-        customer_id: customerId,
-        company_id: profile.company_id,
-        created_by: user.id,
-        inspection_address: reportData.inspectionAddress,
-        inspection_date: reportData.inspectionDate,
-        status: 'draft',
-      })
-      .select()
-      .single();
+    console.log('📦 Saving report:', { 
+      job_id, 
+      report_kind,
+      has_data: !!data,
+      invoiceOnly: data?.invoiceOnly
+    });
     
-    // 3. VYTVOŘIT REPORT
-    const { data: report } = await supabase
+    // Uložit report
+    const { data: report, error: reportError } = await supabase
       .from('reports')
       .insert({
-        job_id: job.id,
+        job_id: job_id,
+        report_kind: report_kind || 'chimney_inspection',
         company_id: profile.company_id,
         created_by: user.id,
-        data: reportData, // Obsahuje invoiceOnly
+        data: data, // Obsahuje všechna data včetně invoiceOnly
       })
       .select()
       .single();
     
-    return NextResponse.json({ success: true, report_id: report.id });
+    if (reportError) {
+      console.error('Report save error:', reportError);
+      return NextResponse.json(
+        { error: 'Failed to save report', details: reportError.message },
+        { status: 500 }
+      );
+    }
+    
+    console.log('✅ Report saved:', report.id);
+    
+    // Pokud je "Na fakturu" → nastavit zákazníka jako sdíleného
+    if (data?.invoiceOnly === true) {
+      console.log('📢 Invoice only - updating customer to shared');
+      
+      // Najít customer_id z jobu
+      const { data: job } = await supabase
+        .from('jobs')
+        .select('customer_id')
+        .eq('id', job_id)
+        .single();
+      
+      if (job?.customer_id) {
+        const { error: updateError } = await supabase
+          .from('customers')
+          .update({ shared: true })
+          .eq('id', job.customer_id);
+        
+        if (updateError) {
+          console.error('Failed to update customer shared:', updateError);
+        } else {
+          console.log('✅ Customer set as shared');
+        }
+      }
+    }
+    
+    return NextResponse.json({ 
+      success: true, 
+      report_id: report.id,
+      report: report
+    });
   } catch (error) {
     console.error('Error saving report:', error);
     return NextResponse.json(
