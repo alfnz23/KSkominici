@@ -272,47 +272,26 @@ const ReportDocument: React.FC<{ data: ReportData }> = ({ data }) => {
           <Text style={styles.sectionTitle}>SPECIFIKACE SPALINOVÉ CESTY:</Text>
           
           <View style={styles.table}>
+            {/* KOMÍN - velký spojený rámeček */}
             <View style={[styles.tableRow, { borderBottom: data.flue ? '1 solid black' : 0 }]}>
               <View style={[styles.tableCell, { width: '20%', fontWeight: 'bold' }]}>
                 <Text>Komín:</Text>
               </View>
               <View style={[styles.tableCell, { width: '80%', borderRight: 0 }]}>
-                <Text>{data.chimneyType}</Text>
+                <Text>{data.chimneyDescription || ''}</Text>
               </View>
             </View>
             
-            {data.chimneyDescription && (
-              <View style={[styles.tableRow, { borderBottom: data.flue ? '1 solid black' : 0 }]}>
+            {/* KOUŘOVOD - velký spojený rámeček */}
+            {data.flue && (
+              <View style={[styles.tableRow, { borderBottom: 0 }]}>
                 <View style={[styles.tableCell, { width: '20%', fontWeight: 'bold' }]}>
-                  <Text>Popis:</Text>
+                  <Text>Kouřovod:</Text>
                 </View>
                 <View style={[styles.tableCell, { width: '80%', borderRight: 0 }]}>
-                  <Text>{data.chimneyDescription}</Text>
+                  <Text>{data.flue}</Text>
                 </View>
               </View>
-            )}
-            
-            {data.flue && (
-              <>
-                <View style={styles.tableRow}>
-                  <View style={[styles.tableCell, { width: '20%', fontWeight: 'bold' }]}>
-                    <Text>Kouřovod:</Text>
-                  </View>
-                  <View style={[styles.tableCell, { width: '80%', borderRight: 0 }]}>
-                    <Text>{data.flueType || ''}</Text>
-                  </View>
-                </View>
-                {data.flue && (
-                  <View style={[styles.tableRow, { borderBottom: 0 }]}>
-                    <View style={[styles.tableCell, { width: '20%', fontWeight: 'bold' }]}>
-                      <Text>Popis:</Text>
-                    </View>
-                    <View style={[styles.tableCell, { width: '80%', borderRight: 0 }]}>
-                      <Text>{data.flue}</Text>
-                    </View>
-                  </View>
-                )}
-              </>
             )}
           </View>
         </View>
