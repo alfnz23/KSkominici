@@ -1,91 +1,86 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { z } from 'zod'
-
-const upsertCustomerSchema = z.object({
-  email: z.string().email(),
-  name: z.string().optional(),
-  phone: z.string().optional(),
-  address: z.string().optional()
-})
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = createClient();
     
-    // Get user from Supabase auth
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user profile to get company_id
     const { data: profile } = await supabase
       .from('profiles')
       .select('company_id')
       .eq('id', user.id)
-      .single()
+      .single();
 
-    if (!profile?.company_id) {
-      return NextResponse.json({ error: 'No company associated with user' }, { status: 400 })
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    const body = await request.json()
-    const validatedData = upsertCustomerSchema.parse(body)
+    const body = await request.json();
+    const { email, name, phone, address, invoiceOnly } = body;
     
-    // Check if customer exists
-    const { data: existingCustomer } = await supabase
+    if (!email) {
+      return NextResponse.json(
+        { error: 'Email is required' },
+        { status: 400 }
+      );
+    }
+    
+    // Určit jestli zákazník má být sdílený
+    const shared = invoiceOnly === true;
+    
+    console.log('📦 Customer upsert:', { 
+      email, 
+      name,
+      invoiceOnly,
+      shared
+    });
+    
+    // Upsert zákazníka
+    const { data: customer, error: customerError } = await supabase
       .from('customers')
-      .select('*')
-      .eq('company_id', profile.company_id)
-      .eq('email', validatedData.email)
-      .single()
-
-    let customer
-    if (existingCustomer) {
-      // Update existing customer
-      const { data, error } = await supabase
-        .from('customers')
-        .update({
-          name: validatedData.name,
-          phone: validatedData.phone,
-          address: validatedData.address,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingCustomer.id)
-        .select()
-        .single()
-
-      if (error) throw error
-      customer = data
-    } else {
-      // Create new customer
-      const { data, error } = await supabase
-        .from('customers')
-        .insert({
-          email: validatedData.email,
-          name: validatedData.name,
-          phone: validatedData.phone,
-          address: validatedData.address,
+      .upsert(
+        {
+          email: email,
+          name: name || '',
+          phone: phone || '',
+          permanent_address: address || '',
           company_id: profile.company_id,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      customer = data
-    }
-
-    return NextResponse.json(customer)
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid input', details: error.errors }, { status: 400 })
+          created_by: user.id,
+          shared: shared, // ← Nastavit shared podle invoiceOnly
+        },
+        { 
+          onConflict: 'email,company_id',
+          ignoreDuplicates: false 
+        }
+      )
+      .select()
+      .single();
+    
+    if (customerError) {
+      console.error('Customer upsert error:', customerError);
+      return NextResponse.json(
+        { error: 'Failed to save customer', details: customerError.message },
+        { status: 500 }
+      );
     }
     
-    console.error('Upsert customer error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.log('✅ Customer saved:', customer.id);
+    
+    return NextResponse.json({ 
+      success: true, 
+      customer_id: customer.id,
+      customer: customer
+    });
+  } catch (error) {
+    console.error('Error upserting customer:', error);
+    return NextResponse.json(
+      { error: 'Failed to upsert customer', details: String(error) },
+      { status: 500 }
+    );
   }
 }
