@@ -237,11 +237,12 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   worksheet.getRow(row).height = 20;
   row++;
 
-  addFullRow('Komín:', data.chimneyType);
-  if (data.chimneyDescription) addFullRow('Popis:', data.chimneyDescription);
+  // KOMÍN - velký spojený rámeček (obsahuje popis spalinové cesty)
+  addFullRow('Komín:', data.chimneyDescription || '');
+  
+  // KOUŘOVOD - velký spojený rámeček
   if (data.flue) {
-    addFullRow('Kouřovod:', data.flueType || '');
-    addFullRow('Popis:', data.flue);
+    addFullRow('Kouřovod:', data.flue);
   }
 
   row++;
