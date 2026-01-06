@@ -346,6 +346,7 @@ export default function SingleReportForm() {
           name: formData.customerName,
           phone: formData.customerPhone,
           address: formData.permanentAddress,
+          invoiceOnly: formData.invoiceOnly, // ← PŘIDAT!
         }),
       });
 
