@@ -40,33 +40,77 @@ export async function POST(request: NextRequest) {
       shared
     });
     
-    // Upsert zákazníka
-    const { data: customer, error: customerError } = await supabase
+    // Zkontrolovat jestli zákazník existuje
+    const { data: existingCustomer } = await supabase
       .from('customers')
-      .upsert(
-        {
+      .select('*')
+      .eq('email', email)
+      .eq('company_id', profile.company_id)
+      .maybeSingle();
+    
+    let customer;
+    
+    if (existingCustomer) {
+      // Update existujícího zákazníka
+      console.log('📝 Updating existing customer:', existingCustomer.id);
+      
+      // Pokud je invoiceOnly a zákazník ještě není shared → update
+      if (shared && !existingCustomer.shared) {
+        const { data: updated, error: updateError } = await supabase
+          .from('customers')
+          .update({
+            name: name || existingCustomer.name,
+            phone: phone || existingCustomer.phone,
+            address: address || existingCustomer.address,
+            shared: true, // Nastavit jako sdílený
+          })
+          .eq('id', existingCustomer.id)
+          .select()
+          .single();
+        
+        if (updateError) {
+          console.error('Customer update error:', updateError);
+          return NextResponse.json(
+            { error: 'Failed to update customer', details: updateError.message },
+            { status: 500 }
+          );
+        }
+        
+        customer = updated;
+        console.log('✅ Customer updated to shared');
+      } else {
+        // Použít existujícího zákazníka
+        customer = existingCustomer;
+        console.log('✅ Using existing customer');
+      }
+    } else {
+      // Vytvořit nového zákazníka
+      console.log('➕ Creating new customer');
+      
+      const { data: newCustomer, error: insertError } = await supabase
+        .from('customers')
+        .insert({
           email: email,
           name: name || '',
           phone: phone || '',
-          address: address || '', // ← Změněno z permanent_address
+          address: address || '',
           company_id: profile.company_id,
           created_by: user.id,
-          shared: shared, // ← Nastavit shared podle invoiceOnly
-        },
-        { 
-          onConflict: 'email,company_id',
-          ignoreDuplicates: false 
-        }
-      )
-      .select()
-      .single();
-    
-    if (customerError) {
-      console.error('Customer upsert error:', customerError);
-      return NextResponse.json(
-        { error: 'Failed to save customer', details: customerError.message },
-        { status: 500 }
-      );
+          shared: shared,
+        })
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error('Customer insert error:', insertError);
+        return NextResponse.json(
+          { error: 'Failed to create customer', details: insertError.message },
+          { status: 500 }
+        );
+      }
+      
+      customer = newCustomer;
+      console.log('✅ Customer created');
     }
     
     console.log('✅ Customer saved:', customer.id);
