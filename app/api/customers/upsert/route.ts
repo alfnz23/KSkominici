@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
           email: email,
           name: name || '',
           phone: phone || '',
-          permanent_address: address || '',
+          address: address || '', // ← Změněno z permanent_address
           company_id: profile.company_id,
           created_by: user.id,
           shared: shared, // ← Nastavit shared podle invoiceOnly
