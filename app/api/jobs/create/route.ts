@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       customer_email,
+      customer_name,
       job_type,
       inspection_address,
       inspection_date,
@@ -47,6 +48,8 @@ export async function POST(request: NextRequest) {
           .insert({
             company_id: profile.company_id,
             email: customer_email,
+            name: customer_name || '', // ← PŘIDÁNO!
+            created_by: user.id,
           })
           .select('id')
           .single();
