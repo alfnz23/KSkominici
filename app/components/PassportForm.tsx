@@ -208,6 +208,7 @@ export default function PassportForm() {
         body: JSON.stringify({
           job_type: 'passport',
           customer_email: formData.customerEmail, // Přidat pro vytvoření customer_id
+          customer_name: formData.buildingCustomerName, // ← PŘIDÁNO!
           inspection_address: formData.buildingAddress,
           inspection_date: formData.inspectionDate,
           building_data: {
