@@ -179,6 +179,26 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto dashboard-dark">
           <div className="max-w-7xl mx-auto p-4 lg:p-8 dashboard-dark">
+            {/* Tlačítko zpět */}
+            {currentView !== 'home' && (
+              <button
+                onClick={() => {
+                  if (currentView === 'passport-detail' && selectedPassport) {
+                    setSelectedPassport(null);
+                    setCurrentView('customers');
+                  } else {
+                    setCurrentView('home');
+                  }
+                }}
+                className="mb-6 flex items-center gap-2 px-4 py-2 bg-slate-900/90 backdrop-blur-xl rounded-lg border border-slate-800/50 text-white hover:bg-slate-800/90 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="font-medium">Zpět</span>
+              </button>
+            )}
+            
             {/* Home View */}
             {currentView === 'home' && (
               <div className="space-y-6">
