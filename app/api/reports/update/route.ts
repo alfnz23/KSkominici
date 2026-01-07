@@ -5,54 +5,50 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = createClient();
     
-    // Auth check
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    const { report_id, data } = body;
-
-    if (!report_id || !data) {
-      return NextResponse.json(
-        { error: 'report_id and data are required' },
-        { status: 400 }
-      );
+    const { job_id, inspection_address, inspection_date } = body;
+    
+    if (!job_id) {
+      return NextResponse.json({ error: 'job_id is required' }, { status: 400 });
     }
-
-    console.log('📝 Updating report:', report_id);
-
-    // Update report data
-    const { error: updateError } = await supabase
-      .from('reports')
-      .update({ 
-        data,
-        updated_at: new Date().toISOString()
+    
+    console.log('🔄 Updating job:', job_id);
+    
+    // Update job
+    const { data: job, error: jobError } = await supabase
+      .from('jobs')
+      .update({
+        inspection_address,
+        inspection_date,
+        updated_at: new Date().toISOString(),
       })
-      .eq('id', report_id);
-
-    if (updateError) {
-      console.error('❌ Update error:', updateError);
+      .eq('id', job_id)
+      .select()
+      .single();
+    
+    if (jobError) {
+      console.error('Job update error:', jobError);
       return NextResponse.json(
-        { error: 'Failed to update report', details: updateError },
+        { error: 'Failed to update job', details: jobError.message },
         { status: 500 }
       );
     }
-
-    console.log('✅ Report updated successfully');
-
-    return NextResponse.json(
-      { 
-        success: true,
-        message: 'Report updated successfully'
-      },
-      { status: 200 }
-    );
+    
+    console.log('✅ Job updated:', job.id);
+    
+    return NextResponse.json({ 
+      success: true, 
+      job
+    });
   } catch (error) {
-    console.error('❌ Error updating report:', error);
+    console.error('Error updating job:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
+      { error: 'Failed to update job', details: String(error) },
       { status: 500 }
     );
   }
