@@ -87,6 +87,7 @@ export default function CustomerList() {
         customerEmail: customer.email,
         customerPhone: customer.phone,
         inspectionAddress: job.inspection_address,
+        renewJobId: job.job_id, // ← PŘIDÁNO pro UPDATE místo CREATE
       }));
 
       window.location.href = '/dashboard?renew=true';
