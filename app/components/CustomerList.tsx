@@ -66,7 +66,8 @@ export default function CustomerList() {
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`/api/reports/latest?customerId=${customer.id}`);
+      // Načíst report pro KONKRÉTNÍ job (ne poslední pro zákazníka!)
+      const res = await fetch(`/api/reports/by-job?job_id=${job.job_id}`);
       if (!res.ok) {
         alert('Nepodařilo se načíst data zprávy');
         return;
