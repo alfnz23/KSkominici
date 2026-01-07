@@ -148,9 +148,6 @@ export async function GET(request: NextRequest) {
     // Filtrovat null (zákazníci bez jobs)
     const validCustomers = customersWithJobs.filter(c => c !== null);
 
-    // Filtrovat null (zákazníci bez jobs)
-    const validCustomers = customersWithJobs.filter(c => c !== null);
-
     console.log('✅ Returning customers:', validCustomers.length);
     return NextResponse.json({ customers: validCustomers }, { status: 200 });
   } catch (error) {
