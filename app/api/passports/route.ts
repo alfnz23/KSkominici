@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch passports' }, { status: 500 });
     }
 
-    // Pro každý pasport zjistit počet bytů (reports) a poslední datum kontroly
+    // Pro každý pasport zjistit počet bytů (reports) a zákazníka
     const passports = await Promise.all(
       (passportJobs || []).map(async (job) => {
         // Počet reportů (bytů) v pasportu
@@ -43,20 +43,28 @@ export async function GET(request: NextRequest) {
           .select('*', { count: 'exact', head: true })
           .eq('job_id', job.id);
 
-        // Načíst jméno zákazníka z prvního reportu
-        const { data: reports } = await supabase
-          .from('reports')
-          .select('data')
-          .eq('job_id', job.id)
-          .limit(1);
-
-        const firstReport = reports?.[0];
-        const customerName = firstReport?.data?.customerName || 'Neznámý zákazník';
+        // Načíst zákazníka z customers tabulky (SPRÁVNĚ!)
+        let customerName = 'Neznámý zákazník';
+        let customerEmail = '';
+        
+        if (job.customer_id) {
+          const { data: customer } = await supabase
+            .from('customers')
+            .select('name, email')
+            .eq('id', job.customer_id)
+            .single();
+          
+          if (customer) {
+            customerName = customer.name || 'Neznámý zákazník';
+            customerEmail = customer.email || '';
+          }
+        }
 
         return {
           id: job.id,
           buildingAddress: job.inspection_address,
           customerName,
+          customerEmail, // ← PŘIDÁNO pro PassportList seskupování
           inspectionDate: job.inspection_date,
           unitsCount: unitsCount || 0,
           status: job.status,
