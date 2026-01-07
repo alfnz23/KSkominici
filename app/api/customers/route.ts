@@ -26,44 +26,28 @@ export async function GET(request: NextRequest) {
     console.log('🔍 User ID:', user.id);
     console.log('🔍 Company ID:', profile.company_id);
 
-    // 1. Zákazníci z vlastních non-passport jobů
+    // Načíst JEN single reports (type='inspection') pro současného uživatele
     const { data: ownJobs, error: ownJobsError } = await supabase
       .from('jobs')
       .select('customer_id')
       .eq('assigned_to', user.id)
-      .neq('type', 'passport');
+      .eq('type', 'inspection'); // ← JEN SINGLE REPORTS!
 
-    console.log('🔍 Own jobs:', ownJobs?.length || 0, ownJobsError);
-    const ownCustomerIds = Array.from(new Set(ownJobs?.map(j => j.customer_id) || []));
+    console.log('🔍 Own inspection jobs:', ownJobs?.length || 0, ownJobsError);
+    const ownCustomerIds = Array.from(new Set(ownJobs?.map(j => j.customer_id) || [])).filter(id => id !== null && id !== undefined);
     console.log('🔍 Own customer IDs:', ownCustomerIds);
 
-    // 2. Zákazníci z passport jobů firmy
-    const { data: passportJobs, error: passportJobsError } = await supabase
-      .from('jobs')
-      .select('customer_id')
-      .eq('company_id', profile.company_id)
-      .eq('type', 'passport');
-
-    console.log('🔍 Passport jobs:', passportJobs?.length || 0, passportJobsError);
-    const passportCustomerIds = Array.from(new Set(passportJobs?.map(j => j.customer_id) || []));
-    console.log('🔍 Passport customer IDs:', passportCustomerIds);
-
-    // 3. Spojit ID zákazníků a filtrovat null
-    const allowedCustomerIds = Array.from(new Set([...ownCustomerIds, ...passportCustomerIds]))
-      .filter(id => id !== null && id !== undefined); // ← FILTROVAT NULL!
-    console.log('🔍 Total allowed customer IDs:', allowedCustomerIds.length, allowedCustomerIds);
-
-    if (allowedCustomerIds.length === 0) {
+    if (ownCustomerIds.length === 0) {
       console.log('⚠️ NO CUSTOMER IDS FOUND!');
       return NextResponse.json({ customers: [] }, { status: 200 });
     }
 
-    // 4. Načti zákazníky
+    // Načti zákazníky
     console.log('🔍 Fetching customers...');
     const { data: customers, error: customersError } = await supabase
       .from('customers')
       .select('*')
-      .in('id', allowedCustomerIds)
+      .in('id', ownCustomerIds)
       .order('created_at', { ascending: false });
 
     if (customersError) {
@@ -78,7 +62,7 @@ export async function GET(request: NextRequest) {
       (customers || []).map(async (customer) => {
         console.log('🔍 Processing customer:', customer.name);
 
-        // 1. Zkus najít inspection job
+        // Najít poslední inspection job
         const { data: inspectionJobs } = await supabase
           .from('jobs')
           .select('id, type, inspection_date')
@@ -87,38 +71,10 @@ export async function GET(request: NextRequest) {
           .order('inspection_date', { ascending: false })
           .limit(1);
 
-        let lastJob = inspectionJobs?.[0];
-        let isPassportCustomer = false;
-
-        // 2. Pokud nemá inspection job, zkus najít passport job
-        if (!lastJob) {
-          const { data: passportReports } = await supabase
-            .from('reports')
-            .select('job_id, data, created_at')
-            .eq('company_id', profile.company_id)
-            .order('created_at', { ascending: false });
-
-          const customerReport = passportReports?.find(r => 
-            r.data?.customerEmail === customer.email
-          );
-
-          if (customerReport) {
-            const { data: passportJobs } = await supabase
-              .from('jobs')
-              .select('id, type, inspection_date')
-              .eq('id', customerReport.job_id)
-              .eq('type', 'passport')
-              .single();
-
-            if (passportJobs) {
-              lastJob = passportJobs;
-              isPassportCustomer = true;
-            }
-          }
-        }
+        const lastJob = inspectionJobs?.[0];
 
         if (!lastJob) {
-          console.log('⚠️ No job found for customer:', customer.name);
+          console.log('⚠️ No inspection job found for customer:', customer.name);
           return {
             ...customer,
             last_inspection_date: null,
@@ -187,7 +143,7 @@ export async function GET(request: NextRequest) {
           status,
           days_until_expiration: daysUntilExpiration,
           pdfUrl,
-          is_passport: isPassportCustomer,
+          is_passport: false, // Vždy false - zobrazujeme JEN single reports
         };
       })
     );
