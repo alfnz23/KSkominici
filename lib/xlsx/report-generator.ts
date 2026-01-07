@@ -145,6 +145,13 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
 
   const validAppliances = data.appliances.filter(a => a.type || a.manufacturer);
 
+  // Helper funkce pro výpočet výšky řádku podle délky textu
+  const calculateRowHeight = (text: string, charsPerLine: number = 80, minHeight: number = 20): number => {
+    const textLength = text?.length || 0;
+    const lines = Math.ceil(textLength / charsPerLine);
+    return Math.max(minHeight, lines * 15); // 15 = výška jednoho řádku textu
+  };
+
   const addFullRow = (label: string, value: string, height: number = 20) => {
     const labelCell = worksheet.getCell(`A${row}`);
     labelCell.value = label;
@@ -157,8 +164,19 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     valueCell.value = value;
     valueCell.font = { size: 10, name: 'Arial' };
     valueCell.border = borderThin;
-    valueCell.alignment = { vertical: 'middle', indent: 1 };
-    worksheet.getRow(row).height = height;
+    valueCell.alignment = { 
+      vertical: 'top',  // Změněno z 'middle' na 'top'
+      indent: 1,
+      wrapText: true    // ← PŘIDÁNO pro zalomení textu
+    };
+    
+    // Vypočítat výšku podle délky textu
+    const textLength = value?.length || 0;
+    const charsPerLine = 80; // Přibližně 80 znaků na řádek při sloučených buňkách B:D
+    const lines = Math.ceil(textLength / charsPerLine);
+    const calculatedHeight = Math.max(height, lines * 15); // 15 = výška jednoho řádku textu
+    
+    worksheet.getRow(row).height = calculatedHeight;
     row++;
   };
 
@@ -265,19 +283,21 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   addSectionLabel('ZJIŠTĚNÉ NEDOSTATKY, KTERÉ BYLY ODSTRANĚNY NA MÍSTĚ:');
   worksheet.mergeCells(`A${row}:D${row}`);
   const d1 = worksheet.getCell(`A${row}`);
-  d1.value = (data.condition !== 'Vyhovuje' && data.defectsFound) ? data.defectsFound : '';
+  const defectsText1 = (data.condition !== 'Vyhovuje' && data.defectsFound) ? data.defectsFound : '';
+  d1.value = defectsText1;
   d1.border = borderThin;
   d1.alignment = { wrapText: true, vertical: 'top', indent: 1 };
-  worksheet.getRow(row).height = 30;
+  worksheet.getRow(row).height = calculateRowHeight(defectsText1, 100, 30); // 100 znaků na řádek, min 30
   row++;
 
   addSectionLabel('ZJIŠTĚNÉ NEDOSTATKY, KTERÉ NEBYLY ODSTRANĚNY NA MÍSTĚ:');
   worksheet.mergeCells(`A${row}:D${row}`);
   const d2 = worksheet.getCell(`A${row}`);
-  d2.value = (data.condition !== 'Vyhovuje' && data.defectsFound) ? data.defectsFound : '';
+  const defectsText2 = (data.condition !== 'Vyhovuje' && data.defectsFound) ? data.defectsFound : '';
+  d2.value = defectsText2;
   d2.border = borderThin;
   d2.alignment = { wrapText: true, vertical: 'top', indent: 1 };
-  worksheet.getRow(row).height = 30;
+  worksheet.getRow(row).height = calculateRowHeight(defectsText2, 100, 30); // 100 znaků na řádek, min 30
   row++;
 
   if (data.defectRemovalDate) {
@@ -306,11 +326,12 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   addSectionLabel('ZÁVĚR:');
   worksheet.mergeCells(`A${row}:D${row}`);
   const concValue = worksheet.getCell(`A${row}`);
-  concValue.value = `${data.condition}\nSpalinová cesta vyhovuje bezpečnému provozu${data.recommendations ? '\n' + data.recommendations : ''}`;
+  const conclusionText = `${data.condition}\nSpalinová cesta vyhovuje bezpečnému provozu${data.recommendations ? '\n' + data.recommendations : ''}`;
+  concValue.value = conclusionText;
   concValue.font = { size: 10, name: 'Arial' };
   concValue.alignment = { wrapText: true, vertical: 'top', indent: 1 };
   concValue.border = borderThin;
-  worksheet.getRow(row).height = 40;
+  worksheet.getRow(row).height = calculateRowHeight(conclusionText, 100, 40); // 100 znaků na řádek, min 40
   row++;
 
   row++;
