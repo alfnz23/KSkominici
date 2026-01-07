@@ -57,99 +57,102 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ Customers fetched:', customers?.length || 0);
 
-    // Pro každého zákazníka načti poslední job + report + dokument
+    // Pro každého zákazníka načti VŠECHNY jeho inspection jobs
     const customersWithJobs = await Promise.all(
       (customers || []).map(async (customer) => {
         console.log('🔍 Processing customer:', customer.name);
 
-        // Najít poslední inspection job
-        const { data: inspectionJobs } = await supabase
+        // Načti VŠECHNY inspection jobs pro tohoto zákazníka
+        const { data: allJobs } = await supabase
           .from('jobs')
-          .select('id, type, inspection_date')
+          .select('id, inspection_address, inspection_date, status')
           .eq('customer_id', customer.id)
           .eq('type', 'inspection')
-          .order('inspection_date', { ascending: false })
-          .limit(1);
+          .order('inspection_date', { ascending: false });
 
-        const lastJob = inspectionJobs?.[0];
-
-        if (!lastJob) {
-          console.log('⚠️ No inspection job found for customer:', customer.name);
-          return {
-            ...customer,
-            last_inspection_date: null,
-            next_inspection_date: null,
-            inspection_address: null,
-            status: 'active',
-            days_until_expiration: 0,
-            pdfUrl: null,
-            is_passport: false,
-          };
+        if (!allJobs || allJobs.length === 0) {
+          return null; // Skip zákazníka bez jobs
         }
 
-        console.log('✅ Found job for customer:', customer.name, 'Job ID:', lastJob.id);
+        // Pro každý job načti report a dokument
+        const jobsWithDetails = await Promise.all(
+          allJobs.map(async (job) => {
+            const { data: reports } = await supabase
+              .from('reports')
+              .select('id, data')
+              .eq('job_id', job.id)
+              .limit(1);
 
-        // Načti report pro tento job
-        const { data: reports } = await supabase
-          .from('reports')
-          .select('id, data')
-          .eq('job_id', lastJob.id)
-          .limit(1);
+            const report = reports?.[0];
+            const reportData = report?.data || {};
 
-        const report = reports?.[0];
-        const reportData = report?.data || {};
+            // Načti PDF
+            const { data: documents } = await supabase
+              .from('documents')
+              .select('id, storage_path')
+              .eq('job_id', job.id)
+              .eq('type', 'pdf')
+              .limit(1);
 
-        // Načti PDF dokument
-        const { data: documents } = await supabase
-          .from('documents')
-          .select('id, storage_path')
-          .eq('job_id', lastJob.id)
-          .eq('type', 'pdf')
-          .limit(1);
+            const pdfDoc = documents?.[0];
+            let pdfUrl = null;
 
-        const pdfDoc = documents?.[0];
-        let pdfUrl = null;
+            if (pdfDoc) {
+              const { data: signedUrl } = await supabase.storage
+                .from('documents')
+                .createSignedUrl(pdfDoc.storage_path, 3600);
+              pdfUrl = signedUrl?.signedUrl || null;
+            }
 
-        if (pdfDoc) {
-          const { data: signedUrl } = await supabase.storage
-            .from('documents')
-            .createSignedUrl(pdfDoc.storage_path, 3600);
+            // Vypočítat status expirce
+            const today = new Date();
+            const nextDate = reportData.nextInspectionDate ? new Date(reportData.nextInspectionDate) : null;
+            
+            let status: 'active' | 'expiring_soon' | 'expired' = 'active';
+            let daysUntilExpiration = 0;
+            
+            if (nextDate) {
+              const diffTime = nextDate.getTime() - today.getTime();
+              daysUntilExpiration = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              
+              if (daysUntilExpiration < 0) {
+                status = 'expired';
+              } else if (daysUntilExpiration <= 30) {
+                status = 'expiring_soon';
+              }
+            }
 
-          pdfUrl = signedUrl?.signedUrl || null;
-        }
-
-        const today = new Date();
-        const nextDate = reportData.nextInspectionDate ? new Date(reportData.nextInspectionDate) : null;
-        
-        let status: 'active' | 'expiring_soon' | 'expired' = 'active';
-        let daysUntilExpiration = 0;
-        
-        if (nextDate) {
-          const diffTime = nextDate.getTime() - today.getTime();
-          daysUntilExpiration = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          
-          if (daysUntilExpiration < 0) {
-            status = 'expired';
-          } else if (daysUntilExpiration <= 30) {
-            status = 'expiring_soon';
-          }
-        }
+            return {
+              job_id: job.id,
+              inspection_address: reportData.inspectionAddress || job.inspection_address,
+              last_inspection_date: reportData.inspectionDate || job.inspection_date,
+              next_inspection_date: reportData.nextInspectionDate || null,
+              status,
+              days_until_expiration: daysUntilExpiration,
+              pdfUrl,
+            };
+          })
+        );
 
         return {
-          ...customer,
-          last_inspection_date: reportData.inspectionDate || lastJob.inspection_date || null,
-          next_inspection_date: reportData.nextInspectionDate || null,
-          inspection_address: reportData.inspectionAddress || null,
-          status,
-          days_until_expiration: daysUntilExpiration,
-          pdfUrl,
-          is_passport: false, // Vždy false - zobrazujeme JEN single reports
+          id: customer.id,
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone,
+          address: customer.address,
+          jobs: jobsWithDetails, // Array všech jobs
         };
       })
     );
 
-    console.log('✅ Returning customers:', customersWithJobs.length);
-    return NextResponse.json({ customers: customersWithJobs }, { status: 200 });
+    // Filtrovat null (zákazníci bez jobs)
+    const validCustomers = customersWithJobs.filter(c => c !== null);
+
+    // Filtrovat null (zákazníci bez jobs)
+    const validCustomers = customersWithJobs.filter(c => c !== null);
+
+    console.log('✅ Returning customers:', validCustomers.length);
+    return NextResponse.json({ customers: validCustomers }, { status: 200 });
   } catch (error) {
     console.error('❌ CATCH ERROR:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
