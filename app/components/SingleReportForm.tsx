@@ -70,6 +70,7 @@ export default function SingleReportForm() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isEditingPassportUnit, setIsEditingPassportUnit] = useState(false);
   const [passportEditData, setPassportEditData] = useState<any>(null);
+  const [renewJobId, setRenewJobId] = useState<string | null>(null); // ← PŘIDÁNO pro UPDATE
 
   // Načíst profil technika při načtení komponenty
   useEffect(() => {
@@ -99,6 +100,12 @@ export default function SingleReportForm() {
       if (renewDataStr) {
         try {
           const renewData = JSON.parse(renewDataStr);
+          
+          // Uložit renewJobId pro UPDATE
+          if (renewData.renewJobId) {
+            setRenewJobId(renewData.renewJobId);
+            console.log('🔄 Renewal mode - job_id:', renewData.renewJobId);
+          }
           
           // Předvyplnit formulář s daty z renewal
           setFormData(prev => ({
@@ -330,6 +337,84 @@ export default function SingleReportForm() {
         }, 1500);
         
         setIsSubmitting(false);
+        return;
+      }
+      
+      // ============================================
+      // POKUD OBNOVUJEME ZPRÁVU → UPDATE
+      // ============================================
+      if (renewJobId) {
+        console.log('🔄 Obnovuji existující zprávu pro job:', renewJobId);
+        
+        // 1. Update customer data
+        const customerRes = await fetch('/api/customers/upsert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.customerEmail,
+            name: formData.customerName,
+            phone: formData.customerPhone,
+            address: formData.permanentAddress,
+            invoiceOnly: formData.invoiceOnly,
+          }),
+        });
+
+        if (!customerRes.ok) throw new Error('Nepodařilo se aktualizovat zákazníka');
+
+        // 2. Update job (datum kontroly)
+        const jobUpdateRes = await fetch('/api/jobs/update', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            job_id: renewJobId,
+            inspection_address: formData.inspectionAddress,
+            inspection_date: formData.inspectionDate,
+          }),
+        });
+
+        if (!jobUpdateRes.ok) throw new Error('Nepodařilo se aktualizovat job');
+
+        // 3. Najít existující report pro tento job
+        const findReportRes = await fetch(`/api/reports/by-job?job_id=${renewJobId}`);
+        if (!findReportRes.ok) throw new Error('Nepodařilo se najít report');
+        
+        const { report: existingReport } = await findReportRes.json();
+
+        // 4. Update report data
+        const reportUpdateRes = await fetch('/api/reports/update', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            report_id: existingReport.id,
+            data: formData,
+          }),
+        });
+
+        if (!reportUpdateRes.ok) throw new Error('Nepodařilo se aktualizovat zprávu');
+        const { report: updatedReport } = await reportUpdateRes.json();
+
+        // 5. Odeslat email + vygenerovat dokumenty
+        const emailRes = await fetch('/api/reports/send-emails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            report_id: updatedReport.id,
+            job_id: renewJobId,
+          }),
+        });
+
+        if (!emailRes.ok) {
+          console.error('Email send error');
+        }
+
+        // 6. Success
+        setSubmitStatus('success');
+        setTimeout(() => {
+          window.location.href = '/dashboard?view=customers';
+        }, 1500);
+
+        setIsSubmitting(false);
+        setRenewJobId(null); // Reset
         return;
       }
       
