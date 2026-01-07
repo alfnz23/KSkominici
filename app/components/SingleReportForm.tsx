@@ -623,6 +623,7 @@ export default function SingleReportForm() {
                         <option value="">Vyberte druh</option>
                         <option value="Kondenzační kotel">Kondenzační kotel</option>
                         <option value="Atmosférický kotel">Atmosférický kotel</option>
+                        <option value="Turbo kotel">Turbo kotel</option>
                         <option value="kotel na TP">kotel na TP</option>
                         <option value="Krbová vložka">Krbová vložka</option>
                         <option value="Krbová kamna">Krbová kamna</option>
