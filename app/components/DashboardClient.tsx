@@ -25,6 +25,7 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ user, profile, initialStats }: DashboardClientProps) {
   const [currentView, setCurrentView] = useState<View>('home');
+  const [previousView, setPreviousView] = useState<View>('home'); // ← PŘIDÁNO
   const [selectedPassport, setSelectedPassport] = useState<string | null>(null);
   const [stats, setStats] = useState(initialStats);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -59,6 +60,7 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
   ];
 
   const handleMenuClick = (viewId: View) => {
+    setPreviousView(currentView); // ← Uložit současný view před změnou
     setCurrentView(viewId);
     setSelectedPassport(null);
     setSidebarOpen(false); // Zavřít sidebar na mobilu
@@ -184,10 +186,14 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
               <button
                 onClick={() => {
                   if (currentView === 'passport-detail' && selectedPassport) {
+                    // Z passport-detail zpět na customers (pasporty)
                     setSelectedPassport(null);
+                    setPreviousView(currentView);
                     setCurrentView('customers');
                   } else {
-                    setCurrentView('home');
+                    // Jinak zpět na předchozí view
+                    setCurrentView(previousView);
+                    setPreviousView('home');
                   }
                 }}
                 className="mb-6 flex items-center gap-2 px-4 py-2 bg-slate-900/90 backdrop-blur-xl rounded-lg border border-slate-800/50 text-white hover:bg-slate-800/90 transition-colors"
@@ -289,6 +295,7 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
                 }}
                 onRenewUnit={(unitData) => {
                   sessionStorage.setItem('renewPassportUnit', JSON.stringify(unitData));
+                  setPreviousView(currentView);
                   setCurrentView('single-report');
                 }}
               />
@@ -297,6 +304,7 @@ export default function DashboardClient({ user, profile, initialStats }: Dashboa
               <CustomerManagement
                 onSelectPassport={(passportId) => {
                   setSelectedPassport(passportId);
+                  setPreviousView(currentView);
                   setCurrentView('passport-detail');
                 }}
               />
