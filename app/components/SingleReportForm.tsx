@@ -358,6 +358,7 @@ export default function SingleReportForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customer_email: formData.customerEmail,
+          customer_name: formData.customerName, // ← PŘIDÁNO!
           job_type: 'single_report',
           inspection_address: formData.inspectionAddress,
           inspection_date: formData.inspectionDate,
