@@ -32,9 +32,12 @@ export default function CustomerManagement({ onSelectPassport }: CustomerManagem
       const reportsRes = await fetch('/api/customers');
       if (reportsRes.ok) {
         const { customers } = await reportsRes.json();
-        const active = customers.filter((c: any) => c.status === 'active').length;
-        const expiring = customers.filter((c: any) => c.status === 'expiring_soon').length;
-        const expired = customers.filter((c: any) => c.status === 'expired').length;
+        
+        // Spočítat VŠECHNY jobs (ne zákazníky)
+        const allJobs = customers.flatMap((c: any) => c.jobs || []);
+        const active = allJobs.filter((j: any) => j.status === 'active').length;
+        const expiring = allJobs.filter((j: any) => j.status === 'expiring_soon').length;
+        const expired = allJobs.filter((j: any) => j.status === 'expired').length;
         
         // Načíst statistiky pro passporty
         const passportsRes = await fetch('/api/passports');
@@ -42,7 +45,7 @@ export default function CustomerManagement({ onSelectPassport }: CustomerManagem
           const { passports } = await passportsRes.json();
           
           setStats({
-            totalReports: customers.length,
+            totalReports: allJobs.length, // Součet všech jobs
             activeReports: active,
             expiringSoon: expiring,
             expired: expired,
