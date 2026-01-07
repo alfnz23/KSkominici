@@ -51,12 +51,12 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     horizontalCentered: true,
   };
 
-  // 4 SLOUPCE - Šířky optimalizované pro lepší čitelnost
+  // 4 SLOUPCE - Šířky optimalizované pro tvou předlohu
   worksheet.columns = [
-    { width: 25 },  // Sloupec A - Label
-    { width: 35 },  // Sloupec B - Hodnota (zvětšeno)
-    { width: 15 },  // Sloupec C - Krátký label
-    { width: 25 },  // Sloupec D - Hodnota (zvětšeno)
+    { width: 32 },  // Sloupec A - Label
+    { width: 28 },  // Sloupec B - Hodnota
+    { width: 12 },  // Sloupec C - Krátký label
+    { width: 18 },  // Sloupec D - Hodnota
   ];
 
   let row = 1;
@@ -146,10 +146,11 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   const validAppliances = data.appliances.filter(a => a.type || a.manufacturer);
 
   // Helper funkce pro výpočet výšky řádku podle délky textu
-  const calculateRowHeight = (text: string, charsPerLine: number = 60, minHeight: number = 20): number => {
-    const textLength = text?.length || 0;
+  const calculateRowHeight = (text: string, charsPerLine: number = 80, minHeight: number = 20): number => {
+    if (!text) return minHeight;
+    const textLength = text.length;
     const lines = Math.ceil(textLength / charsPerLine);
-    return Math.max(minHeight, lines * 18); // 18 = výška jednoho řádku textu (zvýšeno z 15)
+    return Math.max(minHeight, lines * 15);
   };
 
   const addFullRow = (label: string, value: string, height: number = 20) => {
@@ -165,15 +166,13 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
     valueCell.font = { size: 10, name: 'Arial' };
     valueCell.border = borderThin;
     valueCell.alignment = { 
-      vertical: 'top',  // Změněno z 'middle' na 'top'
+      vertical: 'top',
       indent: 1,
-      wrapText: true    // ← PŘIDÁNO pro zalomení textu
+      wrapText: true
     };
     
-    // Vypočítat výšku podle délky textu
-    // Sloučené B:D = přibližně 50-60 znaků na řádek
-    const calculatedHeight = calculateRowHeight(value, 50, height);
-    
+    // Dynamická výška podle textu
+    const calculatedHeight = calculateRowHeight(value, 80, height);
     worksheet.getRow(row).height = calculatedHeight;
     row++;
   };
@@ -285,7 +284,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   d1.value = defectsText1;
   d1.border = borderThin;
   d1.alignment = { wrapText: true, vertical: 'top', indent: 1 };
-  worksheet.getRow(row).height = calculateRowHeight(defectsText1, 70, 30); // 70 znaků pro A:D, min 30
+  worksheet.getRow(row).height = calculateRowHeight(defectsText1, 100, 30);
   row++;
 
   addSectionLabel('ZJIŠTĚNÉ NEDOSTATKY, KTERÉ NEBYLY ODSTRANĚNY NA MÍSTĚ:');
@@ -295,7 +294,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   d2.value = defectsText2;
   d2.border = borderThin;
   d2.alignment = { wrapText: true, vertical: 'top', indent: 1 };
-  worksheet.getRow(row).height = calculateRowHeight(defectsText2, 70, 30); // 70 znaků pro A:D, min 30
+  worksheet.getRow(row).height = calculateRowHeight(defectsText2, 100, 30);
   row++;
 
   if (data.defectRemovalDate) {
@@ -329,7 +328,7 @@ export async function generateReportXLSX(data: ReportData): Promise<Buffer> {
   concValue.font = { size: 10, name: 'Arial' };
   concValue.alignment = { wrapText: true, vertical: 'top', indent: 1 };
   concValue.border = borderThin;
-  worksheet.getRow(row).height = calculateRowHeight(conclusionText, 70, 40); // 70 znaků pro A:D, min 40
+  worksheet.getRow(row).height = calculateRowHeight(conclusionText, 100, 40);
   row++;
 
   row++;
