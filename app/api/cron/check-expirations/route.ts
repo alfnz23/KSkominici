@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       try {
         const report = job.reports?.[0];
         const reportData = report?.data || {};
-        const customerEmail = job.customers?.email || reportData.customerEmail;
+        const customerEmail = job.customers?.[0]?.email || reportData.customerEmail;
 
         const nextInspectionDate = reportData.nextInspectionDate ||
           new Date(new Date(job.inspection_date).setFullYear(new Date(job.inspection_date).getFullYear() + 1));
@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
       const customerId = job.customer_id;
       if (!acc[customerId]) {
         acc[customerId] = {
-          customer: job.customers,
+          customer: job.customers?.[0] || {}, // První prvek pole
           passports: []
         };
       }
