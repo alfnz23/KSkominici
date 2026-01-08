@@ -376,9 +376,19 @@ export default function SingleReportForm() {
 
         // 3. Najít existující report pro tento job
         const findReportRes = await fetch(`/api/reports/by-job?job_id=${renewJobId}`);
-        if (!findReportRes.ok) throw new Error('Nepodařilo se najít report');
+        if (!findReportRes.ok) {
+          const errorText = await findReportRes.text();
+          throw new Error(`Nepodařilo se najít report: ${errorText}`);
+        }
         
-        const { report: existingReport } = await findReportRes.json();
+        const findReportData = await findReportRes.json();
+        const existingReport = findReportData.report;
+        
+        if (!existingReport || !existingReport.id) {
+          throw new Error('Report nebyl nalezen nebo nemá ID');
+        }
+        
+        console.log('✅ Nalezen report:', existingReport.id);
 
         // 4. Update report data
         const reportUpdateRes = await fetch('/api/reports/update', {
@@ -391,16 +401,30 @@ export default function SingleReportForm() {
           }),
         });
 
-        if (!reportUpdateRes.ok) throw new Error('Nepodařilo se aktualizovat zprávu');
-        const { report: updatedReport } = await reportUpdateRes.json();
+        if (!reportUpdateRes.ok) {
+          const errorText = await reportUpdateRes.text();
+          throw new Error(`Nepodařilo se aktualizovat zprávu: ${errorText}`);
+        }
+        
+        const reportUpdateData = await reportUpdateRes.json();
+        let updatedReport = reportUpdateData.report;
+        
+        if (!updatedReport || !updatedReport.id) {
+          console.warn('⚠️ Update nevrátil report, použiji existující ID');
+          // Fallback - použít existující report
+          updatedReport = existingReport;
+        }
+        
+        console.log('✅ Report aktualizován:', updatedReport.id);
 
         // 5. Odeslat email + vygenerovat dokumenty
-        const emailRes = await fetch('/api/reports/send-emails', {
+        const emailRes = await fetch('/api/emails/send-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             report_id: updatedReport.id,
             job_id: renewJobId,
+            to_email: formData.customerEmail,
           }),
         });
 
