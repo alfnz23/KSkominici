@@ -386,6 +386,7 @@ export default function SingleReportForm() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             report_id: existingReport.id,
+            job_id: renewJobId, // ← PŘIDÁNO!
             data: formData,
           }),
         });
